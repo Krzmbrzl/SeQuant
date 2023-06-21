@@ -367,6 +367,8 @@ if (SEQUANT_MIMALLOC)
     target_compile_definitions(SeQuant PUBLIC SEQUANT_HAS_MIMALLOC=1)
 endif ()
 
+add_subdirectory(playground)
+
 ### unit tests
 include(CTest)
 
