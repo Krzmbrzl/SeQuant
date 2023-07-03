@@ -4,6 +4,7 @@
 #include <SeQuant/core/sequant.hpp>
 #include <SeQuant/core/space.hpp>
 #include <SeQuant/core/tensor.hpp>
+#include <SeQuant/core/rational.hpp>
 
 #include "Utils.hpp"
 
@@ -60,7 +61,7 @@ ExprPtr f() {
 }
 
 ExprPtr g() {
-  return ex<Constant>(1.0 / 4) *
+  return ex<Constant>(rational{1,4}) *
          make_op(Tensor(
              L"g",
              std::vector<Index>{create_index(general), create_index(general)},

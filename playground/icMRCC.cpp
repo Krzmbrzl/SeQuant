@@ -1,6 +1,7 @@
 #include <SeQuant/core/expr.hpp>
 #include <SeQuant/core/index.hpp>
 #include <SeQuant/core/op.hpp>
+#include <SeQuant/core/rational.hpp>
 #include <SeQuant/core/sequant.hpp>
 #include <SeQuant/core/space.hpp>
 #include <SeQuant/core/tensor.hpp>
@@ -18,7 +19,7 @@ ExprPtr c0(std::size_t nAct) {
     indices.push_back(create_index(active));
   }
 
-  return ex<Constant>(1.0 / 2) *
+  return ex<Constant>(rational{1, 2}) *
          make_op(Tensor(L"{C_0}", indices, std::vector<Index>{},
                         Symmetry::antisymm));
 }
@@ -29,7 +30,7 @@ ExprPtr c0dagger(std::size_t nAct) {
     indices.push_back(create_index(active));
   }
 
-  return ex<Constant>(1.0 / 2) *
+  return ex<Constant>(rational{1, 2}) *
          make_op(Tensor(L"{C_0^\\dagger}", std::vector<Index>{}, indices,
                         Symmetry::antisymm));
 }
