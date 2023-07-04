@@ -26,13 +26,32 @@ ExprPtr T() {
 ExprPtr Lambda() {
   Tensor TOp = (*T()->begin())->as<Tensor>();
 
-  return make_op(Tensor(L"Λ", TOp.ket(), TOp.bra(), Symmetry::antisymm));
+  return ex<Constant>(rational{1, 4}) *
+         make_op(Tensor(L"Λ", TOp.ket(), TOp.bra(), Symmetry::antisymm));
 }
 
+ExprPtr commutator(ExprPtr A, ExprPtr B) { return A * B - B * A; }
+
 ExprPtr bch() {
-  return H() + H() * T() + ex<Constant>(rational{1, 2}) * H() * T() * T() +
-         ex<Constant>(rational{1, 6}) * H() * T() * T() * T() +
-         ex<Constant>(rational{1, 24}) * H() * T() * T() * T() * T();
+  ExprPtr expr = H();
+
+  ExprPtr comm = commutator(H(), T());
+  simplify(comm);
+  expr += comm;
+
+  comm = commutator(commutator(H(), T()), T());
+  simplify(comm);
+  expr += ex<Constant>(rational{1, 2}) * comm;
+
+  comm = commutator(commutator(commutator(H(), T()), T()), T());
+  simplify(comm);
+  expr += ex<Constant>(rational{1, 6}) * comm;
+
+  comm = commutator(commutator(commutator(commutator(H(), T()), T()), T()), T());
+  simplify(comm);
+  expr += ex<Constant>(rational{1, 24}) * comm;
+
+  return expr;
 }
 
 int main() {
@@ -41,11 +60,11 @@ int main() {
 
   setConvention();
 
-  ExprPtr pre_equations = (ex<Constant>(1) + Lambda()) * bch();
+  ExprPtr pre_equations = (ex<Constant>(1) ) * bch();
   expand(pre_equations);
-  //std::wcout << pre_equations->size() << std::endl;
-  //std::size_t counter = 1;
-  //for (auto current : *pre_equations) {
+  // std::wcout << pre_equations->size() << std::endl;
+  // std::size_t counter = 1;
+  // for (auto current : *pre_equations) {
   //  auto begin = std::chrono::steady_clock::now();
   //  std::wcout << "Term " << counter++ << ": " << to_latex(current) << "\n";
   //  std::wcout << "-> "
@@ -74,5 +93,8 @@ int main() {
                     std::chrono::steady_clock::now() - begin)
                     .count()
              << "s\n";
-  std::wcout << "CCD terms:\n" << to_latex(equations) << "\n";
+
+  simplify(equations);
+
+  std::wcout << "CCD terms:\n" << to_latex_align(equations) << "\n";
 }
