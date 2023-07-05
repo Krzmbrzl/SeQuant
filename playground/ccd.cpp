@@ -2,6 +2,7 @@
 #include <SeQuant/core/index.hpp>
 #include <SeQuant/core/op.hpp>
 #include <SeQuant/core/rational.hpp>
+#include <SeQuant/core/runtime.hpp>
 #include <SeQuant/core/sequant.hpp>
 #include <SeQuant/core/space.hpp>
 #include <SeQuant/core/tensor.hpp>
@@ -55,6 +56,7 @@ ExprPtr bch() {
 }
 
 int main() {
+  set_locale();
   set_default_context(SeQuant(Vacuum::SingleProduct, IndexSpaceMetric::Unit,
                               BraKetSymmetry::conjugate, SPBasis::spinorbital));
 
