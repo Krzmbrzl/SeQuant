@@ -48,7 +48,8 @@ ExprPtr bch() {
   simplify(comm);
   expr += ex<Constant>(rational{1, 6}) * comm;
 
-  comm = commutator(commutator(commutator(commutator(H(), T()), T()), T()), T());
+  comm =
+      commutator(commutator(commutator(commutator(H(), T()), T()), T()), T());
   simplify(comm);
   expr += ex<Constant>(rational{1, 24}) * comm;
 
@@ -81,7 +82,7 @@ int main() {
   //                    .count()
   //             << "s\n\n";
   //}
-  std::wcout << "Now in total...\n";
+  std::wcout << "Contracting..." << std::endl;
   auto begin = std::chrono::steady_clock::now();
   ExprPtr equations =
       FWickTheorem{pre_equations}
