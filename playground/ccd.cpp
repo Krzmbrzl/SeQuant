@@ -62,7 +62,7 @@ int main() {
 
   setConvention();
 
-  ExprPtr pre_equations = (ex<Constant>(1) ) * bch();
+  ExprPtr pre_equations = (ex<Constant>(1) + Lambda()) * bch();
   expand(pre_equations);
   // std::wcout << pre_equations->size() << std::endl;
   // std::size_t counter = 1;
