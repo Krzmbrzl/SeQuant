@@ -185,6 +185,9 @@ eval_seq_t single_term_opt(TensorNetwork const& network, IdxToSz const& idxsz) {
   auto nth_tensor_indices = container::svector<container::svector<Index>>{};
   nth_tensor_indices.reserve(nt);
 
+  std::wcout << "Network contains " << network.tensors().at(0)->_label() << ", "
+             << network.tensors().at(1)->_label() << std::endl;
+
   for (auto i = 0; i < nt; ++i) {
     auto const& tnsr = *network.tensors().at(i);
     auto bk = container::svector<Index>{};
@@ -204,6 +207,8 @@ eval_seq_t single_term_opt(TensorNetwork const& network, IdxToSz const& idxsz) {
   // and so on are set
   size_t power_pos = 0;
   for (size_t n = 1; n < (1 << nt); ++n) {
+    std::wcout << "n = " << n << " -> " << std::bitset<sizeof(size_t)>(n)
+               << std::endl;
     double curr_cost = std::numeric_limits<double>::max();
     std::pair<size_t, size_t> curr_parts{0, 0};
     container::svector<Index> curr_indices{};
@@ -226,6 +231,7 @@ eval_seq_t single_term_opt(TensorNetwork const& network, IdxToSz const& idxsz) {
         curr_cost = new_cost;
         curr_parts = decltype(curr_parts){lpart, rpart};
         curr_indices = std::move(diffs);
+		std::wcout << "curr_indices.size() = " << curr_indices.size() << std::endl;
       }
     };
 
@@ -236,6 +242,8 @@ eval_seq_t single_term_opt(TensorNetwork const& network, IdxToSz const& idxsz) {
       assert(curr_indices.empty());
       // evaluation of a single atomic tensor
       curr_result.flops = 0;
+      std::wcerr << "size: " << nth_tensor_indices.size()
+                 << " index: " << power_pos << std::endl;
       curr_result.indices = std::move(nth_tensor_indices[power_pos]);
       curr_result.sequence = eval_seq_t{static_cast<int>(power_pos++)};
     } else {

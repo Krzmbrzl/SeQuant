@@ -7,6 +7,7 @@
 #include <SeQuant/core/space.hpp>
 #include <SeQuant/core/tensor.hpp>
 #include <SeQuant/core/wick.hpp>
+#include <SeQuant/core/optimize.hpp>
 
 #include "Utils.hpp"
 
@@ -44,17 +45,34 @@ ExprPtr bch() {
   simplify(comm);
   expr += ex<Constant>(rational{1, 2}) * comm;
 
-  comm = commutator(commutator(commutator(H(), T()), T()), T());
-  simplify(comm);
-  expr += ex<Constant>(rational{1, 6}) * comm;
+  //comm = commutator(commutator(commutator(H(), T()), T()), T());
+  //simplify(comm);
+  //expr += ex<Constant>(rational{1, 6}) * comm;
 
+  /*
+	These don't contribute for CCD, but take quite a while to Wick in Debug builds
   comm =
       commutator(commutator(commutator(commutator(H(), T()), T()), T()), T());
   simplify(comm);
   expr += ex<Constant>(rational{1, 24}) * comm;
+  */
 
   return expr;
 }
+
+struct Idx2Size {
+	std::size_t operator()(const Index &idx) const {
+		if (idx.space() == occ) {
+			return 10;
+		} else if (idx.space() == virt) {
+			return 100;
+		} else if (idx.space() == active) {
+			return 5;
+		} else {
+			throw std::runtime_error("Encountered unexpected space in Idx2Size");
+		}
+	}
+};
 
 int main() {
   set_locale();
@@ -100,4 +118,8 @@ int main() {
   simplify(equations);
 
   std::wcout << "CCD terms:\n" << to_latex_align(equations) << "\n";
+
+  ExprPtr optimizedEqs = optimize(equations, Idx2Size{});
+
+  std::wcout << "Optimized CCD terms:\n" << to_latex_align(optimizedEqs) << "\n";
 }
