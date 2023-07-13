@@ -2,6 +2,7 @@
 #include <SeQuant/core/index.hpp>
 #include <SeQuant/core/op.hpp>
 #include <SeQuant/core/rational.hpp>
+#include <SeQuant/core/runtime.hpp>
 #include <SeQuant/core/sequant.hpp>
 #include <SeQuant/core/space.hpp>
 #include <SeQuant/core/tensor.hpp>
@@ -42,6 +43,7 @@ ExprPtr t() {
 }
 
 int main() {
+  set_locale();
   set_default_context(SeQuant(Vacuum::SingleProduct, IndexSpaceMetric::Unit,
                               BraKetSymmetry::conjugate, SPBasis::spinorbital));
 
@@ -56,5 +58,44 @@ int main() {
                         .full_contractions(true)
                         .compute();
 
-  std::wcout << to_latex(expr) << "\n=\n" << to_latex(contracted) << std::endl;
+  std::wcout << "icMRCC equations:\n"
+             << to_latex_align(contracted) << std::endl;
+
+  for (auto &currentSummand : contracted->as<Sum>().summands()) {
+    auto &currentProduct = currentSummand->as<Product>();
+
+    auto c0Iter = std::find_if(
+        currentProduct.factors().begin(), currentProduct.factors().end(),
+        [](const ExprPtr &expr) {
+          return expr.is<Tensor>() && expr.as<Tensor>().label() == L"{C_0}";
+        });
+    auto c0daggerIter =
+        std::find_if(currentProduct.factors().begin(),
+                     currentProduct.factors().end(), [](const ExprPtr &expr) {
+                       return expr.is<Tensor>() &&
+                              expr.as<Tensor>().label() == L"{C_0^\\dagger}";
+                     });
+
+    if (c0Iter == currentProduct.factors().end() ||
+        c0daggerIter == currentProduct.factors().end()) {
+      std::wcout << "Found term without density" << std::endl;
+      continue;
+    }
+
+    auto braIndices = c0Iter->as<Tensor>().bra();
+    auto ketIndices = c0daggerIter->as<Tensor>().ket();
+
+    // Remove reference coefficients
+    // TODO: The order of C0 and C0^+ may be different in general and we have to
+    // look into iterator invalidation issues
+    currentProduct.factors().erase(c0daggerIter);
+    currentProduct.factors().erase(c0Iter);
+
+    // instead, insert a density
+    currentProduct.factors().push_back(
+        ex<Tensor>(L"γ", braIndices, ketIndices, Symmetry::antisymm));
+  }
+
+  std::wcout << "icMRCC equations with densities:\n"
+             << to_latex_align(contracted) << std::endl;
 }
