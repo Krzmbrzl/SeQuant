@@ -1,9 +1,9 @@
 #include <SeQuant/core/expr.hpp>
 #include <SeQuant/core/index.hpp>
 #include <SeQuant/core/op.hpp>
+#include <SeQuant/core/rational.hpp>
 #include <SeQuant/core/space.hpp>
 #include <SeQuant/core/tensor.hpp>
-#include <SeQuant/core/rational.hpp>
 
 #include "Utils.hpp"
 
@@ -11,90 +11,38 @@ using namespace sequant;
 
 static IndexFactory idxFactory(nullptr, 1);
 
+void registerSpace(IndexSpace::Type type, std::wstring label) {
+  IndexSpace::register_instance(label, type, IndexSpace::nullqns, true);
+  IndexSpace::register_instance(label + L"↑", type, IndexSpace::alpha, true);
+  IndexSpace::register_instance(label + L"↓", type, IndexSpace::beta, true);
+}
+
 void setConvention() {
-  IndexSpace::register_instance(L"f", IndexSpace::frozen_occupied,
-                                IndexSpace::nullqns, true);
-  IndexSpace::register_instance(L"f↑", IndexSpace::frozen_occupied,
-                                IndexSpace::alpha, true);
-  IndexSpace::register_instance(L"f↓", IndexSpace::frozen_occupied,
-                                IndexSpace::beta, true);
+  // Base index spaces (occ., act. & virt.)
+  registerSpace(IndexSpace::active_occupied, L"o");
+  registerSpace(IndexSpace::active_unoccupied, L"v");
+  registerSpace(IndexSpace::active, L"a");
 
-  IndexSpace::register_instance(L"z", IndexSpace::inactive_occupied,
-                                IndexSpace::nullqns, true);
-  IndexSpace::register_instance(L"z↑", IndexSpace::inactive_occupied,
-                                IndexSpace::alpha, true);
-  IndexSpace::register_instance(L"z↓", IndexSpace::inactive_occupied,
-                                IndexSpace::beta, true);
+  // Internal (occ. + act.) and external (act. virt.) index spaces
+  registerSpace(IndexSpace::maybe_occupied, L"I");
+  registerSpace(IndexSpace::maybe_unoccupied, L"A");
 
-  IndexSpace::register_instance(L"y", IndexSpace::active_occupied,
-                                IndexSpace::nullqns, true);
-  IndexSpace::register_instance(L"y↑", IndexSpace::active_occupied,
-                                IndexSpace::alpha, true);
-  IndexSpace::register_instance(L"y↓", IndexSpace::active_occupied,
-                                IndexSpace::beta, true);
+  // General indices
+  registerSpace(IndexSpace::complete, L"p");
 
-  IndexSpace::register_instance(L"o", IndexSpace::occupied, IndexSpace::nullqns,
-                                true);
-  IndexSpace::register_instance(L"o↑", IndexSpace::occupied, IndexSpace::alpha,
-                                true);
-  IndexSpace::register_instance(L"o↓", IndexSpace::occupied, IndexSpace::beta,
-                                true);
-
-  IndexSpace::register_instance(L"a", IndexSpace::active_unoccupied,
-                                IndexSpace::nullqns, true);
-  IndexSpace::register_instance(L"a↑", IndexSpace::active_unoccupied,
-                                IndexSpace::alpha, true);
-  IndexSpace::register_instance(L"a↓", IndexSpace::active_unoccupied,
-                                IndexSpace::beta, true);
-
-  IndexSpace::register_instance(L"v", IndexSpace::inactive_unoccupied,
-                                IndexSpace::nullqns, true);
-  IndexSpace::register_instance(L"v↑", IndexSpace::inactive_unoccupied,
-                                IndexSpace::alpha, true);
-  IndexSpace::register_instance(L"v↓", IndexSpace::inactive_unoccupied,
-                                IndexSpace::beta, true);
-
-  IndexSpace::register_instance(L"x", IndexSpace::unoccupied,
-                                IndexSpace::nullqns, true);
-  IndexSpace::register_instance(L"x↑", IndexSpace::unoccupied,
-                                IndexSpace::alpha, true);
-  IndexSpace::register_instance(L"x↓", IndexSpace::unoccupied,
-                                IndexSpace::beta, true);
-
-  IndexSpace::register_instance(L"w", IndexSpace::all_active,
-                                IndexSpace::nullqns, true);
-  IndexSpace::register_instance(L"w↑", IndexSpace::all_active,
-                                IndexSpace::alpha, true);
-  IndexSpace::register_instance(L"w↓", IndexSpace::all_active,
-                                IndexSpace::beta, true);
-
-  IndexSpace::register_instance(L"v", IndexSpace::all, IndexSpace::nullqns,
-                                true);
-  IndexSpace::register_instance(L"v↑", IndexSpace::all, IndexSpace::alpha,
-                                true);
-  IndexSpace::register_instance(L"v↓", IndexSpace::all, IndexSpace::beta,
-                                true);
-
-  IndexSpace::register_instance(L"u", IndexSpace::other_unoccupied,
-                                IndexSpace::nullqns, true);
-  IndexSpace::register_instance(L"u↑", IndexSpace::other_unoccupied,
-                                IndexSpace::alpha, true);
-  IndexSpace::register_instance(L"u↓", IndexSpace::other_unoccupied,
-                                IndexSpace::beta, true);
-
-  IndexSpace::register_instance(L"t", IndexSpace::complete_unoccupied,
-                                IndexSpace::nullqns, true);
-  IndexSpace::register_instance(L"t↑", IndexSpace::complete_unoccupied,
-                                IndexSpace::alpha, true);
-  IndexSpace::register_instance(L"t↓", IndexSpace::complete_unoccupied,
-                                IndexSpace::beta, true);
-
-  IndexSpace::register_instance(L"p", IndexSpace::complete, IndexSpace::nullqns,
-                                true);
-  IndexSpace::register_instance(L"p↑", IndexSpace::complete, IndexSpace::alpha,
-                                true);
-  IndexSpace::register_instance(L"p↓", IndexSpace::complete, IndexSpace::beta,
-                                true);
+  // Unused index spaces (we have to define them, just in case though)
+  registerSpace(IndexSpace::frozen_occupied, L"l");
+  registerSpace(IndexSpace::inactive_occupied, L"m");
+  registerSpace(IndexSpace::occupied, L"n");
+  registerSpace(IndexSpace::active_maybe_occupied, L"q");
+  registerSpace(IndexSpace::active_maybe_unoccupied, L"r");
+  registerSpace(IndexSpace::inactive_unoccupied, L"s");
+  registerSpace(IndexSpace::unoccupied, L"t");
+  registerSpace(IndexSpace::all_active, L"u");
+  registerSpace(IndexSpace::all, L"w");
+  registerSpace(IndexSpace::other_unoccupied, L"x");
+  registerSpace(IndexSpace::complete_unoccupied, L"y");
+  registerSpace(IndexSpace::complete_maybe_unoccupied, L"z");
 
   TensorCanonicalizer::set_cardinal_tensor_labels(
       {L"t", L"f", L"g", L"{C_0}", L"{C_0^\\dagger}"});
@@ -119,7 +67,7 @@ ExprPtr f() {
 }
 
 ExprPtr g() {
-  return ex<Constant>(rational{1,4}) *
+  return ex<Constant>(rational{1, 4}) *
          make_op(Tensor(
              L"g",
              std::vector<Index>{create_index(general), create_index(general)},

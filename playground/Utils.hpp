@@ -4,10 +4,12 @@
 #include <SeQuant/core/tensor.hpp>
 
 // Define aliases for index spaces
-static auto active = sequant::IndexSpace::active_unoccupied;
-static auto occ = sequant::IndexSpace::occupied;
-static auto virt = sequant::IndexSpace::inactive_unoccupied;
+static auto active = sequant::IndexSpace::active;
+static auto occ = sequant::IndexSpace::active_occupied;
+static auto virt = sequant::IndexSpace::active_unoccupied;
 static auto general = sequant::IndexSpace::complete;
+static auto internal = sequant::IndexSpace::maybe_occupied;
+static auto external = sequant::IndexSpace::maybe_unoccupied;
 
 /**
  * Configures SeQuant to use our conventions

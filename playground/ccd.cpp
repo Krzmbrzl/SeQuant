@@ -118,8 +118,12 @@ int main() {
 
   simplify(equations);
 
-  std::wcout << "CCD terms:\n" << to_latex_align(equations) << "\n";
+  std::wcout << "CCD terms:\n" << to_latex_align(equations) << "\n\n\n";
 
+  std::wcout << "Spintracing...\n";
+  for (const ExprPtr &current : equations->as<Sum>()) {
+		std::wcout << to_latex(current) << "  -->  " << spintrace(current) << "  =  " << simplify(spintrace(current)) << "\n\n";
+  }
   ExprPtr spinTracedEqs = simplify(spintrace(equations));
 
   std::wcout << "Spintraced CCD terms:\n" << to_latex_align(spinTracedEqs) << "\n";
