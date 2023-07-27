@@ -7,6 +7,8 @@
 
 #include <bitset>
 #include <cassert>
+#include <codecvt>
+#include <locale>
 
 #include "attr.hpp"
 #include "container.hpp"
@@ -100,6 +102,9 @@ constexpr bool operator==(QuantumNumbersAttr lhs, QuantumNumbersAttr rhs) {
 constexpr bool operator!=(QuantumNumbersAttr lhs, QuantumNumbersAttr rhs) {
   return !(lhs == rhs);
 }
+
+std::wstring to_wstring(TypeAttr type);
+std::wstring to_wstring(QuantumNumbersAttr qns);
 
 /// @brief space of Index objects
 ///
@@ -302,6 +307,7 @@ class IndexSpace {
   };
   struct bad_attr : std::invalid_argument {
     bad_attr() : std::invalid_argument("bad attribute") {}
+    using std::invalid_argument::invalid_argument;
   };
 
   struct KeyCompare {
@@ -340,7 +346,12 @@ class IndexSpace {
     const auto attr = Attr(type, qns);
     assert(attr.is_valid());
     if (attr == Attr::null()) return null_instance();
-    if (!instance_exists(attr)) throw bad_attr();
+    if (!instance_exists(attr)) {
+      std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+      throw bad_attr(converter.to_bytes(L"Request to non-existing space: " +
+                                        sequant::to_wstring(type) + L" " +
+                                        sequant::to_wstring(qns)));
+    }
     return instances_.find(attr)->second;
   }
 
