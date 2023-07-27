@@ -15,27 +15,86 @@ static IndexFactory idxFactory(nullptr, 1);
 void setConvention() {
   IndexSpace::register_instance(L"f", IndexSpace::frozen_occupied,
                                 IndexSpace::nullqns, true);
+  IndexSpace::register_instance(L"f↑", IndexSpace::frozen_occupied,
+                                IndexSpace::alpha, true);
+  IndexSpace::register_instance(L"f↓", IndexSpace::frozen_occupied,
+                                IndexSpace::beta, true);
+
   IndexSpace::register_instance(L"z", IndexSpace::inactive_occupied,
                                 IndexSpace::nullqns, true);
+  IndexSpace::register_instance(L"z↑", IndexSpace::inactive_occupied,
+                                IndexSpace::alpha, true);
+  IndexSpace::register_instance(L"z↓", IndexSpace::inactive_occupied,
+                                IndexSpace::beta, true);
+
   IndexSpace::register_instance(L"y", IndexSpace::active_occupied,
                                 IndexSpace::nullqns, true);
+  IndexSpace::register_instance(L"y↑", IndexSpace::active_occupied,
+                                IndexSpace::alpha, true);
+  IndexSpace::register_instance(L"y↓", IndexSpace::active_occupied,
+                                IndexSpace::beta, true);
+
   IndexSpace::register_instance(L"o", IndexSpace::occupied, IndexSpace::nullqns,
                                 true);
+  IndexSpace::register_instance(L"o↑", IndexSpace::occupied, IndexSpace::alpha,
+                                true);
+  IndexSpace::register_instance(L"o↓", IndexSpace::occupied, IndexSpace::beta,
+                                true);
+
   IndexSpace::register_instance(L"a", IndexSpace::active_unoccupied,
                                 IndexSpace::nullqns, true);
+  IndexSpace::register_instance(L"a↑", IndexSpace::active_unoccupied,
+                                IndexSpace::alpha, true);
+  IndexSpace::register_instance(L"a↓", IndexSpace::active_unoccupied,
+                                IndexSpace::beta, true);
+
   IndexSpace::register_instance(L"v", IndexSpace::inactive_unoccupied,
                                 IndexSpace::nullqns, true);
+  IndexSpace::register_instance(L"v↑", IndexSpace::inactive_unoccupied,
+                                IndexSpace::alpha, true);
+  IndexSpace::register_instance(L"v↓", IndexSpace::inactive_unoccupied,
+                                IndexSpace::beta, true);
+
   IndexSpace::register_instance(L"x", IndexSpace::unoccupied,
                                 IndexSpace::nullqns, true);
+  IndexSpace::register_instance(L"x↑", IndexSpace::unoccupied,
+                                IndexSpace::alpha, true);
+  IndexSpace::register_instance(L"x↓", IndexSpace::unoccupied,
+                                IndexSpace::beta, true);
+
   IndexSpace::register_instance(L"w", IndexSpace::all_active,
                                 IndexSpace::nullqns, true);
+  IndexSpace::register_instance(L"w↑", IndexSpace::all_active,
+                                IndexSpace::alpha, true);
+  IndexSpace::register_instance(L"w↓", IndexSpace::all_active,
+                                IndexSpace::beta, true);
+
   IndexSpace::register_instance(L"v", IndexSpace::all, IndexSpace::nullqns,
                                 true);
+  IndexSpace::register_instance(L"v↑", IndexSpace::all, IndexSpace::alpha,
+                                true);
+  IndexSpace::register_instance(L"v↓", IndexSpace::all, IndexSpace::beta,
+                                true);
+
   IndexSpace::register_instance(L"u", IndexSpace::other_unoccupied,
                                 IndexSpace::nullqns, true);
+  IndexSpace::register_instance(L"u↑", IndexSpace::other_unoccupied,
+                                IndexSpace::alpha, true);
+  IndexSpace::register_instance(L"u↓", IndexSpace::other_unoccupied,
+                                IndexSpace::beta, true);
+
   IndexSpace::register_instance(L"t", IndexSpace::complete_unoccupied,
                                 IndexSpace::nullqns, true);
+  IndexSpace::register_instance(L"t↑", IndexSpace::complete_unoccupied,
+                                IndexSpace::alpha, true);
+  IndexSpace::register_instance(L"t↓", IndexSpace::complete_unoccupied,
+                                IndexSpace::beta, true);
+
   IndexSpace::register_instance(L"p", IndexSpace::complete, IndexSpace::nullqns,
+                                true);
+  IndexSpace::register_instance(L"p↑", IndexSpace::complete, IndexSpace::alpha,
+                                true);
+  IndexSpace::register_instance(L"p↓", IndexSpace::complete, IndexSpace::beta,
                                 true);
 
   TensorCanonicalizer::set_cardinal_tensor_labels(

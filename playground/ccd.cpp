@@ -8,6 +8,7 @@
 #include <SeQuant/core/tensor.hpp>
 #include <SeQuant/core/wick.hpp>
 #include <SeQuant/core/optimize.hpp>
+#include <SeQuant/domain/mbpt/spin.hpp>
 
 #include "Utils.hpp"
 
@@ -119,7 +120,11 @@ int main() {
 
   std::wcout << "CCD terms:\n" << to_latex_align(equations) << "\n";
 
-  ExprPtr optimizedEqs = optimize(equations, Idx2Size{});
+  ExprPtr spinTracedEqs = simplify(spintrace(equations));
+
+  std::wcout << "Spintraced CCD terms:\n" << to_latex_align(spinTracedEqs) << "\n";
+
+  ExprPtr optimizedEqs = simplify(optimize(spinTracedEqs, Idx2Size{}));
 
   std::wcout << "Optimized CCD terms:\n" << to_latex_align(optimizedEqs) << "\n";
 }
