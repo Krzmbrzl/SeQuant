@@ -1,6 +1,6 @@
 #include <SeQuant/core/expr.hpp>
 #include <SeQuant/core/op.hpp>
-#include <SeQuant/core/sequant.hpp>
+#include <SeQuant/core/context.hpp>
 #include <SeQuant/core/tensor.hpp>
 #include <SeQuant/core/wick.hpp>
 #include <SeQuant/domain/mbpt/convention.hpp>
@@ -8,7 +8,7 @@
 int main() {
   using namespace sequant;
 
-  set_default_context(SeQuant(Vacuum::SingleProduct, IndexSpaceMetric::Unit,
+  set_default_context(Context(Vacuum::SingleProduct, IndexSpaceMetric::Unit,
                               BraKetSymmetry::conjugate, SPBasis::spinorbital));
   //TensorCanonicalizer::set_cardinal_tensor_labels(std::vector<std::wstring>{L"f", L"t", L"λ"});
 
