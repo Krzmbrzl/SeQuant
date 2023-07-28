@@ -1,13 +1,13 @@
+#include <SeQuant/core/context.hpp>
 #include <SeQuant/core/expr.hpp>
 #include <SeQuant/core/index.hpp>
 #include <SeQuant/core/op.hpp>
+#include <SeQuant/core/optimize.hpp>
 #include <SeQuant/core/rational.hpp>
 #include <SeQuant/core/runtime.hpp>
-#include <SeQuant/core/context.hpp>
 #include <SeQuant/core/space.hpp>
 #include <SeQuant/core/tensor.hpp>
 #include <SeQuant/core/wick.hpp>
-#include <SeQuant/core/optimize.hpp>
 #include <SeQuant/domain/mbpt/spin.hpp>
 
 #include "Utils.hpp"
@@ -46,33 +46,31 @@ ExprPtr bch() {
   simplify(comm);
   expr += ex<Constant>(rational{1, 2}) * comm;
 
-  //comm = commutator(commutator(commutator(H(), T()), T()), T());
-  //simplify(comm);
-  //expr += ex<Constant>(rational{1, 6}) * comm;
+  // comm = commutator(commutator(commutator(H(), T()), T()), T());
+  // simplify(comm);
+  // expr += ex<Constant>(rational{1, 6}) * comm;
 
   /*
-	These don't contribute for CCD, but take quite a while to Wick in Debug builds
-  comm =
-      commutator(commutator(commutator(commutator(H(), T()), T()), T()), T());
-  simplify(comm);
-  expr += ex<Constant>(rational{1, 24}) * comm;
+        These don't contribute for CCD, but take quite a while to Wick in Debug
+  builds comm = commutator(commutator(commutator(commutator(H(), T()), T()),
+  T()), T()); simplify(comm); expr += ex<Constant>(rational{1, 24}) * comm;
   */
 
   return expr;
 }
 
 struct Idx2Size {
-	std::size_t operator()(const Index &idx) const {
-		if (idx.space() == occ) {
-			return 10;
-		} else if (idx.space() == virt) {
-			return 100;
-		} else if (idx.space() == active) {
-			return 5;
-		} else {
-			throw std::runtime_error("Encountered unexpected space in Idx2Size");
-		}
-	}
+  std::size_t operator()(const Index &idx) const {
+    if (idx.space() == occ) {
+      return 10;
+    } else if (idx.space() == virt) {
+      return 100;
+    } else if (idx.space() == active) {
+      return 5;
+    } else {
+      throw std::runtime_error("Encountered unexpected space in Idx2Size");
+    }
+  }
 };
 
 int main() {
@@ -122,13 +120,17 @@ int main() {
 
   std::wcout << "Spintracing...\n";
   for (const ExprPtr &current : equations->as<Sum>()) {
-		std::wcout << to_latex(current) << "  -->  " << spintrace(current) << "  =  " << simplify(spintrace(current)) << "\n\n";
+    std::wcout << to_latex(current) << "  -->  " << to_latex(spintrace(current))
+               << "  =  " << to_latex(simplify(spintrace(current)))
+               << "\n\n";
   }
   ExprPtr spinTracedEqs = simplify(spintrace(equations));
 
-  std::wcout << "Spintraced CCD terms:\n" << to_latex_align(spinTracedEqs) << "\n";
+  std::wcout << "Spintraced CCD terms:\n"
+             << to_latex_align(spinTracedEqs) << "\n";
 
   ExprPtr optimizedEqs = simplify(optimize(spinTracedEqs, Idx2Size{}));
 
-  std::wcout << "Optimized CCD terms:\n" << to_latex_align(optimizedEqs) << "\n";
+  std::wcout << "Optimized CCD terms:\n"
+             << to_latex_align(optimizedEqs) << "\n";
 }
