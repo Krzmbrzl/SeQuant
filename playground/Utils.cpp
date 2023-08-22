@@ -45,7 +45,7 @@ void setConvention() {
   registerSpace(IndexSpace::complete_maybe_unoccupied, L"z");
 
   TensorCanonicalizer::set_cardinal_tensor_labels(
-      {L"t", L"f", L"g", L"{C_0}", L"{C_0^\\dagger}"});
+      {L"A", L"t", L"f", L"g", L"{C_0}", L"{C_0^\\dagger}"});
 }
 
 ExprPtr make_op(Tensor tensor) {

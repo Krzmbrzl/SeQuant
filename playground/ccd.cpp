@@ -29,8 +29,12 @@ ExprPtr T() {
 ExprPtr Lambda() {
   Tensor TOp = (*T()->begin())->as<Tensor>();
 
+  // return ex<Constant>(rational{1, 4}) *
+  //        make_op(Tensor(L"Λ", TOp.ket(), TOp.bra(), Symmetry::antisymm));
+
+  // SeQuant treats a tensor with name "A" as an antisymmetrization operator
   return ex<Constant>(rational{1, 4}) *
-         make_op(Tensor(L"Λ", TOp.ket(), TOp.bra(), Symmetry::antisymm));
+         make_op(Tensor(L"A", TOp.ket(), TOp.bra(), Symmetry::antisymm));
 }
 
 ExprPtr commutator(ExprPtr A, ExprPtr B) { return A * B - B * A; }
@@ -80,7 +84,8 @@ int main() {
 
   setConvention();
 
-  ExprPtr pre_equations = (ex<Constant>(1) + Lambda()) * bch();
+  //ExprPtr pre_equations = (ex<Constant>(1) + Lambda()) * bch();
+  ExprPtr pre_equations = Lambda() * bch();
   expand(pre_equations);
   // std::wcout << pre_equations->size() << std::endl;
   // std::size_t counter = 1;
@@ -118,19 +123,21 @@ int main() {
 
   std::wcout << "CCD terms:\n" << to_latex_align(equations) << "\n\n\n";
 
+  auto ext_indices = external_indices(equations);
+
   std::wcout << "Spintracing...\n";
   for (const ExprPtr &current : equations->as<Sum>()) {
-    std::wcout << to_latex(current) << "  -->  " << to_latex(spintrace(current))
-               << "  =  " << to_latex(simplify(spintrace(current)))
+    std::wcout << to_latex_align(current) /*<< "\ntraces out to\n" << to_latex_align(spintrace(current)) */
+               << "\ntraces to\n" << to_latex_align(simplify(spintrace(current, ext_indices)))
                << "\n\n";
   }
-  ExprPtr spinTracedEqs = simplify(spintrace(equations));
+  //ExprPtr spinTracedEqs = simplify(spintrace(equations));
 
-  std::wcout << "Spintraced CCD terms:\n"
-             << to_latex_align(spinTracedEqs) << "\n";
+  //std::wcout << "Spintraced CCD terms:\n"
+  //           << to_latex_align(spinTracedEqs) << "\n";
 
-  ExprPtr optimizedEqs = simplify(optimize(spinTracedEqs, Idx2Size{}));
+  //ExprPtr optimizedEqs = simplify(optimize(spinTracedEqs, Idx2Size{}));
 
-  std::wcout << "Optimized CCD terms:\n"
-             << to_latex_align(optimizedEqs) << "\n";
+  //std::wcout << "Optimized CCD terms:\n"
+  //           << to_latex_align(optimizedEqs) << "\n";
 }
