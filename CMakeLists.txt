@@ -138,6 +138,9 @@ check_cxx_execution_header(SEQUANT)
 # Ranges-V3
 include(FindOrFetchRangeV3)
 
+# libPerm
+include(FindOrFetchLibPerm)
+
 # need header-only Boost + (compiled) Boost.Regex and Boost.Locale
 # NB Boost.Container is broken in v1.70
 if (NOT TARGET Boost::boost OR NOT TARGET Boost::regex OR NOT TARGET Boost::locale)

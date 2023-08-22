@@ -16,3 +16,6 @@ target_link_libraries(repro PRIVATE SeQuant::SeQuant utility)
 add_executable(playground_ccd ccd.cpp)
 target_link_libraries(playground_ccd PRIVATE SeQuant::SeQuant utility)
 set_target_properties(playground_ccd PROPERTIES OUTPUT_NAME "ccd")
+
+add_executable(ccd_sequant ccd_sequant.cpp)
+target_link_libraries(ccd_sequant PRIVATE SeQuant::SeQuant libperm::libperm)
