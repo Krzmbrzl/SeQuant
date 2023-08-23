@@ -7,6 +7,7 @@
 #include <SeQuant/core/eval_node.hpp>
 #include <SeQuant/core/logger.hpp>
 #include <SeQuant/core/tensor.hpp>
+#include <SeQuant/core/type_traits.hpp>
 #include <SeQuant/domain/eval/cache_manager.hpp>
 
 #include <btas/btas.h>
@@ -23,22 +24,6 @@
 namespace sequant {
 
 namespace {
-
-#if __cplusplus < 202002L
-template <class T>
-struct remove_cvref {
-  typedef std::remove_cv_t<::std::remove_reference_t<T>> type;
-};
-
-template <class T>
-using remove_cvref_t = typename remove_cvref<T>::type;
-#else
-template <typename T>
-using remove_cvref = std::remove_cvref<T>;
-
-template <typename T>
-using remove_cvref_t = std::remove_cvref_t<T>;
-#endif
 
 template <typename... Args>
 void log_eval(Args const&... args) noexcept {
