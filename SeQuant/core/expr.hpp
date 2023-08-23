@@ -14,6 +14,7 @@
 #include "SeQuant/core/logger.hpp"
 #include "SeQuant/core/meta.hpp"
 #include "SeQuant/core/rational.hpp"
+#include "SeQuant/core/type_traits.hpp"
 #include "SeQuant/core/wolfram.hpp"
 
 #include <range/v3/all.hpp>
@@ -26,9 +27,40 @@
 #include <iostream>
 #include <memory>
 #include <optional>
+#include <type_traits>
 #include <vector>
 
 namespace sequant {
+
+namespace {
+
+
+template <typename T>
+constexpr bool is_an_expr_v = is_a_v<Expr, T>;
+template <typename T>
+constexpr bool is_expr_v = is_v<Expr, T>;
+
+template <typename T>
+constexpr bool is_a_constant_v = is_a_v<Constant, T>;
+template <typename T>
+constexpr bool is_constant_v = is_v<Constant, T>;
+
+template <typename T>
+constexpr bool is_a_sum_v = is_a_v<Sum, T>;
+template <typename T>
+constexpr bool is_sum_v = is_v<Sum, T>;
+
+template <typename T>
+constexpr bool is_a_product_v = is_a_v<Product, T>;
+template <typename T>
+constexpr bool is_product_v = is_v<Product, T>;
+
+template <typename T>
+constexpr bool is_a_variable_v = is_a_v<Variable, T>;
+template <typename T>
+constexpr bool is_variable_v = is_v<Variable, T>;
+
+}  // namespace
 
 /// @brief ExprPtr is a multiple-owner smart pointer to Expr
 
@@ -41,24 +73,16 @@ class ExprPtr : public std::shared_ptr<Expr> {
   using base_type::base_type;
 
   ExprPtr() = default;
-  template <typename E, typename = std::enable_if_t<
-                            std::is_same_v<std::remove_const_t<E>, Expr> ||
-                            std::is_base_of_v<Expr, std::remove_const_t<E>>>>
+  template <typename E, typename = std::enable_if_t<is_an_expr_v<E>>>
   ExprPtr(const std::shared_ptr<E> &other_sptr) : base_type(other_sptr) {}
-  template <typename E, typename = std::enable_if_t<
-                            std::is_same_v<std::remove_const_t<E>, Expr> ||
-                            std::is_base_of_v<Expr, std::remove_const_t<E>>>>
+  template <typename E, typename = std::enable_if_t<is_an_expr_v<E>>>
   ExprPtr(std::shared_ptr<E> &&other_sptr) : base_type(std::move(other_sptr)) {}
-  template <typename E, typename = std::enable_if_t<
-                            std::is_same_v<std::remove_const_t<E>, Expr> ||
-                            std::is_base_of_v<Expr, std::remove_const_t<E>>>>
+  template <typename E, typename = std::enable_if_t<is_an_expr_v<E>>>
   ExprPtr &operator=(const std::shared_ptr<E> &other_sptr) {
     as_shared_ptr() = other_sptr;
     return *this;
   }
-  template <typename E, typename = std::enable_if_t<
-                            std::is_same_v<std::remove_const_t<E>, Expr> ||
-                            std::is_base_of_v<Expr, std::remove_const_t<E>>>>
+  template <typename E, typename = std::enable_if_t<is_an_expr_v<E>>>
   ExprPtr &operator=(std::shared_ptr<E> &&other_sptr) {
     as_shared_ptr() = std::move(other_sptr);
     return *this;
@@ -70,7 +94,7 @@ class ExprPtr : public std::shared_ptr<Expr> {
   const base_type &as_shared_ptr() const &;
   base_type &&as_shared_ptr() &&;
 
-  template <typename E, typename = std::enable_if_t<!std::is_same_v<E, Expr>>>
+  template <typename E, typename = std::enable_if_t<!is_expr_v<E>>>
   std::shared_ptr<E> as_shared_ptr() const {
     assert(this->is<E>());
     return std::static_pointer_cast<E>(this->as_shared_ptr());
@@ -238,13 +262,13 @@ class Expr : public std::enable_shared_from_this<Expr>,
   struct is_shared_ptr_of_expr : std::false_type {};
   template <typename T>
   struct is_shared_ptr_of_expr<std::shared_ptr<T>,
-                               std::enable_if_t<std::is_same_v<Expr, T>>>
+                               std::enable_if_t<is_expr_v<T>>>
       : std::true_type {};
   template <typename T, typename Enabler = void>
   struct is_shared_ptr_of_expr_or_derived : std::false_type {};
   template <typename T>
-  struct is_shared_ptr_of_expr_or_derived<
-      std::shared_ptr<T>, std::enable_if_t<std::is_base_of<Expr, T>::value>>
+  struct is_shared_ptr_of_expr_or_derived<std::shared_ptr<T>,
+                                          std::enable_if_t<is_an_expr_v<T>>>
       : std::true_type {};
 
   /// @brief Reports if this is a c-number
@@ -338,9 +362,8 @@ class Expr : public std::enable_shared_from_this<Expr>,
   /// @tparam T Expr or a class derived from Expr
   /// @return true if @c *this is less than @c that
   /// @note the derived class must implement Expr::static_less_than
-  template <typename T>
-  std::enable_if_t<std::is_base_of<Expr, T>::value, bool> operator<(
-      const T &that) const {
+  template <typename T, typename = std::enable_if<is_an_expr_v<T>>>
+  bool operator<(const T &that) const {
     if (type_id() ==
         that.type_id()) {  // if same type, use generic (or type-specific, if
                            // available) comparison
@@ -369,17 +392,17 @@ class Expr : public std::enable_shared_from_this<Expr>,
   /// @return true if this object is of type @c T
   template <typename T>
   bool is() const {
-    if constexpr (std::is_same_v<std::decay_t<T>, Expr>)
+    if constexpr (is_expr_v<T>)
       return true;
     else
-      return this->type_id() == get_type_id<std::decay_t<T>>();
+      return this->type_id() == get_type_id<remove_cvref_t<T>>();
   }
 
   /// @tparam T an Expr type
   /// @return this object cast to type @c T
   template <typename T>
   const T &as() const {
-    assert(this->is<std::decay_t<T>>());  // so that as<const T>() works fine
+    assert(this->is<T>());
     return static_cast<const T &>(*this);
   }
 
@@ -387,7 +410,7 @@ class Expr : public std::enable_shared_from_this<Expr>,
   /// @return this object cast to type @c T
   template <typename T>
   T &as() {
-    assert(this->is<std::decay_t<T>>());  // so that as<const T>() works fine
+    assert(this->is<T>());
     return static_cast<T &>(*this);
   }
 
@@ -623,8 +646,7 @@ class Constant : public Expr {
   Constant(Constant &&) = default;
   Constant &operator=(const Constant &) = default;
   Constant &operator=(Constant &&) = default;
-  template <typename U, typename = std::enable_if_t<
-                            !std::is_same_v<std::decay_t<U>, Constant>>>
+  template <typename U, typename = std::enable_if_t<!is_constant_v<U>>>
   explicit Constant(U &&value) : value_(std::forward<U>(value)) {}
 
  private:
@@ -728,8 +750,7 @@ class Variable : public Expr, public Labeled {
   Variable(Variable &&) = default;
   Variable &operator=(const Variable &) = default;
   Variable &operator=(Variable &&) = default;
-  template <typename U, typename = std::enable_if_t<
-                            !std::is_same_v<std::decay_t<U>, Variable>>>
+  template <typename U, typename = std::enable_if_t<!is_variable_v<U>>>
   explicit Variable(U &&label) : label_(std::forward<U>(label)) {}
 
   std::wstring_view label() const override;
@@ -800,10 +821,9 @@ class Product : public Expr {
   /// @param rng a range of factors
   /// @param flatten_tag if Flatten::Yes, flatten the factors
   template <typename Range,
-            typename = std::enable_if_t<
-                meta::is_range_v<std::decay_t<Range>> &&
-                !std::is_same_v<std::remove_reference_t<Range>, ExprPtrList> &&
-                !std::is_same_v<std::remove_reference_t<Range>, Product>>>
+            typename = std::enable_if_t<meta::is_range_v<std::decay_t<Range>> &&
+                                        !is_v<Range, ExprPtrList> &&
+                                        !is_v<Range, Product>>>
   explicit Product(Range &&rng, Flatten flatten_tag = Flatten::Yes) {
     using ranges::begin;
     using ranges::end;
@@ -897,8 +917,7 @@ class Product : public Expr {
   /// @return @c *this
   /// @warning if @p factor is a Product, it is flattened recursively
   template <typename T, typename Factor,
-            typename = std::enable_if_t<
-                std::is_base_of_v<Expr, std::remove_reference_t<Factor>>>>
+            typename = std::enable_if_t<is_an_expr_v<Factor>>>
   Product &append(T scalar, Factor &&factor,
                   Flatten flatten_tag = Flatten::Yes) {
     return this->append(scalar,
@@ -952,8 +971,7 @@ class Product : public Expr {
   /// @warning if @p factor is a Product, it is flattened recursively
   /// @note this is less efficient than append()
   template <typename T, typename Factor,
-            typename = std::enable_if_t<
-                std::is_base_of_v<Expr, std::remove_reference_t<Factor>>>>
+            typename = std::enable_if_t<is_an_expr_v<Factor>>>
   Product &prepend(T scalar, Factor &&factor,
                    Flatten flatten_tag = Flatten::Yes) {
     return this->prepend(scalar,
@@ -1193,9 +1211,8 @@ class Sum : public Expr {
   /// construct a Sum out of a range of summands
   /// @param rng a range
   template <typename Range,
-            typename = std::enable_if_t<
-                meta::is_range_v<std::decay_t<Range>> &&
-                !std::is_same_v<std::remove_reference_t<Range>, ExprPtrList>>>
+            typename = std::enable_if_t<meta::is_range_v<std::decay_t<Range>> &&
+                                        !is_v<Range, ExprPtrList>>>
   explicit Sum(Range &&rng) {
     // use append to flatten out Sum summands
     for (auto &&v : rng) {
