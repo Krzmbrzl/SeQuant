@@ -12,6 +12,8 @@
 #include <algorithm>
 #include <cassert>
 #include <iostream>
+#include <memory>
+#include <numeric>
 #include <set>
 #include <string>
 #include <unordered_map>
@@ -178,7 +180,8 @@ std::wstring to_itf(const Tensor& tensor) {
   }
   itf += L"]";
 
-  itf = std::wstring(tensor.label()) + L":" + spaceTag + itf;
+  itf = std::wstring(tensor.label()) +
+        (spaceTag.empty() ? L"" : L":" + spaceTag) + itf;
 
   return itf;
 }
@@ -234,7 +237,7 @@ std::wstring to_itf(const Product& product, const Tensor& result) {
     isNegative = true;
   }
 
-  itf += to_itf(result) + (isNegative ? L" -= " : L" += ") +
+  itf += L"." + to_itf(result) + (isNegative ? L" -= " : L" += ") +
          (factor != 1 ? to_wstring(factor) + L" * " : L"") + productItf + L"\n";
 
   return itf;
@@ -260,6 +263,19 @@ std::wstring to_itf(const ExprPtr& expr, const Tensor& result) {
   return itfCode;
 }
 
+ExprPtr T(const std::vector<std::size_t>& projectionManifold) {
+  auto T = std::make_shared<Sum>();
+  for (std::size_t current : projectionManifold) {
+    if (current == 0) {
+      continue;
+    }
+
+    T->append(op::T_(current));
+  }
+
+  return T;
+}
+
 int main(int argc, const char** argv) {
   sequant::detail::OpIdRegistrar op_id_registrar;
   sequant::set_default_context(
@@ -269,73 +285,102 @@ int main(int argc, const char** argv) {
   TensorCanonicalizer::register_instance(
       std::make_shared<DefaultTensorCanonicalizer>());
 
+  std::size_t maxExcitation = 2;
+  bool includeSingles = false;
+
+  std::vector<std::size_t> projectionManifold(maxExcitation + 1);
+  std::iota(projectionManifold.begin(), projectionManifold.end(), 0);
+  if (!includeSingles && maxExcitation > 1) {
+    projectionManifold.erase(projectionManifold.begin() + 1);
+  }
+
+  std::wcout << L"Chosen projection manifold is ";
+  for (std::size_t currentProjection : projectionManifold) {
+    std::wcout << L"<" << std::to_wstring(currentProjection) << "|, ";
+  }
+  std::wcout << "\n\n";
+
   // 1. Construct Hbar
   ExprPtr hbar = op::H();
   ExprPtr H_Tk = hbar;
   for (int64_t k = 1; k <= 4; ++k) {
-    H_Tk = simplify(ex<Constant>(rational{1, k}) * H_Tk * op::T_(2));
+    H_Tk =
+        simplify(ex<Constant>(rational{1, k}) * H_Tk * T(projectionManifold));
     hbar += H_Tk;
   }
 
   std::wcout << L"Hbar:\n" << to_latex_align(hbar) << "\n\n";
 
   // 2. project onto doubles manifold, screen, lower to tensor form and wick it
-  std::vector<ExprPtr> result;
+  std::vector<ExprPtr> equations;
 
-  std::size_t maxP = 2;
-  std::size_t minP = 2;
-
-  for (auto p = minP; p <= maxP; ++p) {
+  for (std::size_t p : projectionManifold) {
     // 2.a. screen out terms that cannot give nonzero after projection onto
     // <p|
-    std::shared_ptr<Sum>
-        hbar_p;  // products that can produce excitations of rank p
+    std::shared_ptr<Sum> screendedTerms;
 
     for (const ExprPtr& term : *hbar) {
       assert(term->is<Product>() || term->is<op_t>());
 
-      if (op::raises_vacuum_up_to_rank(term, p)) {
-        if (op::raises_vacuum_to_rank(term, p)) {
-          if (!hbar_p) {
-            hbar_p = std::make_shared<Sum>(ExprPtrList{term});
-          } else {
-            hbar_p->append(term);
-          }
+      if (op::raises_vacuum_to_rank(term, p)) {
+        if (!screendedTerms) {
+          screendedTerms = std::make_shared<Sum>(ExprPtrList{term});
+        } else {
+          screendedTerms->append(term);
         }
       }
     }
 
-    // 2.b project onto <p|, i.e. multiply by P(p)
-    ExprPtr P_hbar = simplify(op::P(p) * hbar_p);
+    if (p > 0) {
+      // 2.b project onto <p|, i.e. multiply by P(p)
+      ExprPtr P_hbar = simplify(op::P(p) * screendedTerms);
 
-    // 2.c compute vacuum expectation value (Wick theorem)
-    result.push_back(op::vac_av(P_hbar));
-    simplify(result.back());
+      // 2.c compute vacuum expectation value (Wick theorem)
+      equations.push_back(op::vac_av(P_hbar));
+    } else {
+      // Use equation as-is (no projection required)
+      equations.push_back(op::vac_av(screendedTerms));
+    }
+
+    simplify(equations.back());
   }
 
-  std::wcout << L"Generated equations:\n";
-  for (const ExprPtr& current : result) {
-    std::wcout << to_latex_align(current) << "\n\n";
+  for (std::size_t i = 0; i < projectionManifold.size(); ++i) {
+    std::size_t currentProjection = projectionManifold.at(i);
+    std::wcout << L"Equations for projection on <" << currentProjection
+               << L"|:\n=============================\nRaw ("
+               << equations[i]->size() << L"):\n"
+               << to_latex_align(equations.at(i)) << "\n\n";
+
+    // Spintrace
+    equations[i] =
+        simplify(closed_shell_CC_spintrace(equations[i], currentProjection));
+
+    std::wcout << L"Spin-traced (" << equations[i]->size() << L"):\n"
+               << to_latex_align(equations.at(i)) << "\n\n";
+
+    // Remove symmetrization operator as this is not a tensor (but the optimize
+    // function would treat it as such)
+    // -> from here on the final symmetrization is implicit!
+    equations[i] = remove_tensor(equations[i], L"S");
+
+    // Optimize
+    equations[i] = optimize(equations[i], Idx2Size{});
+
+    std::wcout << L"Optimized (" << equations[i]->size() << L"):\n"
+               << to_latex_align(equations[i]) << "\n\n";
+
+    BraKetIndices externals = determine_result_indices(equations[i]);
+    std::wstring resultName = [&]() -> std::wstring {
+      if (currentProjection == 0) {
+        return L"E";
+      }
+      return L"R" + std::to_wstring(currentProjection) +
+             (currentProjection > 1 ? L"u" : L"");
+    }();
+    Tensor resultTensor(resultName, externals.bra, externals.ket);
+
+    std::wcout << L"ITF code:\n"
+               << to_itf(equations[i], resultTensor) << L"\n\n\n";
   }
-
-  ExprPtr spintracedEqs =
-      simplify(closed_shell_CC_spintrace(result.front(), 2));
-
-  std::wcout << L"Spin-traced equations:\n"
-             << to_latex_align(spintracedEqs) << "\n\n";
-
-  // Remove symmetrization operator as this is not a tensor (but the optimize
-  // function would treat it as such)
-  // -> from here on the final symmetrization is implicit!
-  spintracedEqs = remove_tensor(spintracedEqs, L"S");
-
-  ExprPtr optimizedEqs = optimize(spintracedEqs, Idx2Size{});
-
-  std::wcout << L"Optimized equations (still needs column-symmetrization):\n"
-             << to_latex_align(optimizedEqs) << "\n\n";
-
-  BraKetIndices externals = determine_result_indices(optimizedEqs);
-  Tensor resultTensor(L"R2u", externals.bra, externals.ket);
-
-  std::wcout << L"ITF code:\n" << to_itf(optimizedEqs, resultTensor) << L"\n";
 }
