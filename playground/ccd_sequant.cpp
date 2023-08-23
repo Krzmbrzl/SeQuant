@@ -116,6 +116,12 @@ Tensor transform_two_electron_ints(const Tensor& tensor) {
   std::vector<Index> indices(tensor.braket().begin(), tensor.braket().end());
   assert(indices.size() == 4);
 
+  // TODO: The canonicalization does NOT guarantee us that we end up with the
+  // indices sorted in the way that we would like In order for that to happen,
+  // we'll have to also use the provided compare-object when selecting the coset
+  // representative (which is currently done only by looking at the permutation
+  // images, but that doesn't guarantee anything in terms of ordering of the
+  // actual elements in the canonicalized sequence)
   perm::canonicalize(indices, twoElectronSymmetries,
                      [](const Index& idx1, const Index& idx2) {
                        if (idx1.space().type() != idx2.space().type()) {
@@ -143,6 +149,7 @@ Tensor transform_two_electron_ints(const Tensor& tensor) {
     // Exchange second and third index
     return Tensor(L"J", {indices[0], indices[2]}, {indices[1], indices[3]});
   } else {
+    std::wcout << to_latex(tensor) << std::endl;
     throw std::runtime_error("Unrecognized index space pattern on g-tensor");
   }
 }
@@ -200,16 +207,18 @@ std::wstring to_itf(const Product& product, const Tensor& result) {
   for (const ExprPtr& currentFactor : product) {
     if (currentFactor->is<Product>()) {
       BraKetIndices externals = determine_result_indices(currentFactor);
+
       Tensor intermediate(
           std::wstring(L"STIN") + std::to_wstring(intermediateCounter++),
           externals.bra, externals.ket);
-      std::wstring intermediateDef =
-          to_itf(currentFactor->as<Product>(), intermediate);
+
+      const Product& product = currentFactor->as<Product>();
+
+      std::wstring intermediateDef = to_itf(product, intermediate);
 
       itf += intermediateDef;
 
-      intermediates.insert(
-          {currentFactor->as<Product>(), std::move(intermediate)});
+      intermediates.insert({product, std::move(intermediate)});
     }
   }
 
@@ -274,6 +283,14 @@ ExprPtr T(const std::vector<std::size_t>& projectionManifold) {
   }
 
   return T;
+}
+
+std::size_t getTermCount(const ExprPtr& expr) {
+  if (!expr.is<Sum>()) {
+    return 1;
+  }
+
+  return expr.as<Sum>().summands().size();
 }
 
 int main(int argc, const char** argv) {
@@ -349,14 +366,14 @@ int main(int argc, const char** argv) {
     std::size_t currentProjection = projectionManifold.at(i);
     std::wcout << L"Equations for projection on <" << currentProjection
                << L"|:\n=============================\nRaw ("
-               << equations[i]->size() << L"):\n"
+               << getTermCount(equations.at(i)) << L"):\n"
                << to_latex_align(equations.at(i)) << "\n\n";
 
     // Spintrace
     equations[i] =
         simplify(closed_shell_CC_spintrace(equations[i], currentProjection));
 
-    std::wcout << L"Spin-traced (" << equations[i]->size() << L"):\n"
+    std::wcout << L"Spin-traced (" << getTermCount(equations[i]) << L"):\n"
                << to_latex_align(equations.at(i)) << "\n\n";
 
     // Remove symmetrization operator as this is not a tensor (but the optimize
@@ -367,7 +384,7 @@ int main(int argc, const char** argv) {
     // Optimize
     equations[i] = optimize(equations[i], Idx2Size{});
 
-    std::wcout << L"Optimized (" << equations[i]->size() << L"):\n"
+    std::wcout << L"Optimized (" << getTermCount(equations[i]) << L"):\n"
                << to_latex_align(equations[i]) << "\n\n";
 
     BraKetIndices externals = determine_result_indices(equations[i]);
