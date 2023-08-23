@@ -992,12 +992,14 @@ ExprPtr closed_shell_CC_spintrace(const ExprPtr& expr, size_t nparticles) {
     if (term->is<Product>()) term = remove_tensor(term->as<Product>(), L"S");
   }
 
-  // Biorthogonal transformation
-  st_expr = biorthogonal_transform(st_expr, nparticles, ext_idxs);
+  if (nparticles > 0) {
+    // Biorthogonal transformation
+    st_expr = biorthogonal_transform(st_expr, nparticles, ext_idxs);
 
-  auto bixs = ext_idxs | transform([](auto&& vec) { return vec[0]; });
-  auto kixs = ext_idxs | transform([](auto&& vec) { return vec[1]; });
-  st_expr = ex<Tensor>(Tensor{L"S", bixs, kixs}) * st_expr;
+    auto bixs = ext_idxs | transform([](auto&& vec) { return vec[0]; });
+    auto kixs = ext_idxs | transform([](auto&& vec) { return vec[1]; });
+    st_expr = ex<Tensor>(Tensor{L"S", bixs, kixs}) * st_expr;
+  }
 
   simplify(st_expr);
 
