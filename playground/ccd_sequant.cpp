@@ -311,11 +311,11 @@ int main(int argc, const char** argv) {
     projectionManifold.erase(projectionManifold.begin() + 1);
   }
 
-  std::wcout << L"Chosen projection manifold is ";
-  for (std::size_t currentProjection : projectionManifold) {
-    std::wcout << L"<" << std::to_wstring(currentProjection) << "|, ";
+  std::wcout << L"Chosen projection manifold is { ";
+  for (std::size_t i = 0; i < projectionManifold.size(); ++i) {
+    std::wcout << L"<" << std::to_wstring(projectionManifold[i]) << "|" << (i + 1 < projectionManifold.size() ? ", " : " ");
   }
-  std::wcout << "\n\n";
+  std::wcout << "}\n\n";
 
   // 1. Construct Hbar
   ExprPtr hbar = op::H();
@@ -359,7 +359,7 @@ int main(int argc, const char** argv) {
       equations.push_back(op::vac_av(screendedTerms));
     }
 
-    simplify(equations.back());
+    equations.back() = simplify(equations.back());
   }
 
   for (std::size_t i = 0; i < projectionManifold.size(); ++i) {
