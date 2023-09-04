@@ -1,3 +1,4 @@
+#include <SeQuant/core/export/itf.hpp>
 #include <SeQuant/core/expr.hpp>
 #include <SeQuant/core/optimize.hpp>
 #include <SeQuant/core/tensor.hpp>
@@ -176,14 +177,14 @@ std::wstring to_itf(const Index& idx) {
 std::wstring to_itf(const Tensor& tensor) {
   if (tensor.label() == L"g") {
     // g needs to be mapped to either K or J
-    return to_itf(transform_two_electron_ints(tensor));
+	  return ::to_itf(transform_two_electron_ints(tensor));
   }
 
   std::wstring spaceTag;
   std::wstring itf = L"[";
   for (const Index& current : tensor.braket()) {
-    itf += to_itf(current);
-    spaceTag += to_itf_tag(current.space());
+    itf += ::to_itf(current);
+    spaceTag += ::to_itf_tag(current.space());
   }
   itf += L"]";
 
@@ -214,7 +215,7 @@ std::wstring to_itf(const Product& product, const Tensor& result) {
 
       const Product& product = currentFactor->as<Product>();
 
-      std::wstring intermediateDef = to_itf(product, intermediate);
+      std::wstring intermediateDef = ::to_itf(product, intermediate);
 
       itf += intermediateDef;
 
@@ -229,9 +230,9 @@ std::wstring to_itf(const Product& product, const Tensor& result) {
   for (const ExprPtr& currentFactor : product) {
     if (currentFactor->is<Product>()) {
       productItf +=
-          to_itf(intermediates.at(currentFactor->as<Product>())) + L" ";
+          ::to_itf(intermediates.at(currentFactor->as<Product>())) + L" ";
     } else if (currentFactor->is<Tensor>()) {
-      productItf += to_itf(currentFactor->as<Tensor>()) + L" ";
+      productItf += ::to_itf(currentFactor->as<Tensor>()) + L" ";
     } else if (currentFactor->is<Constant>()) {
       throw std::runtime_error(
           "Expected constant factor to be a property of the Product object");
@@ -246,7 +247,7 @@ std::wstring to_itf(const Product& product, const Tensor& result) {
     isNegative = true;
   }
 
-  itf += L"." + to_itf(result) + (isNegative ? L" -= " : L" += ") +
+  itf += L"." + ::to_itf(result) + (isNegative ? L" -= " : L" += ") +
          (factor != 1 ? to_wstring(factor) + L" * " : L"") + productItf + L"\n";
 
   return itf;
@@ -260,10 +261,10 @@ std::wstring to_itf(const ExprPtr& expr, const Tensor& result) {
 
   for (const ExprPtr& currentAddend : expandedExpr->as<Sum>()) {
     if (currentAddend->is<Tensor>()) {
-      itfCode += to_itf(result) + L" += " +
-                 to_itf(currentAddend->as<Tensor>()) + L"\n";
+      itfCode += ::to_itf(result) + L" += " +
+                 ::to_itf(currentAddend->as<Tensor>()) + L"\n";
     } else if (currentAddend->is<Product>()) {
-      itfCode += to_itf(currentAddend->as<Product>(), result);
+      itfCode += ::to_itf(currentAddend->as<Product>(), result);
     } else {
       throw std::runtime_error("Unhandled case");
     }
@@ -313,7 +314,8 @@ int main(int argc, const char** argv) {
 
   std::wcout << L"Chosen projection manifold is { ";
   for (std::size_t i = 0; i < projectionManifold.size(); ++i) {
-    std::wcout << L"<" << std::to_wstring(projectionManifold[i]) << "|" << (i + 1 < projectionManifold.size() ? ", " : " ");
+    std::wcout << L"<" << std::to_wstring(projectionManifold[i]) << "|"
+               << (i + 1 < projectionManifold.size() ? ", " : " ");
   }
   std::wcout << "}\n\n";
 
@@ -398,6 +400,11 @@ int main(int argc, const char** argv) {
     Tensor resultTensor(resultName, externals.bra, externals.ket);
 
     std::wcout << L"ITF code:\n"
-               << to_itf(equations[i], resultTensor) << L"\n\n\n";
+               << ::to_itf(equations[i], resultTensor) << L"\n\n";
+
+    std::wcout << "Alternative ITF code:\n"
+               << to_itf(itf::CodeBlock(
+                      L"Residual", itf::Result(equations[i], resultTensor)))
+               << "\n\n\n";
   }
 }
