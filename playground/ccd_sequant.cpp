@@ -177,7 +177,7 @@ std::wstring to_itf(const Index& idx) {
 std::wstring to_itf(const Tensor& tensor) {
   if (tensor.label() == L"g") {
     // g needs to be mapped to either K or J
-	  return ::to_itf(transform_two_electron_ints(tensor));
+    return ::to_itf(transform_two_electron_ints(tensor));
   }
 
   std::wstring spaceTag;
@@ -364,6 +364,8 @@ int main(int argc, const char** argv) {
     equations.back() = simplify(equations.back());
   }
 
+  std::vector<itf::Result> results;
+
   for (std::size_t i = 0; i < projectionManifold.size(); ++i) {
     std::size_t currentProjection = projectionManifold.at(i);
     std::wcout << L"Equations for projection on <" << currentProjection
@@ -399,12 +401,38 @@ int main(int argc, const char** argv) {
     }();
     Tensor resultTensor(resultName, externals.bra, externals.ket);
 
-    std::wcout << L"ITF code:\n"
-               << ::to_itf(equations[i], resultTensor) << L"\n\n";
+    // std::wcout << L"ITF code:\n"
+    //            << ::to_itf(equations[i], resultTensor) << L"\n\n";
 
-    std::wcout << "Alternative ITF code:\n"
-               << to_itf(itf::CodeBlock(
-                      L"Residual", itf::Result(equations[i], resultTensor)))
-               << "\n\n\n";
+    results.push_back(
+        itf::Result(equations[i], resultTensor, currentProjection <= 1));
+
+    if (resultName[resultName.size() - 1] == L'u') {
+      // Generate symmetrization
+      Tensor symmetrizedResult(resultName.substr(0, resultName.size() - 1),
+                               resultTensor.bra(), resultTensor.ket());
+
+      assert(externals.bra.size() == externals.ket.size());
+      assert(externals.bra.size() == maxExcitation);
+
+      ExprPtr symmetrization = ex<Sum>(ExprPtrList{});
+      for (std::size_t i = 0; i < externals.bra.size(); ++i) {
+        std::vector<Index> symBra;
+        std::vector<Index> symKet;
+
+        for (std::size_t j = 0; j < externals.bra.size(); ++j) {
+          symBra.push_back(externals.bra[(i + j) % externals.bra.size()]);
+          symKet.push_back(externals.ket[(i + j) % externals.ket.size()]);
+        }
+
+        symmetrization +=
+            ex<Tensor>(resultName, std::move(symBra), std::move(symKet));
+      }
+
+      results.push_back(itf::Result(symmetrization, symmetrizedResult, true));
+    }
   }
+
+  std::wcout << "ITF code:\n\n"
+             << to_itf(itf::CodeBlock(L"Residual", results)) << "\n";
 }

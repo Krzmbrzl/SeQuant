@@ -22,9 +22,10 @@ std::wstring to_itf(const itf::CodeBlock &block) {
 
 namespace itf {
 
-Result::Result(ExprPtr expression, Tensor resultTensor)
+Result::Result(ExprPtr expression, Tensor resultTensor, bool importResultTensor)
     : expression(std::move(expression)),
-      resultTensor(std::move(resultTensor)) {}
+      resultTensor(std::move(resultTensor)),
+      importResultTensor(importResultTensor) {}
 
 Tensor generateResultTensor(ExprPtr expr) {
   BraKet externals = non_repeated_indices(expr);
@@ -32,9 +33,10 @@ Tensor generateResultTensor(ExprPtr expr) {
   return Tensor(L"Result", std::move(externals.bra), std::move(externals.ket));
 }
 
-Result::Result(ExprPtr expression)
+Result::Result(ExprPtr expression, bool importResultTensor)
     : expression(std::move(expression)),
-      resultTensor(generateResultTensor(expression)) {}
+      resultTensor(generateResultTensor(expression)),
+      importResultTensor(importResultTensor) {}
 
 CodeBlock::CodeBlock(std::wstring blockName, Result result)
     : CodeBlock(std::move(blockName), std::vector<Result>{std::move(result)}) {}
@@ -55,9 +57,10 @@ std::vector<Contraction> to_contractions(const Product &product,
     assert(product.factor(0).is<Tensor>());
     assert(product.scalar().imag() == 0);
 
-    return {Contraction{product.scalar().real(), resultTensor,
+    return {Contraction{product.scalar().real(),
+                        resultTensor,
                         product.factor(0).as<Tensor>(),
-                        Tensor(L"One", {}, {})}};
+                        {}}};
   }
 
   // We assume that we're dealing with a binary tree
@@ -119,9 +122,7 @@ std::vector<Contraction> to_contractions(const ExprPtr &expression,
   if (expression.is<Constant>()) {
     throw std::invalid_argument("Can't transform constants into contractions");
   } else if (expression.is<Tensor>()) {
-    // Use the special One[] tensor that is will result in a no-op contraction
-    return {Contraction{1, resultTensor, expression.as<Tensor>(),
-                        Tensor(L"One", {}, {})}};
+    return {Contraction{1, resultTensor, expression.as<Tensor>(), {}}};
   } else if (expression.is<Product>()) {
     // Separate into binary contractions
     return to_contractions(expression.as<Product>(), resultTensor);
@@ -146,9 +147,47 @@ std::vector<Contraction> to_contractions(const ExprPtr &expression,
   }
 }
 
+template <typename IndexContainer, typename SpaceTypeContainer>
+bool isSpacePattern(const IndexContainer &indices,
+                    const SpaceTypeContainer &pattern) {
+  static_assert(std::is_same_v<typename IndexContainer::value_type, Index>);
+  static_assert(std::is_same_v<typename SpaceTypeContainer::value_type,
+                               IndexSpace::Type>);
+  assert(indices.size() == pattern.size());
+
+  auto indexIter = indices.cbegin();
+  auto typeIter = pattern.cbegin();
+
+  while (indexIter != indices.cend() && typeIter != pattern.cend()) {
+    if (indexIter->space().type() != *typeIter) {
+      return false;
+    }
+
+    ++indexIter;
+    ++typeIter;
+  }
+
+  return true;
+}
+
+struct IndexTypeComparer {
+  constexpr bool operator()(const IndexSpace::Type &lhs,
+                            const IndexSpace::Type &rhs) const {
+    static_assert(IndexSpace::active_occupied < IndexSpace::active_unoccupied);
+    return lhs < rhs;
+  }
+};
+
 ExprPtr replaceTwoElectronIntgrals(const ExprPtr expr) {
   ExprPtr expression = expr->clone();
 
+  // Within Molpro the two-electron integrals are stored in two separate
+  // tensors: J and K The mapping to either of these two depends on the index
+  // spaces of the associated indices It's K if one of the following applies
+  // - all indices belong to the same space
+  // - The two indices belonging to particle 1 and those of particle 2 belong to
+  // different spaces
+  // - There
   expression->visit(
       [](ExprPtr &expr) {
         // TODO: Get rid of hardcoded label
@@ -157,35 +196,63 @@ ExprPtr replaceTwoElectronIntgrals(const ExprPtr expr) {
           assert(tensor.bra().size() == 2);
           assert(tensor.ket().size() == 2);
 
-          bool firstParticleSameSpaces =
-              tensor.bra()[0].space() == tensor.ket()[0].space();
-          bool secondParticleSameSpaces =
-              tensor.bra()[1].space() == tensor.ket()[1].space();
+          // Copy indices as we might have to mutate them
+          auto braIndices = tensor.bra();
+          auto ketIndices = tensor.ket();
 
-          if ((firstParticleSameSpaces && secondParticleSameSpaces &&
-               tensor.bra()[0].space() == tensor.ket()[0].space()) ||
-              (!firstParticleSameSpaces && !secondParticleSameSpaces)) {
-            // Integrals are stored on the K tensor in Molpro, if
-            // - all indices are of the same space
-            // - the indices for particle one and those for particle two belong
-            // to different spaces
-            expr = ex<Tensor>(L"K", tensor.bra(), tensor.ket());
-          } else if (firstParticleSameSpaces && secondParticleSameSpaces) {
-            // Integrals are stored on the J tensor in Molpro, if
-            // - the indices for particle one and those for particle two belong
-            // to the same space
+          constexpr IndexSpace::Type occ = IndexSpace::active_occupied;
+          constexpr IndexSpace::Type virt = IndexSpace::active_unoccupied;
 
-            // Note the exchange of the second and third index to store the
-            // tensor in a form in which the first two indices belong to the
-            // same space
-            expr = ex<Tensor>(
-                L"J", std::vector<Index>{tensor.bra()[0], tensor.ket()[0]},
-                std::vector<Index>{tensor.bra()[1], tensor.ket()[1]});
+          // Assert occ < virt
+          IndexTypeComparer cmp;
+          static_assert(cmp(occ, virt));
+
+          // Step 1: Use 8-fold permutational symmetry of spin-summed integrals
+          // to bring indices into a canonical order in terms of the index
+          // spaces they belong to. Note: This symmetry is generated by the two
+          // individual bra-ket symmetries for indices for particle one and two
+          // as well as the particle-1,2-symmetry (column-symmetry)
+          //
+          // The final goal is to order the indices in descending index space
+          // size, where the assumed relative sizes are
+          // occ < virt
+
+          // Step 1a: Particle-intern bra-ket symmetry
+          for (std::size_t i = 0; i < braIndices.size(); ++i) {
+            if (cmp(braIndices.at(i).space().type(),
+                    ketIndices.at(i).space().type())) {
+              // This bra index belongs to a smaller space than the ket index ->
+              // swap them
+              std::swap(braIndices[i], ketIndices[i]);
+            }
+          }
+
+          // Step 1b: Particle-1,2-symmetry
+          if (braIndices[0].space().type() != braIndices[1].space().type()) {
+            if (cmp(braIndices[0].space().type(),
+                    braIndices[1].space().type())) {
+              std::swap(braIndices[0], braIndices[1]);
+              std::swap(ketIndices[0], ketIndices[1]);
+            }
+          } else if (cmp(ketIndices[0].space().type(),
+                         ketIndices[1].space().type())) {
+            std::swap(braIndices[0], braIndices[1]);
+            std::swap(ketIndices[0], ketIndices[1]);
+          }
+
+          // Step 2: Look at the index space patterns to figure out whether
+          // this is a K or a J integral. If the previously attempted sorting
+          // of index spaces can be improved by switching the second and third
+          // index, do that and thereby produce a J tensor. Otherwise, we retain
+          // the index sequence as-is and thereby produce a K tensor.
+          if (cmp(braIndices[1].space().type(), ketIndices[0].space().type())) {
+            std::swap(braIndices[1], ketIndices[0]);
+
+            expr =
+                ex<Tensor>(L"J", std::move(braIndices), std::move(ketIndices));
           } else {
-			  // TODO: Handle cases with index spaces 3-to-1 (e.g. K:eccc)
-            throw std::runtime_error(
-                "Encountered (yet) unsupported index configuration on "
-                "g-tensor");
+            expr =
+                ex<Tensor>(L"K", std::move(braIndices), std::move(ketIndices));
           }
         }
       },
@@ -197,21 +264,30 @@ ExprPtr replaceTwoElectronIntgrals(const ExprPtr expr) {
 void ITFGenerator::addBlock(const itf::CodeBlock &block) {
   m_codes.reserve(m_codes.size() + block.results.size());
 
+  std::vector<std::vector<Contraction>> contractionBlocks;
+
   for (const Result &currentResult : block.results) {
     ExprPtr expression = replaceTwoElectronIntgrals(currentResult.expression);
 
-    m_codes.push_back(ContractionBlock{
-        block.name, to_contractions(expression, currentResult.resultTensor)});
+    contractionBlocks.push_back(
+        to_contractions(expression, currentResult.resultTensor));
 
-    // Assume that all tensors that appear in the expressions as well as the
-    // results that are calculated are tensors that are imported rather than
-    // created from scratch.
-    m_importedTensors.insert(currentResult.resultTensor);
+    if (currentResult.importResultTensor) {
+      m_importedTensors.insert(currentResult.resultTensor);
+    } else {
+      m_createdTensors.insert(currentResult.resultTensor);
+    }
+
+    // If we encounter a tensor in an expression that we have not yet seen
+    // before, it must be an imported tensor (otherwise the expression would be
+    // invalid)
     expression->visit(
         [this](const ExprPtr &expr) {
           if (expr.is<Tensor>()) {
             const Tensor &tensor = expr.as<Tensor>();
-            m_importedTensors.insert(tensor);
+            if (m_createdTensors.find(tensor) == m_createdTensors.end()) {
+              m_importedTensors.insert(tensor);
+            }
             m_encounteredIndices.insert(tensor.braket().begin(),
                                         tensor.braket().end());
           }
@@ -220,13 +296,15 @@ void ITFGenerator::addBlock(const itf::CodeBlock &block) {
 
     // Now go through all result tensors of the contractions that we have
     // produced and add all new tensors to the set of created tensors
-    for (const Contraction &currentContraction : m_codes.back().contractions) {
+    for (const Contraction &currentContraction : contractionBlocks.back()) {
       if (m_importedTensors.find(currentContraction.result) ==
           m_importedTensors.end()) {
         m_createdTensors.insert(currentContraction.result);
       }
     }
   }
+
+  m_codes.push_back(CodeSection{block.name, std::move(contractionBlocks)});
 }
 
 struct IndexComponents {
@@ -324,45 +402,57 @@ std::wstring ITFGenerator::generate() const {
   }
   itf += L"\n";
   for (const Tensor &current : m_createdTensors) {
-    itf += L"tensor: " + to_itf(current) + L", !Create{type:plain}\n";
+    itf += L"tensor: " + to_itf(current) + L", !Create{type:disk}\n";
   }
   itf += L"\n\n";
 
   // Actual code
-  for (const ContractionBlock &currentBlock : m_codes) {
-    itf += L"---- code(\"" + currentBlock.name + L"\")\n";
+  for (const CodeSection &currentSection : m_codes) {
+    itf += L"---- code(\"" + currentSection.name + L"\")\n";
 
     std::set<Tensor, TensorBlockCompare> allocatedTensors;
 
-    for (const Contraction &currentContraction : currentBlock.contractions) {
-      // For now we'll do a really silly contribution-by-contribution
-      // load-process-store strategy
-      if (allocatedTensors.find(currentContraction.result) ==
-          allocatedTensors.end()) {
-        itf += L"alloc " + to_itf(currentContraction.result) + L"\n";
-        allocatedTensors.insert(currentContraction.result);
-      } else {
-        itf += L"load " + to_itf(currentContraction.result) + L"\n";
+    for (const std::vector<Contraction> &currentBlock :
+         currentSection.contractionBlocks) {
+      for (const Contraction &currentContraction : currentBlock) {
+        // For now we'll do a really silly contribution-by-contribution
+        // load-process-store strategy
+        if (allocatedTensors.find(currentContraction.result) ==
+            allocatedTensors.end()) {
+          itf += L"alloc " + to_itf(currentContraction.result) + L"\n";
+          allocatedTensors.insert(currentContraction.result);
+        } else {
+          itf += L"load " + to_itf(currentContraction.result) + L"\n";
+        }
+        itf += L"load " + to_itf(currentContraction.lhs) + L"\n";
+        if (currentContraction.rhs.has_value()) {
+          itf += L"load " + to_itf(currentContraction.rhs.value()) + L"\n";
+        }
+
+        itf += L"." + to_itf(currentContraction.result) + L" ";
+        int sign = currentContraction.factor < 0 ? -1 : 1;
+
+        itf += (sign < 0 ? L"-= " : L"+= ");
+        if (currentContraction.factor * sign != 1) {
+          itf += to_wstring(currentContraction.factor * sign) + L"*";
+        }
+        itf += to_itf(currentContraction.lhs) +
+               (currentContraction.rhs.has_value()
+                    ? L" " + to_itf(currentContraction.rhs.value())
+                    : L"") +
+               L"\n";
+
+        if (currentContraction.rhs.has_value()) {
+          itf += L"drop " + to_itf(currentContraction.rhs.value()) + L"\n";
+        }
+        itf += L"drop " + to_itf(currentContraction.lhs) + L"\n";
+        itf += L"store " + to_itf(currentContraction.result) + L"\n";
       }
-      itf += L"load " + to_itf(currentContraction.lhs) + L"\n";
-      itf += L"load " + to_itf(currentContraction.rhs) + L"\n";
 
-      itf += L"." + to_itf(currentContraction.result) + L" ";
-      int sign = currentContraction.factor < 0 ? -1 : 1;
-
-      itf += (sign < 0 ? L"-= " : L"+= ");
-      if (currentContraction.factor * sign != 1) {
-        itf += to_wstring(currentContraction.factor * sign) + L"*";
-      }
-      itf += to_itf(currentContraction.lhs) + L" " +
-             to_itf(currentContraction.rhs) + L"\n";
-
-      itf += L"drop " + to_itf(currentContraction.rhs) + L"\n";
-      itf += L"drop " + to_itf(currentContraction.lhs) + L"\n";
-      itf += L"store " + to_itf(currentContraction.result) + L"\n";
+      itf += L"\n";
     }
 
-    itf += L"\n";
+    itf += L"\n---- end\n";
   }
 
   return itf;

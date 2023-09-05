@@ -14,6 +14,7 @@
 #include <type_traits>
 #include <unordered_set>
 #include <vector>
+#include <optional>
 
 namespace sequant {
 
@@ -22,9 +23,10 @@ namespace itf {
 struct Result {
   ExprPtr expression;
   Tensor resultTensor;
+  bool importResultTensor;
 
-  Result(ExprPtr expression, Tensor resultTensor);
-  Result(ExprPtr expression);
+  Result(ExprPtr expression, Tensor resultTensor, bool importResultTensor = true);
+  Result(ExprPtr expression, bool importResultTensor = false);
 };
 
 struct CodeBlock {
@@ -67,12 +69,12 @@ struct Contraction {
 
   Tensor result;
   Tensor lhs;
-  Tensor rhs;
+  std::optional<Tensor> rhs;
 };
 
-struct ContractionBlock {
+struct CodeSection {
   std::wstring name;
-  std::vector<Contraction> contractions;
+  std::vector<std::vector<Contraction>> contractionBlocks;
 };
 
 class ITFGenerator {
@@ -87,7 +89,7 @@ class ITFGenerator {
   std::set<Index> m_encounteredIndices;
   std::set<Tensor, TensorBlockCompare> m_importedTensors;
   std::set<Tensor, TensorBlockCompare> m_createdTensors;
-  std::vector<ContractionBlock> m_codes;
+  std::vector<CodeSection> m_codes;
 };
 
 }  // namespace detail
