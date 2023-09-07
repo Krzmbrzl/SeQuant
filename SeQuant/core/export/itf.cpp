@@ -6,9 +6,11 @@
 
 #include <SeQuant/core/utility/expr.hpp>
 
+#include <algorithm>
 #include <array>
 #include <cassert>
 #include <cwchar>
+#include <functional>
 #include <map>
 #include <unordered_map>
 
@@ -22,13 +24,24 @@ std::wstring to_itf(const itf::CodeBlock &block) {
 
 namespace itf {
 
+static constexpr IndexSpace::Type occ = IndexSpace::active_occupied;
+static constexpr IndexSpace::Type virt = IndexSpace::active_unoccupied;
+
+struct IndexTypeComparer {
+  constexpr bool operator()(const IndexSpace::Type &lhs,
+                            const IndexSpace::Type &rhs) const {
+    static_assert(occ < virt);
+    return lhs < rhs;
+  }
+};
+
 Result::Result(ExprPtr expression, Tensor resultTensor, bool importResultTensor)
     : expression(std::move(expression)),
       resultTensor(std::move(resultTensor)),
       importResultTensor(importResultTensor) {}
 
 Tensor generateResultTensor(ExprPtr expr) {
-  BraKet externals = non_repeated_indices(expr);
+  IndexGroups externals = non_repeated_indices(expr);
 
   return Tensor(L"Result", std::move(externals.bra), std::move(externals.ket));
 }
@@ -45,6 +58,26 @@ CodeBlock::CodeBlock(std::wstring blockName, std::vector<Result> results)
     : name(std::move(blockName)), results(std::move(results)) {}
 
 namespace detail {
+
+bool TensorBlockCompare::operator()(const Tensor &lhs,
+                                    const Tensor &rhs) const {
+  if (lhs.label() != rhs.label()) {
+    return lhs.label() < rhs.label();
+  }
+  if (lhs.braket().size() != rhs.braket().size()) {
+    return lhs.braket().size() < rhs.braket().size();
+  }
+  auto lhsBraket = lhs.braket();
+  auto rhsBraket = rhs.braket();
+
+  for (std::size_t i = 0; i < lhsBraket.size(); ++i) {
+    if (lhsBraket.at(i).space() != rhsBraket.at(i).space()) {
+      return lhsBraket.at(i).space() < rhsBraket.at(i).space();
+    }
+  }
+
+  return false;
+}
 
 std::vector<Contraction> to_contractions(const ExprPtr &expression,
                                          const Tensor &resultTensor);
@@ -73,15 +106,42 @@ std::vector<Contraction> to_contractions(const Product &product,
   for (const ExprPtr &factor : product.factors()) {
     if (factor.is<Product>()) {
       // Create intermediate that computes this nested product
-      BraKet intermediateIndices = non_repeated_indices(factor);
+      IndexGroups intermediateIndicexGroups = non_repeated_indices(factor);
+
+      // Collect all intermediate indices and sort them such that the order of
+      // index spaces is the canonical one within ITF (largest space leftmost).
+      // This is possible, because the index ordering of intermediates is
+      // arbitrary
+      std::vector<Index> intermediateIndices;
+      intermediateIndices.reserve(intermediateIndicexGroups.bra.size() +
+                                  intermediateIndicexGroups.ket.size());
+      intermediateIndices.insert(intermediateIndices.end(),
+                                 intermediateIndicexGroups.bra.begin(),
+                                 intermediateIndicexGroups.bra.end());
+      intermediateIndices.insert(intermediateIndices.end(),
+                                 intermediateIndicexGroups.ket.begin(),
+                                 intermediateIndicexGroups.ket.end());
+      std::sort(intermediateIndices.begin(), intermediateIndices.end(),
+                [](const Index &lhs, const Index &rhs) {
+                  IndexTypeComparer cmp;
+                  if (cmp(lhs.space().type(), rhs.space().type())) {
+                    return false;
+                  } else if (cmp(rhs.space().type(), lhs.space().type())) {
+                    return true;
+                  } else {
+                    // Indices are of same space
+                    return lhs < rhs;
+                  }
+                });
 
       std::array<wchar_t, 64> intermediateName;
       swprintf(intermediateName.data(), intermediateName.size(), L"INTER%06u",
                intermediateCounter++);
 
+      // There is no notion of bra and ket for intermediates, so we dump all
+      // indices in the bra for now
       Tensor intermediate(intermediateName.data(),
-                          std::move(intermediateIndices.bra),
-                          std::move(intermediateIndices.ket));
+                          std::move(intermediateIndices), std::vector<Index>{});
 
       std::vector<Contraction> intermediateContractions =
           to_contractions(factor, intermediate);
@@ -170,95 +230,182 @@ bool isSpacePattern(const IndexContainer &indices,
   return true;
 }
 
-struct IndexTypeComparer {
-  constexpr bool operator()(const IndexSpace::Type &lhs,
-                            const IndexSpace::Type &rhs) const {
-    static_assert(IndexSpace::active_occupied < IndexSpace::active_unoccupied);
-    return lhs < rhs;
+void one_electron_integral_remapper(
+    ExprPtr &expr, const std::wstring_view integralTensorLabel) {
+  if (!expr.is<Tensor>()) {
+    return;
   }
-};
 
-ExprPtr replaceTwoElectronIntgrals(const ExprPtr expr) {
-  ExprPtr expression = expr->clone();
+  const Tensor &tensor = expr.as<Tensor>();
 
-  // Within Molpro the two-electron integrals are stored in two separate
-  // tensors: J and K The mapping to either of these two depends on the index
-  // spaces of the associated indices It's K if one of the following applies
-  // - all indices belong to the same space
-  // - The two indices belonging to particle 1 and those of particle 2 belong to
-  // different spaces
-  // - There
-  expression->visit(
-      [](ExprPtr &expr) {
-        // TODO: Get rid of hardcoded label
-        if (expr.is<Tensor>() && expr.as<Tensor>().label() == L"g") {
-          const Tensor &tensor = expr.as<Tensor>();
-          assert(tensor.bra().size() == 2);
-          assert(tensor.ket().size() == 2);
+  if (tensor.label() != integralTensorLabel || tensor.bra().size() != 1 ||
+      tensor.ket().size() != 1) {
+    return;
+  }
 
-          // Copy indices as we might have to mutate them
-          auto braIndices = tensor.bra();
-          auto ketIndices = tensor.ket();
+  assert(tensor.bra().size() == 1);
+  assert(tensor.ket().size() == 1);
 
-          constexpr IndexSpace::Type occ = IndexSpace::active_occupied;
-          constexpr IndexSpace::Type virt = IndexSpace::active_unoccupied;
+  auto braIndices = tensor.bra();
+  auto ketIndices = tensor.ket();
 
-          // Assert occ < virt
-          IndexTypeComparer cmp;
-          static_assert(cmp(occ, virt));
+  IndexTypeComparer cmp;
 
-          // Step 1: Use 8-fold permutational symmetry of spin-summed integrals
-          // to bring indices into a canonical order in terms of the index
-          // spaces they belong to. Note: This symmetry is generated by the two
-          // individual bra-ket symmetries for indices for particle one and two
-          // as well as the particle-1,2-symmetry (column-symmetry)
-          //
-          // The final goal is to order the indices in descending index space
-          // size, where the assumed relative sizes are
-          // occ < virt
+  // Use the bra-ket (hermitian) symmetry of the integrals to exchange creators
+  // and annihilators such that the larger index space is on the left (in the
+  // bra)
+  if (cmp(braIndices[0].space().type(), ketIndices[0].space().type())) {
+    std::swap(braIndices[0], ketIndices[0]);
+  } else if (braIndices[0].space().type() == ketIndices[0].space().type() &&
+             ketIndices[0] < braIndices[0]) {
+    // Cosmetic exchange to arrive at a more canonical index ordering
+    std::swap(braIndices[0], ketIndices[0]);
+  }
 
-          // Step 1a: Particle-intern bra-ket symmetry
-          for (std::size_t i = 0; i < braIndices.size(); ++i) {
-            if (cmp(braIndices.at(i).space().type(),
-                    ketIndices.at(i).space().type())) {
-              // This bra index belongs to a smaller space than the ket index ->
-              // swap them
-              std::swap(braIndices[i], ketIndices[i]);
-            }
-          }
+  expr =
+      ex<Tensor>(tensor.label(), std::move(braIndices), std::move(ketIndices));
+}
 
-          // Step 1b: Particle-1,2-symmetry
-          if (braIndices[0].space().type() != braIndices[1].space().type()) {
-            if (cmp(braIndices[0].space().type(),
-                    braIndices[1].space().type())) {
-              std::swap(braIndices[0], braIndices[1]);
-              std::swap(ketIndices[0], ketIndices[1]);
-            }
-          } else if (cmp(ketIndices[0].space().type(),
-                         ketIndices[1].space().type())) {
-            std::swap(braIndices[0], braIndices[1]);
-            std::swap(ketIndices[0], ketIndices[1]);
-          }
+template <typename Container>
+bool isExceptionalJ(const Container &braIndices, const Container &ketIndices) {
+  assert(braIndices.size() == 2);
+  assert(ketIndices.size() == 2);
+  // integrals with 3 external (virtual) indices ought to be converted to
+  // J-integrals
+  return braIndices[0].space().type() == virt &&
+         braIndices[1].space().type() == virt &&
+         ketIndices[0].space().type() == virt &&
+         ketIndices[1].space().type() != virt;
+}
 
-          // Step 2: Look at the index space patterns to figure out whether
-          // this is a K or a J integral. If the previously attempted sorting
-          // of index spaces can be improved by switching the second and third
-          // index, do that and thereby produce a J tensor. Otherwise, we retain
-          // the index sequence as-is and thereby produce a K tensor.
-          if (cmp(braIndices[1].space().type(), ketIndices[0].space().type())) {
-            std::swap(braIndices[1], ketIndices[0]);
+void two_electron_integral_remapper(
+    ExprPtr &expr, const std::wstring_view integralTensorLabel) {
+  if (!expr.is<Tensor>()) {
+    return;
+  }
 
-            expr =
-                ex<Tensor>(L"J", std::move(braIndices), std::move(ketIndices));
-          } else {
-            expr =
-                ex<Tensor>(L"K", std::move(braIndices), std::move(ketIndices));
-          }
-        }
-      },
-      true);
+  const Tensor &tensor = expr.as<Tensor>();
 
-  return expression;
+  if (tensor.label() != integralTensorLabel || tensor.bra().size() != 2 ||
+      tensor.ket().size() != 2) {
+    return;
+  }
+
+  assert(tensor.bra().size() == 2);
+  assert(tensor.ket().size() == 2);
+
+  // Copy indices as we might have to mutate them
+  auto braIndices = tensor.bra();
+  auto ketIndices = tensor.ket();
+
+  IndexTypeComparer cmp;
+
+  // Step 1: Use 8-fold permutational symmetry of spin-summed integrals
+  // to bring indices into a canonical order in terms of the index
+  // spaces they belong to. Note: This symmetry is generated by the two
+  // individual bra-ket symmetries for indices for particle one and two
+  // as well as the particle-1,2-symmetry (column-symmetry)
+  //
+  // The final goal is to order the indices in descending index space
+  // size, where the assumed relative sizes are
+  // occ < virt
+
+  // Step 1a: Particle-intern bra-ket symmetry
+  for (std::size_t i = 0; i < braIndices.size(); ++i) {
+    if (cmp(braIndices.at(i).space().type(), ketIndices.at(i).space().type())) {
+      // This bra index belongs to a smaller space than the ket index ->
+      // swap them
+      std::swap(braIndices[i], ketIndices[i]);
+    }
+  }
+
+  // Step 1b: Particle-1,2-symmetry
+  bool switchColumns = false;
+  if (braIndices[0].space().type() != braIndices[1].space().type()) {
+    switchColumns =
+        cmp(braIndices[0].space().type(), braIndices[1].space().type());
+  } else if (ketIndices[0].space().type() != ketIndices[1].space().type()) {
+    switchColumns =
+        cmp(ketIndices[0].space().type(), ketIndices[1].space().type());
+  }
+
+  if (switchColumns) {
+    std::swap(braIndices[0], braIndices[1]);
+    std::swap(ketIndices[0], ketIndices[1]);
+  }
+
+  // Step 2: Look at the index space patterns to figure out whether
+  // this is a K or a J integral. If the previously attempted sorting
+  // of index spaces can be improved by switching the second and third
+  // index, do that and thereby produce a J tensor. Otherwise, we retain
+  // the index sequence as-is and thereby produce a K tensor.
+  // There are some explicit exceptions for J-tensors though.
+  std::wstring tensorLabel;
+  Index *particle1_1 = nullptr;
+  Index *particle1_2 = nullptr;
+  Index *particle2_1 = nullptr;
+  Index *particle2_2 = nullptr;
+
+  if (isExceptionalJ(braIndices, ketIndices) ||
+      cmp(braIndices[1].space().type(), ketIndices[0].space().type())) {
+    std::swap(braIndices[1], ketIndices[0]);
+    tensorLabel = L"J";
+
+    particle1_1 = &braIndices[0];
+    particle1_2 = &braIndices[1];
+    particle2_1 = &ketIndices[0];
+    particle2_2 = &ketIndices[1];
+  } else {
+    tensorLabel = L"K";
+
+    particle1_1 = &braIndices[0];
+    particle1_2 = &ketIndices[0];
+    particle2_1 = &braIndices[1];
+    particle2_2 = &ketIndices[1];
+  }
+
+  // Go through the symmetries again to try and produce the most canonical
+  // index ordering possible without breaking the index-space ordering
+  // established up to this point.
+  // This is a purely cosmetic change, but it is very useful for testing
+  // purposes to have  unique representation of the integrals.
+  if (particle1_1->space().type() == particle1_2->space().type() &&
+      *particle1_2 < *particle1_1) {
+    std::swap(*particle1_1, *particle1_2);
+  }
+  if (particle2_1->space().type() == particle2_2->space().type() &&
+      *particle2_2 < *particle2_1) {
+    std::swap(*particle2_1, *particle2_2);
+  }
+  if (particle1_1->space().type() == particle2_1->space().type() &&
+      particle1_2->space().type() == particle2_2->space().type()) {
+    if (*particle2_1 < *particle1_1 ||
+        (*particle1_1 == *particle2_1 && *particle2_2 < *particle1_2)) {
+      std::swap(*particle1_1, *particle2_1);
+      std::swap(*particle1_2, *particle2_2);
+    }
+  }
+
+  expr = ex<Tensor>(std::move(tensorLabel), std::move(braIndices),
+                    std::move(ketIndices));
+}
+
+void integral_remapper(ExprPtr &expr, std::wstring_view oneElectronIntegralName,
+                       std::wstring_view twoElectronIntegralName) {
+  two_electron_integral_remapper(expr, twoElectronIntegralName);
+  one_electron_integral_remapper(expr, oneElectronIntegralName);
+}
+
+void remap_integrals(ExprPtr &expr, std::wstring_view oneElectronIntegralName,
+                     std::wstring_view twoElectronIntegralName) {
+  auto remapper = std::bind(integral_remapper, std::placeholders::_1,
+                            oneElectronIntegralName, twoElectronIntegralName);
+
+  const bool visitedRoot = expr->visit(remapper, true);
+
+  if (!visitedRoot) {
+    remapper(expr);
+  }
 }
 
 void ITFGenerator::addBlock(const itf::CodeBlock &block) {
@@ -267,7 +414,8 @@ void ITFGenerator::addBlock(const itf::CodeBlock &block) {
   std::vector<std::vector<Contraction>> contractionBlocks;
 
   for (const Result &currentResult : block.results) {
-    ExprPtr expression = replaceTwoElectronIntgrals(currentResult.expression);
+    ExprPtr expression = currentResult.expression;
+    remap_integrals(expression);
 
     contractionBlocks.push_back(
         to_contractions(expression, currentResult.resultTensor));
@@ -364,7 +512,7 @@ std::wstring ITFGenerator::generate() const {
   std::wstring itf =
       L"// This ITF algo file has been generated via SeQuant's ITF export\n\n";
 
-  itf += L"----decl\n";
+  itf += L"---- decl\n";
 
   // Index declarations
   std::map<IndexSpace, std::set<std::size_t>> indexGroups =
@@ -434,7 +582,7 @@ std::wstring ITFGenerator::generate() const {
 
         itf += (sign < 0 ? L"-= " : L"+= ");
         if (currentContraction.factor * sign != 1) {
-          itf += to_wstring(currentContraction.factor * sign) + L"*";
+          itf += to_wstring(currentContraction.factor * sign) + L" * ";
         }
         itf += to_itf(currentContraction.lhs) +
                (currentContraction.rhs.has_value()

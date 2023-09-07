@@ -8,12 +8,12 @@
 
 namespace sequant {
 
-struct BraKet {
+struct IndexGroups {
   std::vector<Index> bra;
   std::vector<Index> ket;
 };
 
-BraKet non_repeated_indices(const ExprPtr &expr);
+IndexGroups non_repeated_indices(const ExprPtr &expr);
 
 }  // namespace sequant
 

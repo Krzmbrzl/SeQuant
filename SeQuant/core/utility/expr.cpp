@@ -4,40 +4,55 @@
 
 namespace sequant {
 
-BraKet non_repeated_indices(const ExprPtr& expr) {
-	using Bra = decltype(BraKet::bra);
-	using Ket = decltype(BraKet::ket);
+template <typename Container, typename Element>
+void remove_one(Container& container, const Element& e) {
+  auto iter = std::find(container.begin(), container.end(), e);
 
+  if (iter != container.end()) {
+    container.erase(iter);
+  }
+}
+
+IndexGroups non_repeated_indices(const ExprPtr& expr) {
   if (expr.is<Constant>()) {
     return {};
   } else if (expr.is<Tensor>()) {
     const Tensor& tensor = expr.as<Tensor>();
-    return {Bra(tensor.bra().begin(), tensor.bra().end()),
-            Ket(tensor.ket().begin(), tensor.ket().end())};
+    return {{tensor.bra().begin(), tensor.bra().end()},
+            {tensor.ket().begin(), tensor.ket().end()}};
   } else if (expr.is<Sum>()) {
     // In order for the sum to be valid, all summands must have the same
     // external indices, so it suffices to look only at the first one
     return non_repeated_indices(expr.as<Sum>().summand(0));
   } else if (expr.is<Product>()) {
-    std::set<Index> braIndices;
-    std::set<Index> ketIndices;
+    std::set<Index> encounteredIndices;
+    IndexGroups groups;
 
     for (const ExprPtr& current : expr.as<Product>()) {
-      BraKet indices = non_repeated_indices(current);
+      IndexGroups currentGroups = non_repeated_indices(current);
 
-      braIndices.insert(indices.bra.begin(), indices.bra.end());
-      ketIndices.insert(indices.ket.begin(), indices.ket.end());
+      for (Index& current : currentGroups.bra) {
+        if (encounteredIndices.find(current) == encounteredIndices.end()) {
+          encounteredIndices.insert(current);
+          groups.bra.push_back(std::move(current));
+        } else {
+          remove_one(groups.bra, current);
+          remove_one(groups.ket, current);
+        }
+      }
+      // Same for ket indices
+      for (Index& current : currentGroups.ket) {
+        if (encounteredIndices.find(current) == encounteredIndices.end()) {
+          encounteredIndices.insert(current);
+          groups.ket.push_back(std::move(current));
+        } else {
+          remove_one(groups.bra, current);
+          remove_one(groups.ket, current);
+        }
+      }
     }
 
-    BraKet externals;
-    std::set_difference(braIndices.begin(), braIndices.end(),
-                        ketIndices.begin(), ketIndices.end(),
-                        std::back_inserter(externals.bra));
-    std::set_difference(ketIndices.begin(), ketIndices.end(),
-                        braIndices.begin(), braIndices.end(),
-                        std::back_inserter(externals.ket));
-
-    return externals;
+    return groups;
   } else {
     throw std::runtime_error("Weird expression type encountered");
   }

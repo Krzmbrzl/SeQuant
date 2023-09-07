@@ -14,7 +14,6 @@
 #include <type_traits>
 #include <unordered_set>
 #include <vector>
-#include <optional>
 
 namespace sequant {
 
@@ -25,7 +24,8 @@ struct Result {
   Tensor resultTensor;
   bool importResultTensor;
 
-  Result(ExprPtr expression, Tensor resultTensor, bool importResultTensor = true);
+  Result(ExprPtr expression, Tensor resultTensor,
+         bool importResultTensor = true);
   Result(ExprPtr expression, bool importResultTensor = false);
 };
 
@@ -44,25 +44,14 @@ namespace detail {
 /// belong to. Note that it explicitly does not depend on the explicit index
 /// labelling.
 struct TensorBlockCompare {
-  bool operator()(const Tensor &lhs, const Tensor &rhs) const {
-    if (lhs.label() != rhs.label()) {
-      return lhs.label() < rhs.label();
-    }
-    if (lhs.braket().size() != rhs.braket().size()) {
-      return lhs.braket().size() < rhs.braket().size();
-    }
-    auto lhsBraket = lhs.braket();
-    auto rhsBraket = rhs.braket();
-
-    for (std::size_t i = 0; i < lhsBraket.size(); ++i) {
-      if (lhsBraket.at(i).space() != rhsBraket.at(i).space()) {
-        return lhsBraket.at(i).space() < rhsBraket.at(i).space();
-      }
-    }
-
-    return false;
-  }
+  bool operator()(const Tensor &lhs, const Tensor &rhs) const;
 };
+
+/// Replaces one- and two-electron integrals in the given expression with
+/// versions that use the index ordering and tensor naming as expected in ITF
+void remap_integrals(ExprPtr &expr,
+                     std::wstring_view oneElectronIntegralName = L"f",
+                     std::wstring_view twoElectronIntegralName = L"g");
 
 struct Contraction {
   rational factor;
