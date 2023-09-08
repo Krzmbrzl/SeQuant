@@ -6,6 +6,7 @@
 #include "logger.hpp"
 #include "tensor.hpp"
 #include "tensor_network.hpp"
+#include "tensor_canonicalizer.hpp"
 
 namespace sequant {
 

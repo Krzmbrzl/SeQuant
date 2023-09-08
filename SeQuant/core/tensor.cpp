@@ -3,6 +3,7 @@
 //
 
 #include "tensor.hpp"
+#include "tensor_canonicalizer.hpp"
 
 namespace sequant {
 

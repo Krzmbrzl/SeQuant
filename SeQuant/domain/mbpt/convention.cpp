@@ -5,6 +5,7 @@
 #include "convention.hpp"
 #include "SeQuant/core/index.hpp"
 #include "SeQuant/core/tensor.hpp"
+#include "SeQuant/core/tensor_canonicalizer.hpp"
 #include "op.hpp"
 
 namespace sequant {

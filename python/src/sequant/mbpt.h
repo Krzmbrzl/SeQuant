@@ -4,6 +4,8 @@
 #include <SeQuant/domain/mbpt/convention.hpp>
 #include <SeQuant/domain/mbpt/sr.hpp>
 
+#include <SeQuant/core/tensor_canonicalizer.hpp>
+
 #include "python.h"
 
 #include <cstdint>

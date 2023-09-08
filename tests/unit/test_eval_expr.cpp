@@ -1,6 +1,7 @@
 #include <SeQuant/core/context.hpp>
 #include <SeQuant/core/eval_expr.hpp>
 #include <SeQuant/core/parse_expr.hpp>
+#include <SeQuant/core/tensor_canonicalizer.hpp>
 
 #include "catch.hpp"
 
