@@ -568,6 +568,9 @@ if (SEQUANT_BUILD_BENCHMARKS)
     add_subdirectory(benchmarks)
 endif()
 
+####### Sample codes #######
+add_subdirectory(examples/codes)
+
 ####### Python ########
 
 if (SEQUANT_PYTHON)
