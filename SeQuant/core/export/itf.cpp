@@ -24,14 +24,16 @@ std::wstring to_itf(const itf::CodeBlock &block) {
 
 namespace itf {
 
-// TODO: Get rid of hard-coded index assignments
-static IndexSpace::Type occ = IndexSpace::active_occupied;
-static IndexSpace::Type virt = IndexSpace::active_unoccupied;
+static const IndexSpace::Type occ = IndexSpace::active_occupied;
+static const IndexSpace::Type virt = IndexSpace::active_unoccupied;
+static const IndexSpace::Type auxiliary = IndexSpace::all_active;
 
 struct IndexTypeComparer {
   bool operator()(const IndexSpace::Type &lhs,
                             const IndexSpace::Type &rhs) const {
     assert(occ < virt);
+    assert(occ < auxiliary);
+    assert(virt < auxiliary);
     return lhs < rhs;
   }
 };
@@ -241,6 +243,42 @@ bool isSpacePattern(const IndexContainer &indices,
   return true;
 }
 
+void df_tensor_remapper(ExprPtr &expr,
+                        const std::wstring_view integralTensorLabel) {
+  if (!expr.is<Tensor>()) {
+    return;
+  }
+
+  const Tensor &tensor = expr.as<Tensor>();
+
+  if (tensor.label() != integralTensorLabel || tensor.bra().size() != 1 ||
+      tensor.ket().size() != 1) {
+    return;
+  }
+
+  assert(tensor.bra().size() == 1);
+  assert(tensor.ket().size() == 1);
+
+  auto braIndices = tensor.bra();
+  auto ketIndices = tensor.ket();
+
+  IndexTypeComparer cmp;
+
+  // The DF tensors inherit the bra-ket symmetry of the 2-e integrals they
+  // decompose: g^{pq}_{rs} = DF^{p}_{r}(Q) DF^{q}_{s}(Q)
+  // Thus, we order them such that the larger index space comes first
+  if (cmp(braIndices[0].space().type(), ketIndices[0].space().type())) {
+    std::swap(braIndices[0], ketIndices[0]);
+  } else if (braIndices[0].space().type() == ketIndices[0].space().type() &&
+             ketIndices[0] < braIndices[0]) {
+    // Cosmetic exchange to arrive at a more canonical index ordering
+    std::swap(braIndices[0], ketIndices[0]);
+  }
+
+  expr = ex<Tensor>(tensor.label(), std::move(braIndices),
+                    std::move(ketIndices), tensor.auxiliary());
+}
+
 void one_electron_integral_remapper(
     ExprPtr &expr, const std::wstring_view integralTensorLabel) {
   if (!expr.is<Tensor>()) {
@@ -402,15 +440,19 @@ void two_electron_integral_remapper(
 }
 
 void integral_remapper(ExprPtr &expr, std::wstring_view oneElectronIntegralName,
-                       std::wstring_view twoElectronIntegralName) {
+                       std::wstring_view twoElectronIntegralName,
+                       std::wstring_view dfTensorName) {
   two_electron_integral_remapper(expr, twoElectronIntegralName);
   one_electron_integral_remapper(expr, oneElectronIntegralName);
+  df_tensor_remapper(expr, dfTensorName);
 }
 
 void remap_integrals(ExprPtr &expr, std::wstring_view oneElectronIntegralName,
-                     std::wstring_view twoElectronIntegralName) {
-  auto remapper = std::bind(integral_remapper, std::placeholders::_1,
-                            oneElectronIntegralName, twoElectronIntegralName);
+                     std::wstring_view twoElectronIntegralName,
+                     std::wstring_view dfTensorName) {
+  auto remapper =
+      std::bind(integral_remapper, std::placeholders::_1,
+                oneElectronIntegralName, twoElectronIntegralName, dfTensorName);
 
   const bool visitedRoot = expr->visit(remapper, true);
 
@@ -499,7 +541,10 @@ std::wstring to_itf(const Tensor &tensor, bool includeIndexing = true) {
   std::wstring tags;
   std::wstring indices;
 
-  for (const Index &current : tensor.braket()) {
+  // Note that it is important to iterate over the auxiliary indices first as
+  // ITF expects those the be listed first
+  for (const Index &current :
+       ranges::views::concat(tensor.auxiliary(), tensor.bra(), tensor.ket())) {
     IndexComponents components = decomposeIndex(current);
 
     assert(components.id <= 7);
@@ -510,6 +555,9 @@ std::wstring to_itf(const Tensor &tensor, bool includeIndexing = true) {
     } else if (components.space.type() == IndexSpace::active_unoccupied) {
       tags += L"e";
       indices += static_cast<wchar_t>(L'a' + components.id);
+    } else if (components.space.type() == IndexSpace::all_active) {
+      tags += L"F";
+      indices += static_cast<wchar_t>(L'F' + components.id);
     } else {
       std::runtime_error("Encountered unhandled index space type");
     }
@@ -517,6 +565,13 @@ std::wstring to_itf(const Tensor &tensor, bool includeIndexing = true) {
 
   return std::wstring(tensor.label()) + (tags.empty() ? L"" : L":" + tags) +
          (includeIndexing ? L"[" + indices + L"]" : L"");
+}
+
+bool isSameTensorBlock(const Tensor &lhs, const Tensor &rhs) {
+  TensorBlockCompare cmp;
+
+  // !(a < b) && !(b < a) implies a == b
+  return !cmp(lhs, rhs) && !cmp(rhs, lhs);
 }
 
 std::wstring ITFGenerator::generate() const {
@@ -540,6 +595,10 @@ std::wstring ITFGenerator::generate() const {
       baseLabel = L'a';
       spaceLabel = L"External";
       spaceTag = L"e";
+    } else if (iter->first.type() == IndexSpace::all_active) {
+      baseLabel = L'F';
+      spaceLabel = L"BasisMp2Fit";
+      spaceTag = L"F";
     } else {
       std::runtime_error("Encountered unhandled index space type");
     }
@@ -583,9 +642,16 @@ std::wstring ITFGenerator::generate() const {
         } else {
           itf += L"load " + to_itf(currentContraction.result) + L"\n";
         }
+
         itf += L"load " + to_itf(currentContraction.lhs) + L"\n";
+
+        bool loadedRHS = false;
         if (currentContraction.rhs.has_value()) {
-          itf += L"load " + to_itf(currentContraction.rhs.value()) + L"\n";
+          const Tensor &rhs = currentContraction.rhs.value();
+          if (!isSameTensorBlock(currentContraction.lhs, rhs)) {
+            loadedRHS = true;
+            itf += L"load " + to_itf(rhs) + L"\n";
+          }
         }
 
         itf += L"." + to_itf(currentContraction.result) + L" ";
@@ -601,7 +667,7 @@ std::wstring ITFGenerator::generate() const {
                     : L"") +
                L"\n";
 
-        if (currentContraction.rhs.has_value()) {
+        if (loadedRHS) {
           itf += L"drop " + to_itf(currentContraction.rhs.value()) + L"\n";
         }
         itf += L"drop " + to_itf(currentContraction.lhs) + L"\n";

@@ -18,6 +18,7 @@
 #include <numeric>
 #include <set>
 #include <string>
+#include <tuple>
 #include <unordered_map>
 
 using namespace sequant;
@@ -26,11 +27,14 @@ using namespace sequant::mbpt::sr;
 struct Idx2Size {
   static const size_t nocc = 10;
   static const size_t nvirt = 100;
+  static const size_t naux = 100;
   size_t operator()(Index const& idx) const {
     if (idx.space() == IndexSpace::active_occupied)
       return nocc;
     else if (idx.space() == IndexSpace::active_unoccupied)
       return nvirt;
+    else if (idx.space() == IndexSpace::all_active)
+      return naux;
     else
       throw std::runtime_error("Unsupported IndexSpace type encountered");
   }
@@ -71,19 +75,34 @@ struct Options {
   std::size_t maxExcitation;
   bool includeSingles;
   std::string name;
+  bool densityFitting;
+  bool termByTerm;
 };
 
 Options parseOptions(int argc, const char** argv) {
   Options options;
   if (argc == 2) {
-    if (std::strcmp(argv[1], "ccsd") == 0) {
+    std::string name(argv[1]);
+
+    options.densityFitting = name.size() > 3 && name.substr(0, 3) == "df-";
+    if (options.densityFitting) {
+      name = name.substr(3);
+    }
+
+    options.termByTerm =
+        name.size() > 5 && name.substr(name.size() - 4, 4) == "_tbt";
+    if (options.termByTerm) {
+      name = name.substr(0, name.size() - 4);
+    }
+
+    if (name == "ccsd") {
       options.maxExcitation = 2;
       options.includeSingles = true;
-      options.name = "ccsd";
-    } else if (std::strcmp(argv[1], "ccd") == 0) {
+      options.name = argv[1];
+    } else if (name == "ccd") {
       options.maxExcitation = 2;
       options.includeSingles = false;
-      options.name = "ccd";
+      options.name = argv[1];
     } else {
       throw std::runtime_error(std::string("Unknown/Unsupported CC method: ") +
                                argv[1]);
@@ -92,6 +111,8 @@ Options parseOptions(int argc, const char** argv) {
     options.maxExcitation = 2;
     options.includeSingles = true;
     options.name = "ccsd";
+    options.densityFitting = false;
+    options.termByTerm = false;
   }
   std::wcout << "Generating equations for " << options.name.c_str() << "\n";
 
@@ -169,7 +190,33 @@ std::vector<ExprPtr> generateWorkingEquations(
   return equations;
 }
 
-ExprPtr processExpression(const ExprPtr& expr) {
+IndexGroups<std::vector<Index>> external_indices(const ExprPtr& expr) {
+  IndexGroups groups;
+
+  if (!expr.is<Sum>() && !expr.is<Product>()) {
+    return groups;
+  }
+
+  const Tensor& symmetrizer = [&]() {
+    if (expr.is<Sum>()) {
+      return expr.as<Sum>().summand(0).as<Product>().factor(0).as<Tensor>();
+    } else {
+      return expr.as<Product>().factor(0).as<Tensor>();
+    }
+  }();
+
+  if (symmetrizer.label() == L"A" || symmetrizer.label() == L"S") {
+    groups.bra.insert(groups.bra.end(), symmetrizer.bra().begin(),
+                      symmetrizer.bra().end());
+    groups.ket.insert(groups.ket.end(), symmetrizer.ket().begin(),
+                      symmetrizer.ket().end());
+  }
+
+  return groups;
+}
+
+std::tuple<ExprPtr, IndexGroups<std::vector<Index>>> processExpression(
+    const ExprPtr& expr) {
   ExprPtr result;
   if (expr.is<Sum>()) {
     result = expr;
@@ -181,6 +228,8 @@ ExprPtr processExpression(const ExprPtr& expr) {
   // Spintrace
   result = simplify(closed_shell_CC_spintrace(result));
 
+  IndexGroups externals = external_indices(result);
+
   // Remove symmetrization operator as this is not a tensor (but the
   // optimize function would treat it as such)
   // -> from here on the final symmetrization is implicit!
@@ -189,10 +238,11 @@ ExprPtr processExpression(const ExprPtr& expr) {
   // Optimize
   result = optimize(result, Idx2Size{});
 
-  return result;
+  return {result, externals};
 }
 
-itf::Result toItfResult(ExprPtr& expr, std::size_t projectionLevel) {
+itf::Result toItfResult(ExprPtr& expr, std::size_t projectionLevel,
+                        const IndexGroups<std::vector<Index>>& externals) {
   // Replace amplitudes with names as expected in ITF code
   expr->visit(
       [](ExprPtr& expr) {
@@ -205,9 +255,11 @@ itf::Result toItfResult(ExprPtr& expr, std::size_t projectionLevel) {
         }
 
         if (tensor.braket().size() == 2) {
-          expr = ex<Tensor>(L"T1", tensor.bra(), tensor.ket(), tensor.auxiliary());
+          expr =
+              ex<Tensor>(L"T1", tensor.bra(), tensor.ket(), tensor.auxiliary());
         } else if (tensor.braket().size() == 4) {
-          expr = ex<Tensor>(L"T2", tensor.bra(), tensor.ket(), tensor.auxiliary());
+          expr =
+              ex<Tensor>(L"T2", tensor.bra(), tensor.ket(), tensor.auxiliary());
         }
       },
       true);
@@ -222,7 +274,6 @@ itf::Result toItfResult(ExprPtr& expr, std::size_t projectionLevel) {
   }();
 
   // Assemble the result tensor itself
-  IndexGroups externals = get_unique_indices(expr);
   Tensor resultTensor(resultName, externals.bra, externals.ket, externals.aux);
 
   return itf::Result(expr, resultTensor, projectionLevel <= 1);
@@ -261,6 +312,85 @@ std::optional<itf::Result> generateResultSymmetrization(
   return itf::Result(symmetrization, symmetrizedResult, true);
 }
 
+ExprPtr insertDensityFitting(ExprPtr expr) {
+  expr->visit(
+      [](ExprPtr& current) {
+        if (!current->is<Tensor>()) {
+          return;
+        }
+        Tensor& tensor = current.as<Tensor>();
+        if (tensor.label() != L"g" || tensor.bra_rank() != 2 ||
+            tensor.ket_rank() != 2 || tensor.auxiliary_rank() != 0) {
+          return;
+        }
+
+        bool allVirtual = true;
+        for (const Index& idx : tensor.const_indices()) {
+          if (idx.space() != IndexSpace::instance(L"a_1")) {
+            allVirtual = false;
+            break;
+          }
+        }
+
+        // Don't replace 4ext integrals - we want to make use of KExt
+        if (allVirtual && false) {
+          return;
+        }
+
+        const auto& braIdx = tensor.bra();
+        const auto& ketIdx = tensor.ket();
+
+        // IndexFactory factory;
+        // Index contractionIdx = factory.make(Index(L"x_1"));
+        Index contractionIdx(L"x_1");
+
+        // std::wcout << "Before: " << deparse_expr(current) << "\n";
+
+        ExprPtr df1 = ex<Tensor>(L"DF", std::vector<Index>{braIdx[0]},
+                                 std::vector<Index>{ketIdx[0]},
+                                 std::vector<Index>{contractionIdx},
+                                 Symmetry::nonsymm, BraKetSymmetry::symm);
+        ExprPtr df2 = ex<Tensor>(L"DF", std::vector<Index>{braIdx[1]},
+                                 std::vector<Index>{ketIdx[1]},
+                                 std::vector<Index>{contractionIdx},
+                                 Symmetry::nonsymm, BraKetSymmetry::symm);
+        ExprPtr df3 = ex<Tensor>(L"DF", std::vector<Index>{braIdx[0]},
+                                 std::vector<Index>{ketIdx[1]},
+                                 std::vector<Index>{contractionIdx},
+                                 Symmetry::nonsymm, BraKetSymmetry::symm);
+        ExprPtr df4 = ex<Tensor>(L"DF", std::vector<Index>{braIdx[1]},
+                                 std::vector<Index>{ketIdx[0]},
+                                 std::vector<Index>{contractionIdx},
+                                 Symmetry::nonsymm, BraKetSymmetry::symm);
+
+        if (tensor.symmetry() == Symmetry::antisymm) {
+          // Antisymmetric exchange
+          current =
+              ex<Sum>(ExprPtrList{ex<Product>(ExprPtrList{df1, df2}),
+                                  ex<Product>(-1, ExprPtrList{df3, df4})});
+        } else {
+          // Symmetric exchange
+          current = ex<Product>(ExprPtrList{df1, df2});
+        }
+
+        // std::wcout << "Inserted DF: " << deparse_expr(current) << "\n";
+      },
+      true);
+
+  return expand(expr);
+}
+
+itf::Result processToItf(ExprPtr expr, std::size_t projectionLevel,
+                         bool useDensityFitting) {
+  if (useDensityFitting) {
+    expr = insertDensityFitting(expr);
+  }
+
+  auto [processed, externals] = processExpression(expr);
+
+  return toItfResult(processed, projectionLevel, externals);
+}
+
 int main(int argc, const char** argv) {
   try {
     defaultSetup();
@@ -281,24 +411,40 @@ int main(int argc, const char** argv) {
 
     for (std::size_t i = 0; i < projectionManifold.size(); ++i) {
       const std::size_t currentProjection = projectionManifold.at(i);
-      ExprPtr processedExpr = processExpression(equations.at(i));
 
-      std::wcout << L"Equations for projection on <" << currentProjection
-                 << L"|:\n=============================\nRaw ("
-                 << getTermCount(processedExpr) << L"):\n"
-                 << to_latex_align(processedExpr) << "\n\n";
+      std::wcout << "Processing equations for projection on <"
+                 << currentProjection << "|\n";
 
-      // Transform the current equation into a form that can later be translated
-      // to ITF
-      itf::Result result = toItfResult(processedExpr, currentProjection);
-      results.push_back(result);
+      if (options.termByTerm) {
+        if (!equations[i].is<Sum>()) {
+          equations[i] = ex<Sum>(ExprPtrList{equations[i]});
+        }
 
-      // If necessary, generate the symmetrization code for the result computed
-      // by processedExpr.
-      std::optional<itf::Result> resultSymmetrization =
-          generateResultSymmetrization(result.resultTensor);
-      if (resultSymmetrization.has_value()) {
-        results.push_back(resultSymmetrization.value());
+        Sum& sum = equations[i].as<Sum>();
+        for (std::size_t k = 0; k < sum.size(); ++k) {
+          itf::Result result = processToItf(sum.summand(k), currentProjection,
+                                            options.densityFitting);
+
+          std::wcout << "Term #" << (k + 1) << ": "
+                     << deparse_expr(ex<Tensor>(result.resultTensor))
+                     << " += " << deparse_expr(result.expression) << "\n\n";
+
+          results.push_back(std::move(result));
+        }
+      } else {
+        itf::Result result = processToItf(equations[i], currentProjection,
+                                          options.densityFitting);
+
+        std::wcout << deparse_expr(ex<Tensor>(result.resultTensor)) << " = "
+                   << deparse_expr(result.expression) << "\n\n";
+
+        results.push_back(std::move(result));
+      }
+
+      std::optional<itf::Result> symmetrization =
+          generateResultSymmetrization(results.back().resultTensor);
+      if (symmetrization.has_value()) {
+        results.push_back(std::move(symmetrization.value()));
       }
     }
 
@@ -311,7 +457,6 @@ int main(int argc, const char** argv) {
     stream.close();
     std::wcout << "ITF code written to file " << options.name.c_str()
                << ".itfaa\n";
-
   } catch (const std::exception& e) {
     std::wcout << "[ERROR]: " << e.what() << std::endl;
     return 1;
