@@ -88,9 +88,10 @@ template <typename Container = std::vector<Index>>
 struct IndexGroups {
   Container bra;
   Container ket;
+  Container aux;
 
   bool operator==(const IndexGroups<Container>& other) const {
-    return bra == other.bra && ket == other.ket;
+    return bra == other.bra && ket == other.ket && aux == other.aux;
   }
 
   bool operator!=(const IndexGroups<Container>& other) const {
@@ -138,6 +139,17 @@ IndexGroups<Container> get_unique_indices(const Tensor& tensor) {
     }
   }
 
+  for (const Index& current : tensor.auxiliary()) {
+    if (encounteredIndices.find(current) == encounteredIndices.end()) {
+      groups.aux.push_back(current);
+      encounteredIndices.insert(current);
+    } else {
+      detail::remove_one(groups.bra, current);
+      detail::remove_one(groups.ket, current);
+      detail::remove_one(groups.aux, current);
+    }
+  }
+
   return groups;
 }
 
@@ -181,6 +193,18 @@ IndexGroups<Container> get_unique_indices(const Product& product) {
       } else {
         detail::remove_one(groups.bra, current);
         detail::remove_one(groups.ket, current);
+      }
+    }
+
+    // And for aux indices
+    for (Index& current : currentGroups.aux) {
+      if (encounteredIndices.find(current) == encounteredIndices.end()) {
+        encounteredIndices.insert(current);
+        groups.aux.push_back(std::move(current));
+      } else {
+        detail::remove_one(groups.bra, current);
+        detail::remove_one(groups.ket, current);
+        detail::remove_one(groups.aux, current);
       }
     }
   }
