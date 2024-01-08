@@ -16,7 +16,9 @@
 #include <iostream>
 #include <memory>
 #include <numeric>
+#include <optional>
 #include <set>
+#include <sstream>
 #include <string>
 #include <tuple>
 #include <unordered_map>
@@ -29,9 +31,11 @@ struct Idx2Size {
   static const size_t nvirt = 100;
   static const size_t naux = 100;
   size_t operator()(Index const& idx) const {
-    if (idx.space() == IndexSpace::active_occupied)
+    if (idx.space() == IndexSpace::active_occupied ||
+        idx.space() == IndexSpace::occupied)
       return nocc;
-    else if (idx.space() == IndexSpace::active_unoccupied)
+    else if (idx.space() == IndexSpace::active_unoccupied ||
+             idx.space() == IndexSpace::unoccupied)
       return nvirt;
     else if (idx.space() == IndexSpace::all_active)
       return naux;
@@ -77,11 +81,12 @@ struct Options {
   std::string name;
   bool densityFitting;
   bool termByTerm;
+  std::optional<std::string> inputFile;
 };
 
 Options parseOptions(int argc, const char** argv) {
   Options options;
-  if (argc == 2) {
+  if (argc >= 2) {
     std::string name(argv[1]);
 
     options.densityFitting = name.size() > 3 && name.substr(0, 3) == "df-";
@@ -103,6 +108,24 @@ Options parseOptions(int argc, const char** argv) {
       options.maxExcitation = 2;
       options.includeSingles = false;
       options.name = argv[1];
+    } else if (name == "read") {
+      if (argc < 3) {
+        throw std::runtime_error("Missing argument for read");
+      }
+
+      options.inputFile = argv[2];
+      name = argv[2];
+
+      if (auto idx = name.rfind("."); idx != std::string::npos && idx > 1) {
+        name = name.substr(0, idx);
+      }
+      if (options.termByTerm) {
+        name += "_tbt";
+      }
+      if (options.densityFitting) {
+        name = "df-" + name;
+      }
+      options.name = name;
     } else {
       throw std::runtime_error(std::string("Unknown/Unsupported CC method: ") +
                                argv[1]);
@@ -396,20 +419,53 @@ int main(int argc, const char** argv) {
     defaultSetup();
     Options options = parseOptions(argc, argv);
 
-    // Generate desired equations
-    std::vector<std::size_t> projectionManifold =
-        createProjectionManifold(options.maxExcitation, options.includeSingles);
+    std::vector<ExprPtr> equations;
+    std::vector<std::size_t> projectionManifold;
 
-    ExprPtr hbar = Hbar(projectionManifold);
-    std::wcout << L"Hbar:\n" << to_latex_align(hbar) << "\n\n";
+    if (options.inputFile.has_value()) {
+      // Read in equations
+      std::ifstream input(options.inputFile.value());
+      std::string line;
+      std::size_t currentProjection;
+      std::string currentBlock;
 
-    std::vector<ExprPtr> equations =
-        generateWorkingEquations(projectionManifold, hbar);
+      while (std::getline(input, line)) {
+        if (line.find("level:") == 0) {
+          if (!currentBlock.empty()) {
+            equations.push_back(
+                parse_expr(to_wstring(currentBlock), Symmetry::antisymm));
+            projectionManifold.push_back(currentProjection);
+            currentBlock.clear();
+          }
+          std::stringstream(line.substr(6)) >> currentProjection;
+        } else {
+          currentBlock += "\n" + line;
+        }
+      }
+
+      if (!currentBlock.empty()) {
+        equations.push_back(
+            parse_expr(to_wstring(currentBlock), Symmetry::antisymm));
+        projectionManifold.push_back(currentProjection);
+        currentBlock.clear();
+      }
+    } else {
+      // Generate desired equations
+      projectionManifold = createProjectionManifold(options.maxExcitation,
+                                                    options.includeSingles);
+
+      ExprPtr hbar = Hbar(projectionManifold);
+      std::wcout << L"Hbar:\n" << to_latex_align(hbar) << "\n\n";
+
+      equations = generateWorkingEquations(projectionManifold, hbar);
+    }
+
+    assert(equations.size() <= projectionManifold.size());
 
     // Process generated equations
     std::vector<itf::Result> results;
 
-    for (std::size_t i = 0; i < projectionManifold.size(); ++i) {
+    for (std::size_t i = 0; i < equations.size(); ++i) {
       const std::size_t currentProjection = projectionManifold.at(i);
 
       std::wcout << "Processing equations for projection on <"
