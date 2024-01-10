@@ -28,12 +28,30 @@ static const IndexSpace::Type occ = IndexSpace::active_occupied;
 static const IndexSpace::Type virt = IndexSpace::active_unoccupied;
 static const IndexSpace::Type auxiliary = IndexSpace::all_active;
 
+bool isOcc(IndexSpace::Type type) {
+  return type == IndexSpace::active_occupied || type == IndexSpace::occupied;
+}
+
+bool isVirt(IndexSpace::Type type) {
+  return type == IndexSpace::active_unoccupied ||
+         type == IndexSpace::unoccupied;
+}
+
 struct IndexTypeComparer {
   bool operator()(const IndexSpace::Type &lhs,
                             const IndexSpace::Type &rhs) const {
-    assert(occ < virt);
-    assert(occ < auxiliary);
-    assert(virt < auxiliary);
+    assert(IndexSpace::active_occupied < IndexSpace::active_unoccupied);
+    assert(IndexSpace::occupied < IndexSpace::unoccupied);
+    assert(IndexSpace::active_occupied < IndexSpace::unoccupied);
+    assert(IndexSpace::occupied < IndexSpace::active_unoccupied);
+    assert(IndexSpace::active_unoccupied < auxiliary);
+    assert(!(IndexSpace::unoccupied < auxiliary));
+    if (lhs == auxiliary) {
+      return false;
+    }
+    if (rhs == auxiliary && lhs == IndexSpace::unoccupied) {
+      return true;
+    }
     return lhs < rhs;
   }
 };
@@ -321,10 +339,10 @@ bool isExceptionalJ(const Container &braIndices, const Container &ketIndices) {
   assert(ketIndices.size() == 2);
   // integrals with 3 external (virtual) indices ought to be converted to
   // J-integrals
-  return braIndices[0].space().type() == virt &&
-         braIndices[1].space().type() == virt &&
-         ketIndices[0].space().type() == virt &&
-         ketIndices[1].space().type() != virt;
+  return isVirt(braIndices[0].space().type()) &&
+         isVirt(braIndices[1].space().type()) &&
+         isVirt(ketIndices[0].space().type()) &&
+         !isVirt(ketIndices[1].space().type());
 }
 
 void two_electron_integral_remapper(
@@ -549,13 +567,13 @@ std::wstring to_itf(const Tensor &tensor, bool includeIndexing = true) {
 
     assert(components.id <= 7);
 
-    if (components.space.type() == IndexSpace::active_occupied) {
+    if (isOcc(components.space.type())) {
       tags += L"c";
       indices += static_cast<wchar_t>(L'i' + components.id);
-    } else if (components.space.type() == IndexSpace::active_unoccupied) {
+    } else if (isVirt(components.space.type())) {
       tags += L"e";
       indices += static_cast<wchar_t>(L'a' + components.id);
-    } else if (components.space.type() == IndexSpace::all_active) {
+    } else if (components.space.type() == auxiliary) {
       tags += L"F";
       indices += static_cast<wchar_t>(L'F' + components.id);
     } else {
@@ -587,15 +605,15 @@ std::wstring ITFGenerator::generate() const {
     wchar_t baseLabel;
     std::wstring spaceLabel;
     std::wstring spaceTag;
-    if (iter->first.type() == IndexSpace::active_occupied) {
+    if (isOcc(iter->first.type())) {
       baseLabel = L'i';
       spaceLabel = L"Closed";
       spaceTag = L"c";
-    } else if (iter->first.type() == IndexSpace::active_unoccupied) {
+    } else if (isVirt(iter->first.type())) {
       baseLabel = L'a';
       spaceLabel = L"External";
       spaceTag = L"e";
-    } else if (iter->first.type() == IndexSpace::all_active) {
+    } else if (iter->first.type() == auxiliary) {
       baseLabel = L'F';
       spaceLabel = L"BasisMp2Fit";
       spaceTag = L"F";
