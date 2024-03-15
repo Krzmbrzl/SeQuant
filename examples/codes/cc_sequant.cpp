@@ -30,6 +30,7 @@ struct Idx2Size {
   static const size_t nocc = 10;
   static const size_t nvirt = 100;
   static const size_t naux = 100;
+  static const size_t nact = 4;
   size_t operator()(Index const& idx) const {
     if (idx.space() == IndexSpace::active_occupied ||
         idx.space() == IndexSpace::occupied)
@@ -37,10 +38,12 @@ struct Idx2Size {
     else if (idx.space() == IndexSpace::active_unoccupied ||
              idx.space() == IndexSpace::unoccupied)
       return nvirt;
+    else if (idx.space() == IndexSpace::active)
+		return nact;
     else if (idx.space() == IndexSpace::all_active)
       return naux;
     else
-      throw std::runtime_error("Unsupported IndexSpace type encountered");
+      throw std::runtime_error("Unsupported IndexSpace type encountered in Idx2Size");
   }
 };
 
@@ -478,11 +481,12 @@ int main(int argc, const char** argv) {
 
         Sum& sum = equations[i].as<Sum>();
         for (std::size_t k = 0; k < sum.size(); ++k) {
+          std::wcout << "Term #" << (k + 1) << ":\n  " << deparse_expr(sum.summand(k)) << "\n  processes to\n";
+
           itf::Result result = processToItf(sum.summand(k), currentProjection,
                                             options.densityFitting);
 
-          std::wcout << "Term #" << (k + 1) << ": "
-                     << deparse_expr(ex<Tensor>(result.resultTensor))
+		  std::wcout << "  " << deparse_expr(ex<Tensor>(result.resultTensor))
                      << " += " << deparse_expr(result.expression) << "\n\n";
 
           results.push_back(std::move(result));
@@ -502,6 +506,8 @@ int main(int argc, const char** argv) {
       if (symmetrization.has_value()) {
         results.push_back(std::move(symmetrization.value()));
       }
+
+	  std::wcout << "\n\n";
     }
 
     // TODO: Factor out K4E
