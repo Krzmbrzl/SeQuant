@@ -212,6 +212,8 @@ set(SeQuant_src
         SeQuant/core/runtime.hpp
         SeQuant/core/space.cpp
         SeQuant/core/space.hpp
+		SeQuant/core/spin/RestrictedDiophantineSolver.cpp
+		SeQuant/core/spin/RestrictedDiophantineSolver.hpp
         SeQuant/core/tag.hpp
         SeQuant/core/tensor.cpp
         SeQuant/core/tensor.hpp
@@ -385,6 +387,7 @@ if (BUILD_TESTING)
             tests/unit/test_mbpt_cc.cpp
             tests/unit/test_tensor_network.cpp
             tests/unit/test_spin.cpp
+            tests/unit/test_spin_new.cpp
             tests/unit/test_canonicalize.cpp
             tests/unit/test_expr.cpp
             tests/unit/test_parse_expr.cpp
