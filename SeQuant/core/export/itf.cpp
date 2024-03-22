@@ -576,6 +576,9 @@ std::wstring to_itf(const Tensor &tensor, bool includeIndexing = true) {
     } else if (components.space.type() == auxiliary) {
       tags += L"F";
       indices += static_cast<wchar_t>(L'F' + components.id);
+    } else if (components.space.type() == IndexSpace::active) {
+      tags += L"V";
+      indices += static_cast<wchar_t>(L'V' + components.id);
     } else {
       std::runtime_error("Encountered unhandled index space type");
     }
@@ -617,6 +620,10 @@ std::wstring ITFGenerator::generate() const {
       baseLabel = L'F';
       spaceLabel = L"BasisMp2Fit";
       spaceTag = L"F";
+    } else if (iter->first.type() == IndexSpace::active) {
+      baseLabel = L'p';
+      spaceLabel = L"Active";
+      spaceTag = L"a";
     } else {
       std::runtime_error("Encountered unhandled index space type");
     }
