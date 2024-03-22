@@ -252,7 +252,8 @@ std::tuple<ExprPtr, IndexGroups<std::vector<Index>>> processExpression(
   }
 
   // Spintrace
-  result = simplify(closed_shell_CC_spintrace(result));
+  //result = simplify(closed_shell_CC_spintrace(result));
+  result = simplify(spintrace(result));
 
   IndexGroups externals = external_indices(result);
 
