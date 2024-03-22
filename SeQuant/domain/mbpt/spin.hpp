@@ -194,6 +194,7 @@ std::size_t count_cycles(Seq0&& v0, const Seq1& v1) {
       } while (idx1 != idx);
     }
   }
+  std::wcout << "Num cycles is " << n_cycles << std::endl;
   return n_cycles;
 };
 

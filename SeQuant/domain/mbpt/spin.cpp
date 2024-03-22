@@ -896,6 +896,7 @@ ExprPtr closed_shell_spintrace(
         auto first = *it;
         it++;
         auto second = *it;
+		std::wcout << "Replacing " << first.label() << " with " << second.label() << "\n";
         std::replace(product_bras.begin(), product_bras.end(), first, second);
         std::replace(product_kets.begin(), product_kets.end(), first, second);
       }
@@ -905,6 +906,18 @@ ExprPtr closed_shell_spintrace(
     if ((*ext_index_groups.begin()).size() == 2) {
       ranges::for_each(ext_index_groups, substitute_ext_idx);
     }
+
+	std::wcout << "Expression: " << to_latex(temp_product) << std::endl;
+	std::wcout << "Ket indices:\n";
+	for (const Index &idx : product_kets) {
+		std::wcout << idx.label() << ", ";
+	}
+	std::wcout << std::endl;
+	std::wcout << "Bra indices:\n";
+	for (const Index &idx : product_bras) {
+		std::wcout << idx.label() << ", ";
+	}
+	std::wcout << std::endl;
 
     auto n_cycles = count_cycles(product_kets, product_bras);
 
@@ -1607,7 +1620,11 @@ ExprPtr spintrace(
       // NB: There are temporaries in the following code to enable
       // printing intermediate expressions.
       if (spin_expr->is<Tensor>()) {
+		  std::wcout << "Spin tracing " << to_latex(spin_expr) << std::endl;
         auto st_expr = spin_trace_tensor(spin_expr->as<Tensor>());
+		if (st_expr.is<Constant>() && st_expr->as<Constant>().is_zero()) {
+			continue;
+		}
         result->append(spinfree_index_spaces ? remove_spin(st_expr) : st_expr);
       } else if (spin_expr->is<Product>()) {
         auto st_expr = spin_trace_product(spin_expr->as<Product>());
