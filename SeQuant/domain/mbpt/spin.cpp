@@ -1620,7 +1620,6 @@ ExprPtr spintrace(
       // NB: There are temporaries in the following code to enable
       // printing intermediate expressions.
       if (spin_expr->is<Tensor>()) {
-		  std::wcout << "Spin tracing " << to_latex(spin_expr) << std::endl;
         auto st_expr = spin_trace_tensor(spin_expr->as<Tensor>());
 		if (st_expr.is<Constant>() && st_expr->as<Constant>().is_zero()) {
 			continue;
