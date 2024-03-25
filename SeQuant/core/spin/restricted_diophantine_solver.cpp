@@ -1,4 +1,4 @@
-#include <SeQuant/core/spin/RestrictedDiophantineSolver.hpp>
+#include <SeQuant/core/spin/restricted_diophantine_solver.hpp>
 
 #include <SeQuant/core/math.hpp>
 
