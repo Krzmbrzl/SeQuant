@@ -212,8 +212,9 @@ set(SeQuant_src
         SeQuant/core/runtime.hpp
         SeQuant/core/space.cpp
         SeQuant/core/space.hpp
-		SeQuant/core/spin/restricted_diophantine_solver.cpp
 		SeQuant/core/spin/restricted_diophantine_solver.hpp
+		SeQuant/core/spin/spin_integration.cpp
+		SeQuant/core/spin/spin_integration.hpp
         SeQuant/core/tag.hpp
         SeQuant/core/tensor.cpp
         SeQuant/core/tensor.hpp
