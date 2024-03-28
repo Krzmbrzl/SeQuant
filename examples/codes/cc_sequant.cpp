@@ -242,7 +242,7 @@ IndexGroups<std::vector<Index>> external_indices(const ExprPtr& expr) {
 }
 
 std::tuple<ExprPtr, IndexGroups<std::vector<Index>>> processExpression(
-    const ExprPtr& expr) {
+    const ExprPtr& expr, bool do_optimize = true) {
   ExprPtr result;
   if (expr.is<Sum>()) {
     result = expr;
@@ -251,19 +251,21 @@ std::tuple<ExprPtr, IndexGroups<std::vector<Index>>> processExpression(
     result = ex<Sum>(ExprPtrList{expr});
   }
 
+  IndexGroups externals = external_indices(result);
+
   // Spintrace
   //result = simplify(closed_shell_CC_spintrace(result));
   result = simplify(spintrace(result));
-
-  IndexGroups externals = external_indices(result);
 
   // Remove symmetrization operator as this is not a tensor (but the
   // optimize function would treat it as such)
   // -> from here on the final symmetrization is implicit!
   result = remove_tensor(result, L"S");
 
-  // Optimize
-  result = optimize(result, Idx2Size{});
+  if (do_optimize) {
+    // Optimize
+    result = optimize(result, Idx2Size{});
+  }
 
   return {result, externals};
 }
@@ -469,6 +471,9 @@ int main(int argc, const char** argv) {
     // Process generated equations
     std::vector<itf::Result> results;
 
+	std::wofstream tex_summary(options.name + ".tex");
+	tex_summary << "\\documentclass{scrarticle}\n\\usepackage{amsmath}\n\\usepackage{hyperref}\n\\begin{document}\n\n";
+
     for (std::size_t i = 0; i < equations.size(); ++i) {
       const std::size_t currentProjection = projectionManifold.at(i);
 
@@ -482,12 +487,26 @@ int main(int argc, const char** argv) {
 
         Sum& sum = equations[i].as<Sum>();
         for (std::size_t k = 0; k < sum.size(); ++k) {
+			tex_summary << "\\section{Term " << (k + 1) << "}\n";
           std::wcout << "Term #" << (k + 1) << ":\n  " << deparse_expr(sum.summand(k)) << "\n  processes to\n";
 
+		  tex_summary << "Starting from\n" << to_latex_align(sum.summand(k)) << "\n";
+
+		  auto [expr, externals] = processExpression(sum.summand(k), false);
           itf::Result result = processToItf(sum.summand(k), currentProjection,
                                             options.densityFitting);
 
-		  std::wcout << "  " << deparse_expr(ex<Tensor>(result.resultTensor))
+          tex_summary << "yields\n" << to_latex_align(expr) << "\n";
+          tex_summary << "externals: $\\{";
+          for (std::size_t kind : {0, 1}) {
+            const auto& indices = kind == 0 ? externals.bra : externals.ket;
+            for (std::size_t i = 0; i < indices.size(); ++i) {
+              tex_summary << indices[i].label();
+            }
+          }
+          tex_summary << "\\}$\n";
+
+          std::wcout << "  " << deparse_expr(ex<Tensor>(result.resultTensor))
                      << " += " << deparse_expr(result.expression) << "\n\n";
 
           results.push_back(std::move(result));
@@ -510,6 +529,8 @@ int main(int argc, const char** argv) {
 
 	  std::wcout << "\n\n";
     }
+
+	tex_summary << "\n\\end{document}\n";
 
     // TODO: Factor out K4E
 
