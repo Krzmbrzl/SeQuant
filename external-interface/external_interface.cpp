@@ -1,4 +1,5 @@
 #include "processing.hpp"
+#include "utils.hpp"
 
 #include <SeQuant/core/expr.hpp>
 #include <SeQuant/core/parse_expr.hpp>
@@ -21,7 +22,7 @@
 using nlohmann::json;
 using sequant::toUtf16;
 
-void generate_itf(const json &blocks, std::string_view out_file) {
+void generateITF(const json &blocks, std::string_view out_file, const IndexSpaceMeta &spaceMeta) {
 	for (const json &current_block : blocks) {
 		const std::string block_name = current_block.at("name");
 
@@ -40,29 +41,29 @@ void generate_itf(const json &blocks, std::string_view out_file) {
 			const std::wstring transcoded_input = toUtf16(input);
 			sequant::ExprPtr expression         = sequant::parse_expr(transcoded_input);
 
-			expression = post_process(expression);
+			expression = postProcess(expression, spaceMeta);
 
 			// TODO: Add generated expression to ITF block to generate ITF code from
 		}
 	}
 }
 
-void generate_code(const json &details) {
+void generateCode(const json &details, const IndexSpaceMeta &spaceMeta) {
 	const std::string format   = details.at("output_format");
 	const std::string out_path = details.at("output_path");
 
 	if (boost::iequals(format, "itf")) {
-		generate_itf(details.at("code_blocks"), out_path);
+		generateITF(details.at("code_blocks"), out_path, spaceMeta);
 	} else {
 		throw std::runtime_error("Unknown code generation target format '" + std::string(format) + "'");
 	}
 }
 
-void process(const json &driver) {
+void process(const json &driver, const IndexSpaceMeta &spaceMeta) {
 	if (driver.contains("code_generation")) {
 		const json &details = driver.at("code_generation");
 
-		generate_code(details);
+		generateCode(details, spaceMeta);
 	}
 }
 
@@ -79,12 +80,14 @@ int main(int argc, char **argv) {
 		throw std::runtime_error("Specified driver file '" + driver + "' does not exist");
 	}
 
+	IndexSpaceMeta spaceMeta;
+
 	try {
 		std::ifstream in(driver);
 		json driver_info;
 		in >> driver_info;
 
-		process(driver_info);
+		process(driver_info, spaceMeta);
 	} catch (const std::exception &e) {
 		std::wcout << "[ERROR]: " << e.what() << std::endl;
 		return 1;

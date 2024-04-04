@@ -18,6 +18,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
 add_executable(external_interface
 	external_interface.cpp
 	processing.cpp
+	utils.cpp
 )
 
 target_link_libraries(external_interface

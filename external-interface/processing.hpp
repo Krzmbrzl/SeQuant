@@ -1,8 +1,29 @@
 #ifndef SEQUANT_EXTERNAL_INTERFACE_PROCESSING_HPP
 #define SEQUANT_EXTERNAL_INTERFACE_PROCESSING_HPP
 
+#include "utils.hpp"
+
 #include <SeQuant/core/expr_fwd.hpp>
 
-sequant::ExprPtr post_process(const sequant::ExprPtr &expression);
+enum class SpinTracing {
+	None,
+	ClosedShell,
+	Rigorous,
+};
+
+enum class ProjectionTransformation {
+	None,
+	Biorthogonal,
+};
+
+struct ProcessingOptions {
+	bool density_fitting               = false;
+	SpinTracing spintrace              = SpinTracing::Rigorous;
+	ProjectionTransformation transform = ProjectionTransformation::None;
+	bool factorize_to_binary           = true;
+};
+
+sequant::ExprPtr postProcess(const sequant::ExprPtr &expression, const IndexSpaceMeta &space_meta,
+							  const ProcessingOptions &options = {});
 
 #endif
