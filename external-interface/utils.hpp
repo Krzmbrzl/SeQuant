@@ -5,25 +5,50 @@
 #include <SeQuant/core/expr_fwd.hpp>
 #include <SeQuant/core/index.hpp>
 #include <SeQuant/core/space.hpp>
+#include <SeQuant/core/utility/indices.hpp>
 
 #include <functional>
 #include <map>
+#include <optional>
+#include <string>
 
 class IndexSpaceMeta {
 public:
+	struct Entry {
+		std::wstring label;
+		std::wstring tag;
+		std::wstring name;
+		std::size_t size;
+	};
+
 	IndexSpaceMeta() = default;
 
 	std::size_t getSize(const sequant::IndexSpace &space) const;
 	std::size_t getSize(const sequant::Index &index) const;
 
+	std::wstring getLabel(const sequant::IndexSpace &space) const;
+
+	std::wstring getName(const sequant::IndexSpace &space) const;
+
+	std::wstring getTag(const sequant::IndexSpace &space) const;
+
 	std::function< std::size_t(const sequant::IndexSpace &) > getSizeProxy() const;
 	std::function< std::size_t(const sequant::Index &) > getIndexSizeProxy() const;
 
+	void registerSpace(sequant::IndexSpace space, Entry entry);
+
 private:
-	std::map< sequant::IndexSpace, std::size_t > m_sizes;
+	std::map< sequant::IndexSpace, Entry > m_entries;
 };
 
 sequant::container::svector< sequant::container::svector< sequant::Index > >
 	getExternalIndexPairs(const sequant::ExprPtr &expression);
+
+std::optional< sequant::ExprPtr > popTensor(sequant::ExprPtr &expression, std::wstring_view label);
+
+bool needsSymmetrization(const sequant::ExprPtr &expression);
+
+sequant::ExprPtr generateResultSymmetrization(std::wstring_view precursorName,
+											  const sequant::IndexGroups< std::vector< sequant::Index > > &externals);
 
 #endif

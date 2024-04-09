@@ -17,6 +17,8 @@ enum class ProjectionTransformation {
 };
 
 struct ProcessingOptions {
+	ProcessingOptions() = default;
+
 	bool density_fitting               = false;
 	SpinTracing spintrace              = SpinTracing::Rigorous;
 	ProjectionTransformation transform = ProjectionTransformation::None;

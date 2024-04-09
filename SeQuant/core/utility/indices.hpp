@@ -181,6 +181,7 @@ IndexGroups<Container> get_unique_indices(const Product& product) {
       } else {
         detail::remove_one(groups.bra, current);
         detail::remove_one(groups.ket, current);
+        detail::remove_one(groups.aux, current);
       }
     }
 
@@ -192,6 +193,7 @@ IndexGroups<Container> get_unique_indices(const Product& product) {
       } else {
         detail::remove_one(groups.bra, current);
         detail::remove_one(groups.ket, current);
+        detail::remove_one(groups.aux, current);
       }
     }
 

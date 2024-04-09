@@ -12,7 +12,15 @@
 using namespace sequant;
 
 ExprPtr postProcess(const ExprPtr &expression, const IndexSpaceMeta &spaceMeta, const ProcessingOptions &options) {
+	if (expression.is< Constant>() || expression.is< Variable >()) {
+		return expression;
+	}
+
 	ExprPtr processed;
+	if (options.density_fitting) {
+		throw std::runtime_error("DF insertion not yet implemented");
+	}
+
 	switch (options.spintrace) {
 		case SpinTracing::None:
 			processed = expression->clone();
@@ -52,8 +60,16 @@ ExprPtr postProcess(const ExprPtr &expression, const IndexSpaceMeta &spaceMeta, 
 	}
 
 	if (options.factorize_to_binary) {
-		// TODO: Remove symmetrization operator before optimization
+		std::optional< ExprPtr > symmetrizer = popTensor(processed, L"S");
+		if (!symmetrizer.has_value()) {
+			symmetrizer = popTensor(processed, L"A");
+		}
+
 		processed = optimize(processed, spaceMeta.getIndexSizeProxy());
+
+		if (symmetrizer.has_value()) {
+			processed = ex< Product >(1, ExprPtrList{ symmetrizer.value(), processed });
+		}
 	}
 
 	return processed;

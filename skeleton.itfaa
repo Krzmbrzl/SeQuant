@@ -1,0 +1,1842 @@
+---- decl
+index-space: pqrstuvwxyz, Active  , a
+index-space: ijkl       , Closed  , c
+index-space: gh         , ClosedF , f
+index-space: abcd       , External, e
+index-space: mno        , Internal, i
+index-space: CD         , Core    , C
+
+index-space: IJK        , ConfigI0, I
+index-space: MN         , OrthActPair, K
+
+index-space: P          , ConfigP2, P
+
+
+
+// K-integral tensors
+tensor: K:ccaa[ijpq], K:ccaa
+tensor: K:ecaa[aipq], K:ecaa
+tensor: K:aaaa[pqrs], K:aaaa                                                                                                                          
+tensor: K:aaac[qpri], K:aaac                                                                                                                                                                                                                                                                                              
+tensor: K:aacc[pqij], K:aacc                                                                                                                          
+tensor: K:ccca[kijp], K:ccca                                                                                                                          
+tensor: K:cccc[klij], K:cccc                                                                                                                          
+tensor: K:eaaa[cqpr], K:eaaa                                                                                                                          
+tensor: K:eaac[cpqi], K:eaac                                                                                                                          
+tensor: K:eaca[cqkr], K:eaca                                                                                                                          
+tensor: K:eacc[cqkj], K:eacc                                                                                                                          
+tensor: K:eccc[clkj], K:eccc                                                                                                                          
+tensor: K:eeaa[cdpq], K:eeaa                                                                                                                          
+tensor: K:eeac[dcqk], K:eeac                                                                                                                          
+tensor: K:eecc[cdkl], K:eecc
+
+// J-integral tensors
+tensor: INTkx:eecc[abij], !Create{type:disk}
+tensor: INTkx:eeac[abpj], !Create{type:disk}
+tensor: INTkx:eeaa[abpq], !Create{type:disk}
+tensor: f:ac[pi], f:ac
+tensor: f:ea[ap], f:ea
+tensor: f:aa[pq], f:aa
+tensor: f:ee[ab], f:ee
+tensor: f:cc[ij], f:cc
+tensor: f:ec[ai], f:ec
+tensor: J:eacc[apij], J:eacc
+tensor: J:ecca[aijp], J:ecca
+tensor: J:ecaa[aipq], J:ecaa
+tensor: J:eaaa[apqr], J:eaaa
+tensor: J:ccaa[ijpq], J:ccaa
+tensor: J:caaa[ipqr], J:caaa
+tensor: J:ccca[ijkp], J:ccca
+tensor: J:eccc[aijk], J:eccc
+tensor: J:eecc[abij], J:eecc
+tensor: J:eeaa[abpq], J:eeaa
+
+
+// Special integral tensors
+tensor: K4E:eecc[abij], K4E:eecc
+tensor: K4E:eeac[abpj], K4E:eeac
+tensor: K4E:eeaa[abpq], K4E:eeaa
+tensor: K4C[abmn], K4C
+
+// Tensor to send to Kext
+tensor: INTpp[abmn], INTpp
+tensor: INTpp1[abmi], !Create{type:disk}, INTpp1
+tensor: INTpp2[abnp], !Create{type:disk}, INTpp2
+
+tensor: deltaai[pm], DeltaActInt
+tensor: deltaci[im], DeltaCloInt
+
+// Fock tensors
+
+// reference coeff tensor
+tensor: T:I[I], T:I
+
+// Singles amplitude tensors
+
+// Doubles amplitude tensors
+
+// Singles residual tensors
+
+// Doubles residual tensors
+
+// Residuals not used in the code
+tensor: R:I[I], R:I
+tensor: R1:ac[pi], R1:ac
+tensor: R1:ec[ai], R1:ec
+tensor: R1:ea[ap], R1:ea
+tensor: R2:ac[pi], R2:ac
+tensor: R2:ec[ai], R2:ec
+tensor: R2:ea[ap], R2:ea
+tensor: R2:aacc[pqij], R2:aacc
+tensor: R2:aaac[pqri], R2:aaac
+tensor: R2:eacc[apij], R2:eacc
+tensor: R2:eaac[apqi], R2:eaac
+tensor: R2:eaca[apiq], R2:eaca
+tensor: R2:eaaa[apqr], R2:eaaa
+tensor: R2:eecc[abij], R2:eecc
+tensor: R2:eeac[abpi], R2:eeac
+tensor: R2:eeaa[abpq], R2:eeaa
+
+// Amplitudes not used in the code
+tensor: T1:ac[pi], T1:ac
+tensor: T1:ec[ai], T1:ec
+tensor: T1:ea[ap], T1:ea
+tensor: T2:ac[pi], T2:ac
+tensor: T2:ec[ai], T2:ec
+tensor: T2:ea[ap], T2:ea
+tensor: T2:aacc[pqij], T2:aacc
+tensor: T2:aaac[pqri], T2:aaac
+tensor: T2:eacc[apij], T2:eacc
+tensor: T2:eaac[apqi], T2:eaac
+tensor: T2:eaca[apiq], T2:eaca
+tensor: T2:eaaa[apqr], T2:eaaa
+tensor: T2:eecc[abij], T2:eecc
+tensor: T2:eeac[abpi], T2:eeac
+tensor: T2:eeaa[abpq], T2:eeaa
+tensor: T1s:ec[ai],  !Create{type:disk}
+
+// Energy and DIIS scalars
+tensor: EDi2[], EDi2     // Direct 1st order energy
+tensor: Nrm1[], Nrm1     // Singles amplitude norm
+tensor: Nrm2[], Nrm2     // Doubles amplitude norm
+tensor: Var1[], Var1     // Singles residual norm
+tensor: Var2[], Var2     // Doubles residual norm
+tensor: LCor1[], LCor1   // Singles Lagrange correction
+tensor: LCor2[], LCor2   // Doubles Lagrange correction
+tensor: ShiftP[], ShiftP
+tensor: ShiftI[], ShiftI
+tensor: ShiftS[], ShiftS
+
+tensor: EInact[], EInact  // inactive energy
+tensor: EActiv[], EActiv  // active energy
+
+tensor: Heff[IJ], Heff    // the effective Hamiltonian
+
+// Fock matrices, including core orbitals
+tensor: fc:aa[pq], fc:aa
+tensor: fc:cc[ki], fc:cc
+tensor: fc:ea[aq], fc:ea
+tensor: fc:ec[ai], fc:ec
+tensor: fc:ee[ab], fc:ee
+tensor: fc:ca[ip], fc:ca
+
+// Effective Fock matrices
+tensor: g:aa[pq]
+tensor: g:ac[pi]
+tensor: g:cc[ij]
+tensor: g:ea[ap]
+tensor: g:ec[ai]
+tensor: g:ee[ab]
+
+// Reference coefficients
+tensor: CR0[I]  , CR0I0
+tensor: HCR0[I] , !Create{type:plain; irrep:ref} 
+tensor: RR0[I]  , !Create{type:plain; irrep:ref}
+tensor: Eeff0[] , Eeff0  
+tensor: VarR0[] , VarR0
+
+
+// Reduced density tensors (Icc-Icc coupling-coefficients)
+// these are created on C++ side in CreateMrciTensors method
+tensor: Dm1[pp],         DDm1
+tensor: Dm2[pppp],       DDm2
+tensor: Dm3[pppppp],     DDm3
+tensor: Dm1H[pp],        DHm1
+tensor: Dm2H[pppp],      DHm2
+tensor: Dm3H[pppppp],    DHm3
+
+// Non-disk density matrix drivers
+// Can be loaded, but can not be stored.
+// spec:<Ref|+-+-|Ref> means that Dm2X[pqrs] = <Ref|E^p_q R^r_s|Ref>
+tensor: Dm2X[pppp],      !Create{type:cc-drv; spec:<Ref|+-+-|Ref>; irrep:0;}
+tensor: Dm3X[pppppp],    !Create{type:cc-drv; spec:<Ref|+-+-+-|Ref>; irrep:0;}
+tensor: Dm2HX[pppp],     !Create{type:cc-drv; spec:<Ref|/+/-/+/-|Ref>; irrep:0;}
+tensor: Dm3HX[pppppp],   !Create{type:cc-drv; spec:<Ref|/+/-/+/-/+/-|Ref>; irrep:0;}
+
+// Coupling coefficients for reference space CSFs
+tensor: Cc2I0I0ac[IpqJ],    !Create{type:cc-drv-inline; spec:<I0|+-|I0>; irrep:0;}
+tensor: CcP2I0[IpqP],       !Create{type:cc-drv-inline; spec:<I0|++|P2>; irrep:0,1,2,3,4,5,6,7;}
+
+tensor: CcI0I0ac[IJpq],     !Create{type:disk; irrep:0;}
+tensor: CcP2I0d[IPpq],      !Create{type:disk; irrep:0,1,2,3,4,5,6,7;}
+tensor: CcI0I0aacc[IJqprs], !Create{type:disk; irrep:0;}
+
+// Delta tensors
+tensor: deltacc[ij],      DeltaCloClo
+tensor: deltaaa[pq],      DeltaActAct
+tensor: deltap[ppM],      DeltaPair
+tensor: delta4[pppp],     !Create{type:plain}, Delta4  // Intermediate rank4 delta tensor
+tensor: DeltaCSF[IJ],     DeltaCSF
+tensor: Delta[ii],        Delta
+
+
+// Overlap tensors labeled by the exciation class
+tensor: S1:I1[pp],       S1:I1
+tensor: S2:I1[pppppp],   S2:I1
+tensor: S3:I1[pppp],     S3:I1
+tensor: S2:I2s[pppp],     S2:I2s
+tensor: S2:I2t[pppp],     S2:I2t
+tensor: S1:S0[pp],       S1:S0
+tensor: S2:S0[pppppp],   S2:S0
+tensor: S3:S0[pppp],     S3:S0
+tensor: S2B:S1[pppp],    S2B:S1
+tensor: S2A:S1[pppp],    S2A:S1
+tensor: S3A:S1[pp],       S3A:S1
+tensor: S3B:S1[pp],      S3B:S1
+tensor: S4A:S1[pppp],    S4A:S1
+tensor: S4B:S1[pppp],    S4B:S1
+tensor: S2:S2[pp],       S2:S2
+tensor: S2:P0s[pppp],     S2:P0s
+tensor: S2:P0t[pppp],     S2:P0t
+tensor: S2:P1[pp],       S2:P1
+
+// X transformation tensors
+tensor: X1:I1[pp],       X1:I1
+tensor: X2:I1[pppppp],   X2:I1
+tensor: X2:I2s[pppp],     X2:I2s
+tensor: X2:I2t[pppp],     X2:I2t
+tensor: X1:S0[pp],       X1:S0
+tensor: X2:S0[pppppp],   X2:S0
+tensor: X2B:S1[pppp],    X2B:S1
+tensor: X2A:S1[pppp],    X2A:S1
+tensor: X4A:S1[pppp],    X4A:S1
+tensor: X4B:S1[pppp],    X4B:S1
+tensor: SX12a:S1[pp],    SX12a:S1
+tensor: SX12b:S1[pp],    SX12b:S1
+tensor: XS12a:S1[pp],    XS12a:S1
+tensor: XS12b:S1[pp],    XS12b:S1
+tensor: X2:S2[pp],       X2:S2
+tensor: X2:P0s[pppp],     X2:P0s
+tensor: X2:P0t[pppp],     X2:P0t
+tensor: X2:P1[pp],       X2:P1
+
+// PRJ = X X^-1 projector tensors
+tensor: PRJ1:I1[pp],       PRJ1:I1
+tensor: PRJ2:I1[pppppp],   PRJ2:I1
+tensor: PRJ2:I2s[pppp],     PRJ2:I2s
+tensor: PRJ2:I2t[pppp],     PRJ2:I2t
+tensor: PRJ1:S0[pp],       PRJ1:S0
+tensor: PRJ2:S0[pppppp],   PRJ2:S0
+tensor: PRJ2A:S1[pppp],    PRJ2A:S1
+tensor: PRJ2B:S1[pppp],    PRJ2B:S1
+tensor: PRJ4A:S1[pppp],    PRJ4A:S1
+tensor: PRJ4B:S1[pppp],    PRJ4B:S1
+tensor: PRJ2:S2[pp],       PRJ2:S2
+tensor: PRJ2:P0s[pppp],     PRJ2:P0s
+tensor: PRJ2:P0t[pppp],     PRJ2:P0t
+tensor: PRJ2:P1[pp],       PRJ2:P1
+
+tensor: I1[pppp], !Create{type:plain}
+tensor: I2[pppp], !Create{type:plain}
+tensor: I3[pppppp], !Create{type:plain}
+
+// Orthogonal residuals
+tensor: OR1:ac[pi], !Create{type:plain}
+tensor: OR1:ec[ai], !Create{type:plain}
+tensor: OR1:ea[ap], !Create{type:plain}
+tensor: OR2:ac[pi], !Create{type:plain}
+tensor: OR2:ec[ai], !Create{type:plain}
+tensor: OR2:ea[ap], !Create{type:plain}
+tensor: OR2:aacc[pqij], !Create{type:plain}
+tensor: OR2:aaac[pqri], !Create{type:plain}
+tensor: OR2:eacc[apij], !Create{type:plain}
+tensor: OR2:eaac[apqi], !Create{type:plain}
+tensor: OR2:eaca[apiq], !Create{type:plain}
+tensor: OR2:eaaa[apqr], !Create{type:plain}
+tensor: OR2:eecc[abij], !Create{type:plain}
+tensor: OR2:eeac[abpi], !Create{type:plain}
+tensor: OR2:eeaa[abpq], !Create{type:plain}
+
+// Orthogonal amplitudes
+tensor: OT1:ac[pi], !Create{type:plain}
+tensor: OT1:ec[ai], !Create{type:plain}
+tensor: OT1:ea[ap], !Create{type:plain}
+tensor: OT2:aaccS[Mij], !Create{type:plain}
+tensor: OT2:aaccT[Mij], !Create{type:plain}
+tensor: OT2:eacc[apij], !Create{type:plain}
+tensor: OT2:eaac[aiM], !Create{type:plain}
+tensor: OT2:eaca[aiM], !Create{type:plain}
+tensor: OT2:eeac[abpi], !Create{type:plain}
+tensor: OT2:eeaaS[abM], !Create{type:plain}
+tensor: OT2:eeaaT[abM], !Create{type:plain}
+
+tensor: R1SCR[ai], !Create{type:plain}
+tensor: R2SCR[abij], !Create{type:plain}
+
+tensor: Tmp1[], !Create{type:plain}
+tensor: Tmp2[], !Create{type:plain}
+
+// Active preconditioner blocks
+tensor: A1[pp],    !Create{type:disk; sym:+01}
+//tensor: A2[ppppp], !Create{type:disk; sym:012/345}
+//tensor: A3[pppp], !Create{type:disk; sym:01/23}
+tensor: A4[pp],    !Create{type:disk; sym:+01}
+//tensor: A5[pppppp],  !Create{type:disk; sym:012/345}
+//tensor: A6[pppp], !Create{type:disk; sym:01/23}
+
+// New preconditioner blocks
+tensor: Y1:I1[pp],     Y1:I1
+tensor: Y2:I1[pppppp], Y2:I1
+tensor: Y2:I2s[pppp],   Y2:I2s
+tensor: Y2:I2t[pppp],   Y2:I2t
+tensor: Y1:S0[pp],     Y1:S0
+tensor: Y2:S0[pppppp], Y2:S0
+tensor: YA:S1[pppp],   YA:S1
+tensor: YB:S1[pppp],   YB:S1
+tensor: Y2:S2[pp],     Y2:S2
+tensor: Y2:P0s[pppp],   Y2:P0s
+tensor: Y2:P0t[pppp],   Y2:P0t
+tensor: Y2:P1[pp],     Y2:P1
+
+tensor: Fact[],     !Create{type:scalar}
+tensor: D1f[pp],    !Create{type:disk}
+tensor: D2f[pppp],  !Create{type:disk}
+tensor: Ph1[pp],    !Create{type:disk}
+
+tensor: OR2:aaccS[Mij], !Create{type:disk}
+tensor: OR2:aaccT[Mij], !Create{type:disk}
+tensor: OR2:eaca[aiM], !Create{type:disk}
+tensor: OR2:eaac[aiM], !Create{type:disk}
+tensor: OR2:eeaaS[abM], !Create{type:disk}
+tensor: OR2:eeaaT[abM], !Create{type:disk}
+tensor: Y2:I2s[MN],    !Create{type:disk}
+tensor: Y2:I2t[MN],    !Create{type:disk}
+tensor: YA:S1[MN],    !Create{type:disk}
+tensor: YB:S1[MN],    !Create{type:disk}
+tensor: Y2:P0s[MN],    !Create{type:disk}
+tensor: Y2:P0t[MN],    !Create{type:disk}
+tensor: Yi[Mrs],      !Create{type:disk}
+//tensor: OT:aacc[Mij], !Create{type:disk}
+//tensor: OT:eaca[aiM], !Create{type:disk}
+//tensor: OT:eaac[aiM], !Create{type:disk}
+//tensor: OT:eeaa[abM], !Create{type:disk}
+tensor: I1[pq],       !Create{type:disk}
+tensor: X2:I2s[pqM],    !Create{type:disk}
+tensor: X2:I2t[pqM],    !Create{type:disk}
+tensor: X2:P0s[pqM],    !Create{type:disk}
+tensor: X2:P0t[pqM],    !Create{type:disk}
+tensor: X2A:S1[pqM],    !Create{type:disk}
+tensor: X2B:S1[pqM],    !Create{type:disk}
+tensor: X4A:S1[pqM],    !Create{type:disk}
+tensor: X4B:S1[pqM],    !Create{type:disk}
+tensor: SX12a:S1[M],   !Create{type:disk}
+tensor: SX12b:S1[M],   !Create{type:disk}
+tensor: XS12a:S1[M],   !Create{type:disk}
+tensor: XS12b:S1[M],   !Create{type:disk}
+
+
+// Density matrices
+tensor: Ym1[pp],      !Create{type:disk} Ym1
+tensor: Ym2[pppp],    !Create{type:disk} Ym2
+tensor: Ym3[pppppp],  !Create{type:disk} Ym3
+
+// Intermediates
+
+
+---- code("Init_Amplitudes")
+alloc T:I[I]
+load CR0[I]
+.T:I[I] := CR0[I]
+drop CR0[I]
+store T:I[I]
+
+
+---- code("Update_INTkx")
+// Intermediate to pass to Kext
+alloc INTpp1[abmi]
+alloc INTpp[abmn]
+load deltaci[im], deltaai[pm]
+load T2:eecc[abij], T2:eeac[abpi]
+.INTpp1[abmj] += T2:eecc[abij] deltaci[im]
+.INTpp1[abmi] += T2:eeac[abpi] deltaai[pm]
+.INTpp[abmn] += INTpp1[abmj] deltaci[jn]
+drop T2:eeac[abpi], T2:eecc[abij]
+drop deltaai[pm], deltaci[im]
+store INTpp[abmn]
+store INTpp1[abmi]
+
+---- code("Transform_K")
+// Transform output form Kext into separate blocks
+alloc K4E:eecc[abij], K4E:eeac[abpi], K4E:eeaa[abpq]
+load deltaci[im], deltaai[pm]
+load K4C[abmn]
+alloc INTpp1[abmi]
+.INTpp1[abmj] += K4C[abmn] deltaci[jn]
+.K4E:eecc[abij] += INTpp1[abmj] deltaci[im]
+.K4E:eeac[abpi] += INTpp1[abmi] deltaai[pm]
+drop INTpp1[abmi]
+alloc INTpp2[abnp]
+.INTpp2[abmq] += K4C[abmn] deltaai[qn]
+.K4E:eeaa[abpq] += INTpp2[abmq] deltaai[pm]
+drop INTpp2[abnp]
+drop K4C[abmn]
+drop deltaai[pm], deltaci[im]
+store K4E:eeaa[abpq], K4E:eeac[abpi], K4E:eecc[abij]
+
+
+
+---- code("Transform_INTK")
+// transform intermediate for Kext into single block over internal orbitals
+alloc INTpp[abmn]
+load deltaci[im], deltaai[pm]
+load INTkx:eecc[abij], INTkx:eeac[abpi], INTkx:eeaa[abpq]
+alloc INTpp1[abmi]
+.INTpp1[abmj] += INTkx:eecc[abij] deltaci[im]
+.INTpp1[abmi] += 2.0*INTkx:eeac[abpi] deltaai[pm]
+.INTpp[abmn] += 0.5*INTpp1[abmj] deltaci[jn]
+.INTpp[banm] += 0.5*INTpp1[abmj] deltaci[jn]
+drop INTpp1[abmi]
+alloc INTpp2[abmq]
+.INTpp2[abmq] += INTkx:eeaa[abpq] deltaai[pm]
+.INTpp[abmn] += INTpp2[abmq] deltaai[qn]
+drop INTpp2[abmq]
+drop INTkx:eeaa[abpq], INTkx:eeac[abpi], INTkx:eecc[abij]
+drop deltaai[pm], deltaci[im]
+store INTpp[abmn]
+
+
+
+
+
+---- code("Generate_Fock_Matrices")
+alloc f:ac[**]
+load fc:ca[**]
+.f:ac[pi] := fc:ca[ip]
+drop fc:ca[**]
+load deltacc[**], J:ccca[****]
+.f:ac[pi] += (2.*J:ccca[jkip] - J:ccca[ikjp]) deltacc[kj]
+drop J:ccca[****], deltacc[**]
+store f:ac[**]
+
+alloc f:ec[**]
+load fc:ec[**]
+.f:ec[ai] += fc:ec[ai]
+drop fc:ec[**]
+load deltacc[**], J:eccc[****]
+.f:ec[ai] += (2.*J:eccc[aijk] - J:eccc[ajik]) deltacc[kj]
+drop J:eccc[****], deltacc[**]
+store f:ec[**]
+
+alloc f:cc[**]
+load fc:cc[**]
+.f:cc[ij] := fc:cc[ij]
+drop fc:cc[**]
+load deltacc[**], K:cccc[****]
+.f:cc[ij] += (2.*K:cccc[jkil] - K:cccc[jkli]) deltacc[lk]
+drop K:cccc[****], deltacc[**]
+store f:cc[**]
+
+alloc f:ea[**]
+load fc:ea[**]
+.f:ea[ap] := fc:ea[ap]
+drop fc:ea[**]
+load deltacc[**]
+load J:eacc[****], J:ecca[****]
+.f:ea[ap] += (2.*J:eacc[apij] - J:ecca[ajip])  deltacc[ji]
+drop J:ecca[****], J:eacc[****]
+drop deltacc[**]
+store f:ea[**]
+
+alloc f:ee[**]
+load fc:ee[**]
+.f:ee[ab] := fc:ee[ab]
+drop fc:ee[**]
+load deltacc[**]
+load J:eecc[****], K:eecc[****]
+.f:ee[ab] += (2.*J:eecc[baij] - K:eecc[baji]) deltacc[ji]
+drop K:eecc[****], J:eecc[****]
+drop deltacc[**]
+store f:ee[**]
+
+alloc f:aa[**]
+load fc:aa[**]
+.f:aa[pq] := fc:aa[pq]
+drop fc:aa[**]
+load deltacc[**]
+load J:ccaa[****], K:ccaa[****]
+.f:aa[pq] += (2.*J:ccaa[ijqp] - K:ccaa[jiqp]) deltacc[ji]
+drop K:ccaa[****], J:ccaa[****]
+drop deltacc[**]
+store f:aa[**]
+
+alloc g:ac[**]
+load f:ac[**]
+.g:ac[pi] := f:ac[pi]
+drop f:ac[**]
+load J:caaa[****], Dm1[**]
+.g:ac[pi] += (J:caaa[ipqr] - .5*J:caaa[irqp]) Dm1[qr]
+drop Dm1[**], J:caaa[****]
+store g:ac[**]
+
+alloc g:ec[**]
+load f:ec[**]
+.g:ec[ai] := f:ec[ai]
+drop f:ec[**]
+load Dm1[**]
+load J:ecaa[****], K:ecaa[****]
+.g:ec[ai] += (J:ecaa[aipq] - .5*K:ecaa[aipq]) Dm1[pq]
+drop K:ecaa[****], J:ecaa[****]
+drop Dm1[**]
+store g:ec[**]
+
+alloc g:cc[**]
+load f:cc[**]
+.g:cc[ij] := f:cc[ij]
+drop f:cc[**]
+load Dm1[**]
+load J:ccaa[****], K:ccaa[****]
+.g:cc[ij] += (J:ccaa[jipq] - .5*K:ccaa[jiqp]) Dm1[pq]
+drop K:ccaa[****], J:ccaa[****]
+drop Dm1[**]
+store g:cc[**]
+
+alloc g:ea[**]
+load f:ea[**]
+.g:ea[ap] := f:ea[ap]
+drop f:ea[**]
+load J:eaaa[****], Dm1[**]
+.g:ea[ap] += (J:eaaa[apqr] - .5*J:eaaa[arqp]) Dm1[qr]
+drop Dm1[**], J:eaaa[****]
+store g:ea[**]
+
+alloc g:ee[**]
+load f:ee[**]
+.g:ee[ab] := f:ee[ab]
+drop f:ee[**]
+load Dm1[**]
+load J:eeaa[****], K:eeaa[****]
+.g:ee[ab] += (J:eeaa[bapq] - .5*K:eeaa[baqp]) Dm1[pq]
+drop K:eeaa[****], J:eeaa[****]
+drop Dm1[**]
+store g:ee[**]
+
+alloc g:aa[**]
+load f:aa[**]
+.g:aa[pq] := f:aa[pq]
+drop f:aa[**]
+load Dm1[**]
+load K:aaaa[****]
+.g:aa[pq] += (K:aaaa[qrps] - .5*K:aaaa[qrsp])  Dm1[rs]
+drop K:aaaa[****]
+drop Dm1[**]
+store g:aa[**]
+
+// Construct active preconditoner blocks
+alloc A1[**]
+load f:aa[**], Dm1[**], K:aaaa[pqrs]
+.A1[pq] += 2.*f:aa[pq]
+.A1[ps] -= f:aa[pq] Dm1[qs]
+.A1[pq] += K:aaaa[pqrs] Dm1[rs]
+drop K:aaaa[pqrs], Dm1[**], f:aa[**]
+store A1[**]
+
+alloc A4[**]
+load f:aa[**], Dm1[**]
+.A4[ps] += f:aa[pq] Dm1[qs]
+drop Dm1[**], f:aa[**]
+store A4[**]
+
+
+---- code ("Inact_Energy")
+alloc EInact[]
+// Get contribution from core from IntegralSet.CoreEnergy
+// This is the contribution from the inactive shells
+// computed from the inactive Fock matrix (f) and the core Fock matrix (fc)
+load f:cc[ii], fc:cc[ii], Delta[ii]
+.EInact += f:cc[ij] Delta[ij]
+.EInact += fc:cc[ij] Delta[ij]
+drop Delta, fc:cc, f:cc
+store EInact[]
+
+
+---- code ("Act_Energy")
+alloc EActiv[]
+load f:aa[pq], Dm1[pq]
+.EActiv[] += Dm1[pq] f:aa[pq]
+drop Dm1[pq], f:aa[pq]
+
+load K:aaaa[pqrs], Dm2[pqrs]
+.EActiv[] += 0.5*Dm2[qprs] K:aaaa[pqrs]
+drop Dm2[pqrs], K:aaaa[pqrs]
+store EActiv[]
+
+
+---- code("Make_CcI0I0")
+// Create disk version of the I0-I0 coupling coefficients
+// not very efficient in general, but for CAS(2,2) a quick an viable solution
+// we also modify them such that they can be directly substituted for Ym1 and Ym2
+// we have to transpose the orbital indices as the Ket state actually goes with the 
+// creation indices of the Cc's
+
+load DeltaCSF[IK], Cc2I0I0ac[KpqJ]
+alloc CcI0I0ac[IJpq]
+// note that the driver only seems to work with this specific sequence 
+// of tensors and indices:
+.CcI0I0ac[IJqp] := 0.5*DeltaCSF[IK] Cc2I0I0ac[KpqJ]
+store CcI0I0ac[IJpq]
+drop Cc2I0I0ac[KpqJ]
+
+// generate the two-body CC's via RI
+load CcP2I0[KpqP]
+alloc CcP2I0d[KPpq]
+.CcP2I0d[IPpq] := DeltaCSF[IK] CcP2I0[KpqP]
+store CcP2I0d[KPpq]
+drop CcP2I0[KpqP]
+
+alloc CcI0I0aacc[IJpqrs]
+load CcP2I0d[KPpq]
+.CcI0I0aacc[IJrspq] := (1./3.)*CcP2I0d[IPpq] CcP2I0d[JPrs]
+.CcI0I0aacc[IJrspq] += (1./6.)*CcP2I0d[IPpq] CcP2I0d[JPsr]
+drop CcP2I0d[KPpq]
+store CcI0I0aacc[IJpqrs]
+drop DeltaCSF[IK]
+
+
+---- code("Heff")
+
+// Dummy computation for now as Molpro wants to call this algo in all cases
+alloc Heff[IJ]
+store Heff[IJ]
+
+---- code("Heff0")
+// active contributions to the effective H (small CAS cases)
+// inactive contributions and nucl. repulsion will be added in main program
+load Heff[IJ]
+load f:aa[pq], CcI0I0ac[IJpq]
+.Heff[IJ] += 2.0*f:aa[pq] CcI0I0ac[IJpq]
+drop CcI0I0ac[IJpq], f:aa[pq]
+load K:aaaa[pqrs], CcI0I0aacc[IJpqrs]
+.Heff[IJ] += CcI0I0aacc[IJpqrs] (2*K:aaaa[pqrs] - K:aaaa[pqsr])
+drop CcI0I0aacc[IJpqrs], K:aaaa[pqrs]
+
+// compute energy with current Ref and corresp. residual
+load CR0[I]
+alloc HCR0[I], RR0[I]
+alloc Eeff0[], VarR0[]
+.HCR0[I] := Heff[IJ] CR0[J]
+.Eeff0[] := CR0[I] HCR0[I]
+.RR0[I] := HCR0[I]
+.RR0[I] -= Eeff0[] CR0[I]
+.VarR0[] := RR0[I] RR0[I] 
+store VarR0[], Eeff0[]
+drop RR0[I], HCR0[I]
+drop CR0[I]
+
+store Heff[IJ]
+
+
+// Set up 3rd order denisty and hole tensors
+// This is taken from the cic code
+---- code("FormDm3OnDisk")
+// <E^pqr_stu> += <E^p_s E^q_t R^r_u>
+//             -= delta_rs <E^pq_ut>
+//             -= delta_rt <E^pq_su>
+//             -= delta_qs <E^p_t E^r_u>
+
+alloc Dm3[******]
+load deltaaa[**]
+load Dm3X[******]
+.Dm3[pqruts] += Dm3X[psqtru]
+drop Dm3X
+load Dm2[****]
+.Dm3[pqruts] -= deltaaa[rs] Dm2[pqtu]
+.Dm3[pqruts] -= deltaaa[rt] Dm2[pqus]
+drop Dm2
+load Dm2X[****]
+.Dm3[pqruts] -= deltaaa[qs] Dm2X[ptru]
+drop Dm2X
+drop deltaaa[**]
+store Dm3
+
+// also hole dm3
+// <E^k_s E^l_t E^m_u E^r_m E^q_l E^p_k> = HDm3[sturqp]
+//          + <E^k_s E^p_k E^l_t E^q_l E^m_u E^r_m>
+//          - delta_pu <E^m_s E^l_t E^q_l E^r_m>
+//          - delta_pt <E^l_s E^m_u E^r_m E^q_l>
+//          - delta_qu <E^k_s E^p_k E^m_t E^r_m>
+
+alloc Dm3H[******]
+load deltaaa[**]
+load Dm3HX[******]
+.Dm3H[sturqp] += Dm3HX[sptqur]
+drop Dm3HX
+load Dm2H[****]
+.Dm3H[sturqp] -= deltaaa[pu] Dm2H[stqr]
+.Dm3H[sturqp] -= deltaaa[pt] Dm2H[surq]
+drop Dm2H
+load Dm2HX[****]
+.Dm3H[sturqp] -= deltaaa[qu] Dm2HX[sptr]
+drop Dm2HX
+drop deltaaa[**]
+store Dm3H
+
+alloc Ym1[pq]
+load Dm1[pq]
+.Ym1[pq] += .5*Dm1[pq]
+drop Dm1[pq]
+store Ym1[pq]
+
+alloc Ym2[pqrs]
+load Dm2[pqrs]
+.Ym2[pqrs] += (2./6.)*Dm2[qprs]
+.Ym2[pqrs] += (1./6.)*Dm2[qpsr]
+drop Dm2[pqrs]
+store Ym2[pqrs]
+
+
+
+---- code("Update_Amplitudes")
+// the new condensed amplitude update
+alloc Nrm1[], Nrm2[]
+alloc LCor1[], LCor2[]
+alloc Var1[], Var2[]
+//alloc Tmp1[], Tmp2[]
+load ShiftI[], ShiftS[], ShiftP[]
+
+// === I1 ===
+load R1:ac[pi]
+load T1:ac[pi]
+
+// Amplitude norm (old)
+//.Nrm1 += 2*T1:ac[pi] T1:ac[pi]
+
+// Transform, divide by preconditioner and transform back
+load X1:I1[pq]
+alloc OR1:ac[pi], OT1:ac[pi]
+.OR1:ac[qi] += 2*R1:ac[pi] X1:I1[pq]
+.Var1 += OR1:ac[pi] OR1:ac[pi]
+
+.OT1:ac[pi] := OR1:ac[pi]
+
+load Y1:I1[pp], g:cc[ii]
+denom-scale OT1:ac[pi], Y1:I1[pp] - g:cc[ii] + ShiftI[]
+drop g:cc[ii], Y1:I1[pp]
+
+.LCor1 -= OT1:ac[pi] OR1:ac[pi]     // dT * R term
+.LCor1 += 2*T1:ac[pi] R1:ac[pi]     //  T * R term
+
+.R1:ac[pi] := OT1:ac[qi] X1:I1[pq]  // traf. back prec. residual (= dT)
+drop OT1:ac[pi], OR1:ac[pi]
+drop X1:I1[pq]
+
+// update ampltidues
+.T1:ac[pi] -= R1:ac[pi]
+
+// Amplitude norm (updated)
+.Nrm1 += 2*T1:ac[pi] T1:ac[pi]
+
+store T1:ac[pi]   // store new amplitudes
+store R1:ac[pi]   // store preconditioned residuals for DIIS error vector
+
+
+// === S0 ===
+load R1:ea[ap]
+load T1:ea[ap]
+
+// Amplitude norm
+//.Nrm1 += 2*T1:ea[ap] T1:ea[ap]
+
+// Transform, divide by preconditioner and transform back
+load X1:S0[pq]
+alloc OR1:ea[ap], OT1:ea[ap]
+.OR1:ea[aq] += 2*R1:ea[ap] X1:S0[pq]
+.Var1 += OR1:ea[ap] OR1:ea[ap]
+
+.OT1:ea[aq] := OR1:ea[aq]
+
+load Y1:S0[pp], g:ee[aa]
+denom-scale OT1:ea[ap], g:ee[aa] + Y1:S0[pp] + ShiftS[]
+drop g:ee[aa], Y1:S0[pp]
+
+.LCor1 -= OT1:ea[aq] OR1:ea[aq]
+.LCor1 += 2*T1:ea[aq] R1:ea[aq]
+
+.R1:ea[ap] := OT1:ea[aq] X1:S0[pq]
+drop OT1:ea[ap], OR1:ea[ap]
+drop X1:S0[pq]
+
+// update ampltidues
+.T1:ea[ap] -= R1:ea[ap]
+
+// Amplitude norm
+.Nrm1 += 2*T1:ea[ap] T1:ea[ap]
+
+store T1:ea[ap]   // store new amplitudes
+store R1:ea[ap]   // store preconditioned residuals for DIIS error vector
+
+
+// === S1 singles ===
+load R1:ec[ai]
+load T1:ec[ai]
+
+// Amplitude norm
+//.Nrm1 += 2*T1:ec[ai] T1:ec[ai]
+.LCor1 += 2*T1:ec[ai] R1:ec[ai]
+
+alloc R1SCR[ai]
+.R1SCR[ai] := R1:ec[ai]
+
+load g:ee[aa], g:cc[ii]
+denom-scale R1:ec[ai], g:ee[aa] - g:cc[ii] + ShiftS[]
+drop g:cc[ii], g:ee[aa]
+
+.LCor1 -= 2*R1:ec[ai] R1SCR[ai]
+
+drop R1SCR[ai]
+
+// update ampltidues
+.T1:ec[ai] -= R1:ec[ai]
+
+// Amplitude norm
+.Nrm1 += 2*T1:ec[ai] T1:ec[ai]
+
+store T1:ec[ai]   // store new amplitudes
+store R1:ec[ai]   // store preconditioned residuals for DIIS error vector
+
+// === S1 doubles ===
+
+load R2:ec[ai], R2:eaac[apqi], R2:eaca[apiq]
+// new: we remove the R2:ec contribution already here:
+load S3A:S1[pq], S3B:S1[pq]
+.R2:eaac[apqi] -= (1./6.)*S3B:S1[pq] R2:ec[ai]
+.R2:eaac[apqi] -= (1./12.)*S3A:S1[pq] R2:ec[ai]
+.R2:eaca[apiq] -= (1./6.)*S3A:S1[pq] R2:ec[ai]
+.R2:eaca[apiq] -= (1./12.)*S3B:S1[pq] R2:ec[ai]
+drop S3B:S1[pq], S3A:S1[pq]
+
+load T2:ec[ai], T2:eaac[apqi], T2:eaca[apiq]
+
+//.Nrm2 +=  2*T2:ec[ai] T2:ec[ai]
+//.Nrm2 += (2*T2:eaca[apiq]-T2:eaac[apqi]) T2:eaca[apiq]
+//.Nrm2 += T2:eaac[apqi] (2*T2:eaac[apqi] -T2:eaca[apiq])
+
+alloc OR2:eaac[aiM], OT2:eaac[aiM]
+load X2B:S1[pqM], X4B:S1[pqM]
+.OR2:eaac[aiM] += (4*R2:eaac[apqi] - 2*R2:eaca[apiq]) X2B:S1[pqM]
+.OR2:eaac[aiM] += (4*R2:eaca[apiq] - 2*R2:eaac[apqi]) X4B:S1[pqM]
+drop X4B:S1[pqM], X2B:S1[pqM]
+
+// This term is now already covered (see above)
+//load XS12b:S1[M]
+//.OR2:eaac[aiM] += 2*XS12b:S1[M] R2:ec[ai]
+//drop XS12b:S1[M]
+
+.Var2 += OR2:eaac[aiM] OR2:eaac[aiM]
+
+.OT2:eaac[aiM] := OR2:eaac[aiM]
+
+load g:ee[aa], g:cc[ii], YB:S1[MM]
+denom-scale OT2:eaac[aiM], g:ee[aa] + YB:S1[MM] - g:cc[ii] + ShiftS[]
+drop YB:S1[MM], g:cc[ii], g:ee[aa]
+
+alloc OR2:eaca[aiM], OT2:eaca[aiM]
+load X4A:S1[pqM], X2A:S1[pqM]
+.OR2:eaca[aiM] += (4*R2:eaac[apqi] - 2*R2:eaca[apiq]) X4A:S1[pqM]
+.OR2:eaca[aiM] += (4*R2:eaca[apiq] - 2*R2:eaac[apqi]) X2A:S1[pqM]
+drop X2A:S1[pqM], X4A:S1[pqM]
+
+// This term is now already covered (see above)
+//load XS12a:S1[M]
+//.OR2:eaca[aiM] += 2*XS12a:S1[M] R2:ec[ai]
+//drop XS12a:S1[M]
+
+.Var2 += OR2:eaca[aiM] OR2:eaca[aiM]
+
+.OT2:eaca[aiM] := OR2:eaca[aiM]
+
+load g:ee[aa], g:cc[ii], YA:S1[MM]
+denom-scale OT2:eaca[aiM], g:ee[aa] + YA:S1[MM] - g:cc[ii] + ShiftS[]
+drop YA:S1[MM], g:cc[ii], g:ee[aa]
+
+// Add off-diag orthogonalisation term
+load SX12a:S1[M], SX12b:S1[M]
+// note that this resets R2:ec 
+.R2:ec[ai] := SX12a:S1[M] OT2:eaca[aiM]
+.R2:ec[ai] += SX12b:S1[M] OT2:eaac[aiM]
+drop SX12b:S1[M], SX12a:S1[M]
+
+.T2:ec[ai] -= R2:ec[ai]
+
+.LCor2 -= OT2:eaac[aiM] OR2:eaac[aiM]
+.LCor2 += (2*T2:eaac[apqi] - T2:eaca[apiq]) (2*R2:eaac[apqi] - R2:eaca[apiq])
+.LCor2 -= OT2:eaca[aiM] OR2:eaca[aiM]
+.LCor2 += (2*T2:eaca[apiq] - T2:eaac[apqi]) (2*R2:eaca[apiq] - R2:eaac[apqi])
+
+load X2B:S1[pqM], X4B:S1[pqM], X2A:S1[pqM], X4A:S1[pqM]
+.R2:eaac[apqi] := OT2:eaac[aiM] (X2B:S1[pqM] + 0.5*X4B:S1[pqM])
+.R2:eaac[apqi] += OT2:eaca[aiM] (X4A:S1[pqM] + 0.5*X2A:S1[pqM])
+.T2:eaac[apqi] -= R2:eaac[apqi]
+.R2:eaca[apiq] := OT2:eaac[aiM] (0.5*X2B:S1[pqM] + X4B:S1[pqM])
+.R2:eaca[apiq] += OT2:eaca[aiM] (0.5*X4A:S1[pqM] + X2A:S1[pqM])
+.T2:eaca[apiq] -= R2:eaca[apiq]
+drop X4A:S1[pqM], X2A:S1[pqM], X4B:S1[pqM], X2B:S1[pqM]
+
+drop OT2:eaca[aiM], OR2:eaca[aiM], OT2:eaac[aiM], OR2:eaac[aiM]
+
+.Nrm2 +=  2*T2:ec[ai] T2:ec[ai]
+.Nrm2 += (2*T2:eaca[apiq]-T2:eaac[apqi]) T2:eaca[apiq]
+.Nrm2 += T2:eaac[apqi] (2*T2:eaac[apqi] -T2:eaca[apiq])
+
+store T2:eaca[apiq], T2:eaac[apqi], T2:ec[ai]
+store R2:eaca[apiq], R2:eaac[apqi], R2:ec[ai]
+
+
+// === I2 ===
+load R2:aacc[pqij]
+load T2:aacc[pqij]
+
+// Transform, divide by preconditioner and transform back
+load X2:I2s[pqM], X2:I2t[pqM]
+
+alloc OR2:aaccS[Mij], OT2:aaccS[Mij]
+alloc OR2:aaccT[Mij], OT2:aaccT[Mij]
+.OR2:aaccS[Mij] += 2.*(R2:aacc[pqij] + R2:aacc[pqji]) X2:I2s[pqM]
+.OR2:aaccT[Mij] += 6.*(R2:aacc[pqij] - R2:aacc[pqji]) X2:I2t[pqM]
+.Var2 += OR2:aaccS[Mij] OR2:aaccS[Mij]
+.Var2 += OR2:aaccT[Mij] OR2:aaccT[Mij]
+
+.OT2:aaccS[Mij] := OR2:aaccS[Mij]
+.OT2:aaccT[Mij] := OR2:aaccT[Mij]
+
+load Y2:I2s[MM], g:cc[ii]
+denom-scale OT2:aaccS[Mij], Y2:I2s[MM] - g:cc[ii] - g:cc[jj] + ShiftI[]
+drop g:cc[ii], Y2:I2s[MM]
+load Y2:I2t[MM], g:cc[ii]
+denom-scale OT2:aaccT[Mij], Y2:I2t[MM] - g:cc[ii] - g:cc[jj] + ShiftI[]
+drop g:cc[ii], Y2:I2t[MM]
+
+.LCor2 -= OT2:aaccS[Mij] OR2:aaccS[Mij]
+.LCor2 -= OT2:aaccT[Mij] OR2:aaccT[Mij]
+.LCor2 += 0.25*(T2:aacc[pqij] + T2:aacc[qpij]) (R2:aacc[pqij] + R2:aacc[qpij])
+.LCor2 += 0.25*(T2:aacc[pqij] - T2:aacc[qpij]) (R2:aacc[pqij] - R2:aacc[qpij])
+
+.R2:aacc[pqij] := OT2:aaccS[Mij] X2:I2s[pqM]
+.R2:aacc[pqij] += OT2:aaccT[Mij] X2:I2t[pqM]
+drop OT2:aaccT[Mij], OR2:aaccT[Mij]
+drop OT2:aaccS[Mij], OR2:aaccS[Mij]
+drop X2:I2t[pqM]
+drop X2:I2s[pqM]
+
+// update ampltidues
+.T2:aacc[pqij] -= R2:aacc[pqij]
+
+// Amplitude norm 
+.Nrm2 +=  0.25*(T2:aacc[pqij] + T2:aacc[qpij]) (T2:aacc[pqij] + T2:aacc[qpij])
+.Nrm2 +=  0.25*(T2:aacc[pqij] - T2:aacc[qpij]) (T2:aacc[pqij] - T2:aacc[qpij])
+
+store T2:aacc[pqij]   // store new amplitudes
+store R2:aacc[pqij]   // store preconditioned residuals for DIIS error vector
+
+
+// === S2 ===
+load R2:eacc[apij]
+load T2:eacc[apij]
+
+// Amplitude norm 
+//.Nrm2 +=  (2*T2:eacc[apij] - T2:eacc[apji]) T2:eacc[apij]
+
+// Transform, divide by preconditioner and transform back
+load X2:S2[pq]
+
+alloc OR2:eacc[apij], OT2:eacc[apij]
+.OR2:eacc[aqij] += 2*R2:eacc[apij] X2:S2[pq]
+.Var2 += OR2:eacc[apij] OR2:eacc[apij]
+
+.OT2:eacc[aqij] := OR2:eacc[aqij]
+
+load g:ee[aa], Y2:S2[pp], g:cc[ii]
+denom-scale OT2:eacc[apij], g:ee[aa] + Y2:S2[pp] - g:cc[ii] - g:cc[jj] + ShiftS[]
+drop g:cc[ii], Y2:S2[pp], g:ee[aa]
+
+.LCor2 -= OT2:eacc[apij] OR2:eacc[apij]
+.LCor2 += (2*T2:eacc[apij] - T2:eacc[apji]) R2:eacc[apij]
+
+.R2:eacc[apij] := OT2:eacc[aqij] X2:S2[pq]
+drop OT2:eacc[aqij], OR2:eacc[aqij]
+drop X2:S2[pq]
+
+// update ampltidues
+.T2:eacc[apij] -= R2:eacc[apij]
+
+// Amplitude norm 
+.Nrm2 +=  (2*T2:eacc[apij] - T2:eacc[apji]) T2:eacc[apij]
+
+store T2:eacc[apij]   // store new amplitudes
+store R2:eacc[apij]   // store preconditioned residuals for DIIS error vector
+
+
+// === P0 ===
+load R2:eeaa[abpq]
+load T2:eeaa[abpq]
+
+
+// Transform, divide by preconditioner and transform back
+load X2:P0s[pqM]
+load X2:P0t[pqM]
+
+alloc OR2:eeaaS[abM], OT2:eeaaS[abM]
+alloc OR2:eeaaT[abM], OT2:eeaaT[abM]
+.OR2:eeaaS[abM] += 2.*(R2:eeaa[abpq] + R2:eeaa[bapq]) X2:P0s[pqM]
+.OR2:eeaaT[abM] += 6.*(R2:eeaa[abpq] - R2:eeaa[bapq]) X2:P0t[pqM]
+.Var2 += OR2:eeaaS[abM] OR2:eeaaS[abM]
+.Var2 += OR2:eeaaT[abM] OR2:eeaaT[abM]
+
+.OT2:eeaaS[abM] := OR2:eeaaS[abM]
+.OT2:eeaaT[abM] := OR2:eeaaT[abM]
+
+load g:ee[aa], Y2:P0s[MM]
+denom-scale OT2:eeaaS[abM], g:ee[aa] + g:ee[bb] + Y2:P0s[MM] + ShiftP[]
+drop Y2:P0s[MM], g:ee[aa]
+load g:ee[aa], Y2:P0t[MM]
+denom-scale OT2:eeaaT[abM], g:ee[aa] + g:ee[bb] + Y2:P0t[MM] + ShiftP[]
+drop Y2:P0t[MM], g:ee[aa]
+
+.LCor2 -= OT2:eeaaS[abM] OR2:eeaaS[abM]
+.LCor2 -= OT2:eeaaT[abM] OR2:eeaaT[abM]
+.LCor2 += 0.25*(T2:eeaa[abpq] + T2:eeaa[bapq]) (R2:eeaa[abpq] + R2:eeaa[bapq])
+.LCor2 += 0.25*(T2:eeaa[abpq] - T2:eeaa[bapq]) (R2:eeaa[abpq] - R2:eeaa[bapq])
+
+.R2:eeaa[abpq] := OT2:eeaaS[abM] X2:P0s[pqM]
+.R2:eeaa[abpq] += OT2:eeaaT[abM] X2:P0t[pqM]
+drop OT2:eeaaT[abM], OR2:eeaaT[abM]
+drop OT2:eeaaS[abM], OR2:eeaaS[abM]
+drop X2:P0t[pqM]
+drop X2:P0s[pqM]
+
+// update ampltidues
+.T2:eeaa[abpq] -= R2:eeaa[abpq]
+
+// Amplitude norm
+.Nrm2 += 0.25*(T2:eeaa[abpq] + T2:eeaa[bapq]) (T2:eeaa[abpq] + T2:eeaa[bapq])
+.Nrm2 += 0.25*(T2:eeaa[abpq] - T2:eeaa[bapq]) (T2:eeaa[abpq] - T2:eeaa[bapq])
+
+store T2:eeaa[abpq]   // store new amplitudes
+store R2:eeaa[abpq]   // store preconditioned residuals for DIIS error vector
+
+
+// === P1 ===
+load R2:eeac[abpi]
+load T2:eeac[abpi]
+
+// Amplitude norm
+//.Nrm2 +=  (2*T2:eeac[abpi] - T2:eeac[bapi]) T2:eeac[abpi]
+
+// Transform, divide by preconditioner and transform back
+load X2:P1[pq]
+
+alloc OR2:eeac[abpi], OT2:eeac[abpi]
+.OR2:eeac[abqi] += 2*R2:eeac[abpi] X2:P1[pq]
+.Var2 += OR2:eeac[abpi] OR2:eeac[abpi]
+
+.OT2:eeac[abqi] := OR2:eeac[abqi]
+
+load g:ee[aa], g:cc[ii], Y2:P1[pp]
+denom-scale OT2:eeac[abpi], g:ee[aa] + g:ee[bb] + Y2:P1[pp] - g:cc[ii] + ShiftP[]
+drop Y2:P1[pp], g:cc[ii], g:ee[aa]
+
+.LCor2 -= OT2:eeac[abqi] OR2:eeac[abqi]
+.LCor2 += (2*T2:eeac[abqi] - T2:eeac[baqi]) R2:eeac[abqi]
+
+.R2:eeac[abpi] := OT2:eeac[abqi] X2:P1[pq]
+drop OT2:eeac[abpi], OR2:eeac[abpi]
+drop X2:P1[pq]
+
+// update ampltidues
+.T2:eeac[abpi] -= R2:eeac[abpi]
+
+// Amplitude norm
+.Nrm2 +=  (2*T2:eeac[abpi] - T2:eeac[bapi]) T2:eeac[abpi]
+
+store T2:eeac[abpi]   // store new amplitudes  
+store R2:eeac[abpi]   // store preconditioned residuals for DIIS error vector
+
+
+
+// === P2 ===
+load R2:eecc[abij]
+load T2:eecc[abij]
+
+// Amplitude norm
+//.Nrm2 +=  (2*T2:eecc[abij] - T2:eecc[baij]) T2:eecc[abij]
+.LCor2 += (2*T2:eecc[abij] - T2:eecc[baij]) R2:eecc[abij]
+
+.Var2 += (2*R2:eecc[abij] - R2:eecc[baij]) R2:eecc[abij]
+
+alloc R2SCR[abij]
+
+.R2SCR[abij] := R2:eecc[abij]
+
+load g:ee[aa], g:cc[ii]
+denom-scale R2:eecc[abij], g:ee[aa] + g:ee[bb] - g:cc[ii] - g:cc[jj] + ShiftP[]
+drop g:cc[ii], g:ee[aa]
+
+.LCor2 -= R2SCR[abij] R2:eecc[abij]
+
+drop R2SCR[abij]
+
+// update ampltidues
+.T2:eecc[abij] -= R2:eecc[abij]
+
+.Nrm2 +=  (2*T2:eecc[abij] - T2:eecc[baij]) T2:eecc[abij]
+
+store T2:eecc[abij]   // store new amplitudes
+store R2:eecc[abij]   // store preconditioned residuals for DIIS error vector
+
+
+
+drop ShiftP[], ShiftS[], ShiftI[]
+//drop Tmp2[], Tmp1[]
+store Var2[], Var1[]
+store LCor2[], LCor1[]
+store Nrm2[], Nrm1[]
+
+
+---- code("Transform_to_Pair_Index")
+// Preliminary: Replace pseudo double index by pair index for orthogonal space  
+
+// this tensor encodes the mapping
+load deltap[pqM]
+
+// I2
+load X2:I2s[pqrs]
+alloc X2:I2s[pqM]
+.X2:I2s[pqM] := X2:I2s[pqrs] deltap[rsM]
+store X2:I2s[pqM]
+drop X2:I2s[pqrs]
+
+load X2:I2t[pqrs]
+alloc X2:I2t[pqM]
+.X2:I2t[pqM] := X2:I2t[pqrs] deltap[rsM]
+store X2:I2t[pqM]
+drop X2:I2t[pqrs]
+
+alloc Y2:I2s[MN]
+load Y2:I2s[pqrs]
+alloc Yi[Mrs]
+.Yi[Mrs] += Y2:I2s[pqrs] deltap[pqM]
+.Y2:I2s[MN] += Yi[Mrs] deltap[rsN]
+drop Yi[Mrs]
+drop Y2:I2s[pqrs]
+store Y2:I2s[MN]
+
+alloc Y2:I2t[MN]
+load Y2:I2t[pqrs]
+alloc Yi[Mrs]
+.Yi[Mrs] += Y2:I2t[pqrs] deltap[pqM]
+.Y2:I2t[MN] += Yi[Mrs] deltap[rsN]
+drop Yi[Mrs]
+drop Y2:I2t[pqrs]
+store Y2:I2t[MN]
+
+
+// S1
+load X2A:S1[pqrs]
+alloc X2A:S1[pqM]
+.X2A:S1[pqM] := X2A:S1[pqrs] deltap[rsM]
+store X2A:S1[pqM]
+drop X2A:S1[pqrs]
+
+load X2B:S1[pqrs]
+alloc X2B:S1[pqM]
+.X2B:S1[pqM] := X2B:S1[pqrs] deltap[rsM]
+store X2B:S1[pqM]
+drop X2B:S1[pqrs]
+
+load X4A:S1[pqrs]
+alloc X4A:S1[pqM]
+.X4A:S1[pqM] := X4A:S1[pqrs] deltap[rsM]
+store X4A:S1[pqM]
+drop X4A:S1[pqrs]
+
+load X4B:S1[pqrs]
+alloc X4B:S1[pqM]
+.X4B:S1[pqM] := X4B:S1[pqrs] deltap[rsM]
+store X4B:S1[pqM]
+drop X4B:S1[pqrs]
+
+load XS12a:S1[pq]
+alloc XS12a:S1[M]
+.XS12a:S1[M] := XS12a:S1[pq] deltap[pqM]
+store XS12a:S1[M]
+drop XS12a:S1[pq]
+
+load XS12b:S1[pq]
+alloc XS12b:S1[M]
+.XS12b:S1[M] := XS12b:S1[pq] deltap[pqM]
+store XS12b:S1[M]
+drop XS12b:S1[pq]
+
+load SX12a:S1[pq]
+alloc SX12a:S1[M]
+.SX12a:S1[M] := SX12a:S1[pq] deltap[pqM]
+store SX12a:S1[M]
+drop SX12a:S1[pq]
+
+load SX12b:S1[pq]
+alloc SX12b:S1[M]
+.SX12b:S1[M] := SX12b:S1[pq] deltap[pqM]
+store SX12b:S1[M]
+drop SX12b:S1[pq]
+
+alloc YA:S1[MN], YB:S1[MN]
+load  YA:S1[pqrs], YB:S1[pqrs]
+alloc Yi[Mrs]
+.Yi[Mrs] += YA:S1[pqrs] deltap[pqM]
+.YA:S1[MN] += Yi[Mrs] deltap[rsN]
+drop Yi[Mrs]
+alloc Yi[Mrs]
+.Yi[Mrs] += YB:S1[pqrs] deltap[pqM]
+.YB:S1[MN] += Yi[Mrs] deltap[rsN]
+drop Yi[Mrs]
+drop YB:S1[pqrs], YA:S1[pqrs]
+store YB:S1[MN], YA:S1[MN]
+
+
+// P0
+load X2:P0s[pqrs]
+alloc X2:P0s[pqM]
+.X2:P0s[pqM] := X2:P0s[pqrs] deltap[rsM]
+store X2:P0s[pqM]
+drop X2:P0s[pqrs]
+
+load X2:P0t[pqrs]
+alloc X2:P0t[pqM]
+.X2:P0t[pqM] := X2:P0t[pqrs] deltap[rsM]
+store X2:P0t[pqM]
+drop X2:P0t[pqrs]
+
+alloc Y2:P0s[MN]
+load Y2:P0s[pqrs]
+alloc Yi[Mrs]
+.Yi[Mrs] += Y2:P0s[pqrs] deltap[pqM]
+.Y2:P0s[MN] += Yi[Mrs] deltap[rsN]
+drop Yi[Mrs]
+drop Y2:P0s[pqrs]
+store Y2:P0s[MN]
+
+alloc Y2:P0t[MN]
+load Y2:P0t[pqrs]
+alloc Yi[Mrs]
+.Yi[Mrs] += Y2:P0t[pqrs] deltap[pqM]
+.Y2:P0t[MN] += Yi[Mrs] deltap[rsN]
+drop Yi[Mrs]
+drop Y2:P0t[pqrs]
+store Y2:P0t[MN]
+
+drop deltap[pqM]
+
+
+---- code("Construct_GS_Overlap")
+// Construct overlap blocks of S1 and S2 parts which
+// don't involve orthogonalisation to S1 parts
+// denominators are also evaluated
+// I1 and S0 are still WIP
+
+// I1
+alloc S1:I1[pq]
+load Dm1H[pq]
+.S1:I1[pq] := Dm1H[qp]
+drop Dm1H[pq]
+store S1:I1[pq]
+
+// S0
+alloc S1:S0[pq]
+load Dm1[pp]
+.S1:S0[pq] := Dm1[qp]
+drop Dm1[pp]
+store S1:S0[pq]
+
+// I2
+alloc S2:I2s[pqrs]
+alloc S2:I2t[pqrs]
+load Dm2H[pppp]
+.S2:I2s[pqrs] := (Dm2H[qprs] + Dm2H[qpsr])
+.S2:I2t[pqrs] := (Dm2H[qprs] - Dm2H[qpsr])
+drop Dm2H[pppp]
+store S2:I2t[pqrs]
+store S2:I2s[pqrs]
+
+// S2
+alloc S2:S2[pq]
+load Dm1H[pq]
+.S2:S2[pq] := Dm1H[qp]
+drop Dm1H[pq]
+store S2:S2[pq]
+
+// P0
+alloc S2:P0s[pqrs]
+alloc S2:P0t[pqrs]
+load Dm2[pppp]
+.S2:P0s[pqrs] := (Dm2[qprs] + Dm2[qpsr])
+.S2:P0t[pqrs] := (Dm2[qprs] - Dm2[qpsr])
+drop Dm2[pppp]
+store S2:P0t[pqrs]
+store S2:P0s[pqrs]
+
+// P1
+alloc S2:P1[pq]
+load Dm1[pp]
+.S2:P1[pq] := Dm1[qp]
+drop Dm1[pp]
+store S2:P1[pq]
+
+// Construct new preconditioner
+alloc Fact[]
+load Dm1[pq], g:aa[pq]
+.Fact[] += Dm1[pq] g:aa[pq]
+drop g:aa[pq], Dm1[pq]
+store Fact[]
+
+alloc D1f[pq]
+load Dm2[pqrs], g:aa[qs]
+.D1f[ps] += Dm2[pqrs] g:aa[qr]
+drop g:aa[qs], Dm2[pqrs]
+store D1f[pq]
+
+alloc Ph1[pq]
+load Dm1[pq], g:aa[pq]
+.Ph1[pq] += Dm1[pr] g:aa[rq]
+drop g:aa[pq], Dm1[pq]
+load D1f[pq]
+.Ph1[pq] += D1f[pq]
+drop D1f[pq]
+store Ph1[pq]
+
+alloc D2f[pqrs]
+load Dm3[pqrstu], g:aa[pq]
+.D2f[pqtu] += Dm3[pqrstu] g:aa[rs]
+drop g:aa[pq], Dm3[pqrstu]
+store D2f[pqrs]
+
+
+// I2
+// Factor of 0.25 included here instead of in the transformation
+alloc Y2:I2s[pqrs]
+alloc Y2:I2t[pqrs]
+load Fact[], deltaaa[pr], g:aa[pr], Dm1H[qs], D1f[rq], D2f[pqsr]
+alloc I2[pqrs]
+.I2[pqrs] += deltaaa[pr] deltaaa[qs]
+element* I2[pqrs], Fact[]
+.I2[pqrs] -= 0.5*deltaaa[pr] D1f[qs]
+.I2[pqrs] -= 0.5*deltaaa[qs] D1f[pr]
+.I2[pqrs] += 0.5*Dm1H[pr] g:aa[qs]
+.I2[pqrs] += 0.5*Dm1H[qs] g:aa[pr]
+
+// now contruct the two parity cases:
+.Y2:I2s[pqrs] := 0.25*(I2[pqrs] + I2[pqsr])
+.Y2:I2t[pqrs] := 0.75*(I2[pqrs] - I2[pqsr])
+
+// to be checked (no contribution for CAS(2,2))
+.Y2:I2s[pqrs] += .125*(D2f[pqsr] + D2f[pqrs])
+.Y2:I2t[pqrs] += .125*(D2f[pqsr] - D2f[pqrs])
+
+drop I2[pqrs]
+
+load S2:I2s[pqts]
+.Y2:I2s[pqrs] += .25*g:aa[rt] S2:I2s[pqts]
+.Y2:I2s[pqrs] += .25*g:aa[pt] S2:I2s[rstq]
+.Y2:I2s[pqrs] += .25*g:aa[st] S2:I2s[pqrt]
+.Y2:I2s[pqrs] += .25*g:aa[qt] S2:I2s[rspt]
+.Y2:I2s[pqrs] -= Fact[] S2:I2s[pqrs]
+drop S2:I2s[pqrs]
+load S2:I2t[pqts]
+.Y2:I2t[pqrs] += .25*g:aa[rt] S2:I2t[pqts]
+.Y2:I2t[pqrs] += .25*g:aa[pt] S2:I2t[rstq]
+.Y2:I2t[pqrs] += .25*g:aa[st] S2:I2t[pqrt]
+.Y2:I2t[pqrs] += .25*g:aa[qt] S2:I2t[rspt]
+.Y2:I2t[pqrs] -= Fact[] S2:I2t[pqrs]
+drop S2:I2t[pqrs]
+drop D2f[pqsr], D1f[rq], Dm1H[qs], g:aa[pr], deltaaa[pr], Fact[]
+store Y2:I2t[pqrs]
+store Y2:I2s[pqrs]
+
+// S2
+alloc Y2:S2[pq]
+load Fact[], Dm1[pq], D1f[pq], S2:S2[pr], g:aa[rq]
+.Y2:S2[pq] += Fact[] Dm1[pq]
+.Y2:S2[pq] -= D1f[pq]
+.Y2:S2[pq] += S2:S2[pr] g:aa[rq]
+.Y2:S2[pq] -= g:aa[pr] Dm1[rq]
+drop g:aa[rq], S2:S2[pr], D1f[pq], Dm1[pq], Fact[]
+store Y2:S2[pq]
+
+// I1 <-- use Y2:S2 for this case
+alloc Y1:I1[pq]
+load Y2:S2[pq]
+.Y1:I1[pq] := Y2:S2[pq]
+drop Y2:S2[pq]
+store Y1:I1[pq]
+
+// P0
+// first for + parity ...
+alloc Y2:P0s[pqrs]
+load D2f[pqrs], Fact[], S2:P0s[pqrs]
+.Y2:P0s[pqrs] += 0.25*(D2f[prsq] + D2f[prqs])
+.Y2:P0s[pqrs] -= Fact[] S2:P0s[pqrs]
+drop S2:P0s[pqrs], Fact[], D2f[pqrs]
+store Y2:P0s[pqrs]
+// ... and then for - parity
+alloc Y2:P0t[pqrs]
+load D2f[pqrs], Fact[], S2:P0t[pqrs]
+.Y2:P0t[pqrs] += 0.25*(D2f[prsq] - D2f[prqs])
+.Y2:P0t[pqrs] -= Fact[] S2:P0t[pqrs]
+drop S2:P0t[pqrs], Fact[], D2f[pqrs]
+store Y2:P0t[pqrs]
+
+// P1
+alloc Y2:P1[pq]
+load D1f[pq], Fact[], S2:P1[pq]
+.Y2:P1[pq] += D1f[pq]
+.Y2:P1[pq] -= Fact[] S2:P1[pq]
+drop S2:P1[pq], Fact[], D1f[pq]
+store Y2:P1[pq]
+
+// S0 <--- use Y2:P1 for that case
+alloc Y1:S0[pq]
+load Y2:P1[rq]
+.Y1:S0[pq] := Y2:P1[pq]
+drop Y2:P1[rq]
+store Y1:S0[pq]
+
+
+---- code("Construct_S2")
+// For debug purposes only, these overlaps are overwritten
+// in Construct_projected_s2
+
+// I1
+alloc S2:I1[pqrstu]
+load Dm3[pppppp], Dm2[pppp], Dm1[pp], deltaaa[pp]
+.S2:I1[pqrstu] := Dm3[pqrstu]
+.S2:I1[pqrstu] -= deltaaa[pt] Dm2[rqsu]
+.S2:I1[pqrstu] += deltaaa[pu] Dm2[rqst]
+.S2:I1[pqrstu] += deltaaa[qt] Dm2[rpsu]
+.S2:I1[pqrstu] -= deltaaa[qu] Dm2[rpst]
+alloc delta4[pppp]
+.delta4[pqtu] += deltaaa[pt] deltaaa[qu]
+.S2:I1[pqrstu] += delta4[pqtu] Dm1[rs]
+drop delta4[pppp]
+drop deltaaa[pp], Dm1[pp], Dm2[pppp], Dm3[pppppp]
+store S2:I1[pqrstu]
+
+alloc S3:I1[pqrs]
+load Dm2[pppp], Dm1[pp], deltaaa[pp]
+.S3:I1[pqrs] -= Dm2[qprs]
+.S3:I1[pqrs] += deltaaa[ps] Dm1[qr]
+drop deltaaa[pp], Dm1[pp], Dm2[pppp]
+store S3:I1[pqrs]
+
+// S0
+alloc S2:S0[pqrstu]
+load Dm3[pppppp], Dm2[pppp], deltaaa[pp]
+.S2:S0[pqrstu] -= Dm3[pqrstu]
+.S2:S0[pqrstu] += deltaaa[pu] Dm2[qrst]
+drop deltaaa[pp], Dm2[pppp], Dm3[pppppp]
+store S2:S0[pqrstu]
+
+alloc S3:S0[pqrs]
+load Dm2[pppp]
+.S3:S0[pqrs] := Dm2[pqsr]
+drop Dm2[pppp]
+store S3:S0[pqrs]
+
+// S1
+alloc S2B:S1[pqrs]
+load Dm2[pppp], Dm1[pp], deltaaa[pp]
+.S2B:S1[pqrs] -= Dm2[qprs]
+.S2B:S1[pqrs] += deltaaa[ps] Dm1[qr]
+drop deltaaa[pp], Dm1[pp], Dm2[pppp]
+store S2B:S1[pqrs]
+
+alloc S3A:S1[pq]
+load Dm1[pp]
+.S3A:S1[pq] := Dm1[qp]
+drop Dm1[pp]
+store S3A:S1[pq]
+
+
+---- code("Construct_Projected_S2")
+// Set up overlap metric, ready to construct X used
+// in sequential orthogonalisation
+// only relevant for class S1, denominators are also contructed here
+// classes I1 and S0 are still WIP
+
+// I1
+alloc S3:I1[pqrs]
+load Dm2[pppp], Dm1[pp], deltaaa[pp]
+.S3:I1[pqrs] -= Dm2[qprs]
+.S3:I1[pqrs] += deltaaa[ps] Dm1[qr]
+drop deltaaa[pp], Dm1[pp], Dm2[pppp]
+store S3:I1[pqrs]
+
+alloc I1[pqrs], I2[pqrs]
+load S1:I1[pq], S3:I1[pqrs]
+.I1[pqts] += S3:I1[qpsr] S1:I1[rt]
+.I2[pqts] += S3:I1[pqrs] S1:I1[tr]
+drop S3:I1[pqrs], S1:I1[pq]
+alloc I3[pqrstu]
+.I3[pqrstu] += I1[pvst] I2[qrvu]
+alloc S2:I1[pqrstu]
+load Dm3[pppppp], Dm2[pppp], Dm1[pp], deltaaa[pp]
+.S2:I1[pqrstu] := Dm3[rqpstu]
+.S2:I1[pqrstu] -= deltaaa[qt] Dm2[rpsu]
+.S2:I1[pqrstu] += deltaaa[rt] Dm2[qpsu]
+.S2:I1[pqrstu] += deltaaa[qu] Dm2[rpst]
+.S2:I1[pqrstu] -= deltaaa[ru] Dm2[qpst]
+alloc delta4[pppp]
+.delta4[pqtu] += deltaaa[pt] deltaaa[qu]
+.S2:I1[pqrstu] += delta4[qrtu] Dm1[sp]
+drop delta4[pppp]
+.S2:I1[pqrstu] -= I3[pqrstu]
+drop deltaaa[pp], Dm1[pp], Dm2[pppp], Dm3[pppppp]
+store S2:I1[pqrstu]
+drop I3[pqrstu]
+drop I2[pqrs], I1[pqrs]
+
+// S0
+alloc S3:S0[pqrs]
+load Dm2[pppp]
+.S3:S0[pqrs] := Dm2[qpsr]
+drop Dm2[pppp]
+store S3:S0[pqrs]
+
+alloc I1[pqrs], I2[pqrs]
+load S1:S0[pq], S3:S0[pqrs]
+.I1[pqts] += S3:S0[qpsr] S1:S0[rt]
+.I2[pqts] += S3:S0[pqrs] S1:S0[tr]
+drop S3:S0[pqrs], S1:S0[pq]
+alloc I3[pqrstu]
+.I3[pqrstu] += I1[pvst] I2[qrvu]
+alloc S2:S0[pqrstu]
+load Dm3[pppppp], Dm2[pppp], deltaaa[pp]
+.S2:S0[pqrstu] -= Dm3[rqpstu]
+.S2:S0[pqrstu] += deltaaa[pu] Dm2[qrst]
+drop deltaaa[pp], Dm2[pppp], Dm3[pppppp]
+.S2:S0[pqrstu] -= I3[pqrstu]
+store S2:S0[pqrstu]
+drop I3[pqrstu]
+drop I2[pqrs], I1[pqrs]
+
+// S1
+alloc S3A:S1[pq]
+load Dm1[pp]
+.S3A:S1[pq] := 2*Dm1[qp]
+drop Dm1[pp]
+store S3A:S1[pq]
+
+alloc S3B:S1[pq]
+load Dm1[pp]
+.S3B:S1[pq] -= Dm1[qp]
+drop Dm1[pp]
+store S3B:S1[pq]
+
+alloc S2B:S1[rpqs]
+load Dm2[pppp], Dm1[pp], deltaaa[pp]
+.S2B:S1[rpqs] -= Dm2[pqrs]
+.S2B:S1[rpqs] += 2*deltaaa[qr] Dm1[ps]
+load S3B:S1[pq]
+.S2B:S1[rpqs] -= .5*S3B:S1[pr] S3B:S1[qs]
+drop S3B:S1[pq]
+drop deltaaa[pp], Dm1[pp], Dm2[pppp]
+store S2B:S1[rpqs]
+
+alloc S2A:S1[rpqs]
+load Dm2[pppp], Dm1[pp], deltaaa[pp]
+.S2A:S1[rpqs] += 2*Dm2[qprs]
+.S2A:S1[rpqs] += 2*deltaaa[qr] Dm1[ps]
+load S3A:S1[pq]
+.S2A:S1[rpqs] -= .5*S3A:S1[pr] S3A:S1[qs]
+drop S3A:S1[pq]
+drop deltaaa[pp], Dm1[pp], Dm2[pppp]
+store S2A:S1[rpqs]
+
+alloc S4A:S1[rpqs]
+load S2A:S1[rpqs]
+.S4A:S1[rpqs] += -0.5*S2A:S1[rpqs]
+drop S2A:S1[rpqs]
+store S4A:S1[rpqs]
+
+alloc S4B:S1[rpqs]
+load S4A:S1[rpqs]
+.S4B:S1[rpqs] += S4A:S1[qsrp]
+drop S4A:S1[rpqs]
+store S4B:S1[rpqs]
+
+
+
+// Construct preconditoner
+
+// S1
+alloc YA:S1[pqrs]
+load D1f[pq], D2f[pqrs], Dm1[pq], Dm2[pqru], g:aa[rs], deltaaa[rs]
+.YA:S1[pqrs] += D1f[pr] deltaaa[qs]
+.YA:S1[pqrs] += Dm1[pr] g:aa[qs]
+.YA:S1[pqrs] += D2f[psrq]
+.YA:S1[pqrs] += g:aa[st] Dm2[ptrq]
+.YA:S1[pqrs] += Dm2[psrt] g:aa[tq]
+load Ph1[pq]
+.YA:S1[pqrs] -= Dm1[qp] Ph1[rs]
+.YA:S1[pqrs] -= Dm1[rs] Ph1[qp]
+drop Ph1[pq]
+alloc I2[pqrs]
+load Fact[]
+.I2[pqrs] += Dm1[pq] Dm1[rs]
+.YA:S1[pqrs] += Fact[] I2[pqrs]
+drop Fact[]
+drop I2[pqrs]
+// subtract Fact * Overlap 
+load Fact[], S2A:S1[pqrs]
+// factor 0.5 as S2x is twice the overlap
+.YA:S1[pqrs] -= 0.5*Fact[] S2A:S1[pqrs]
+drop S2A:S1[pqrs], Fact[]
+drop deltaaa[rs], g:aa[rs], Dm2[pqru], Dm1[pq], D2f[pqrs], D1f[pq]
+store YA:S1[pqrs]
+
+alloc YB:S1[pqrs]
+load D1f[pq], D2f[pqrs], Dm1[pq], Dm2[pqru], g:aa[rs], deltaaa[rs]
+.YB:S1[pqrs] += 2*D1f[pr] deltaaa[qs]
+.YB:S1[pqrs] += 2*Dm1[pr] g:aa[qs]
+.YB:S1[pqrs] -= D2f[psqr]
+.YB:S1[pqrs] -= g:aa[st] Dm2[ptqr]
+.YB:S1[pqrs] -= Dm2[pstr] g:aa[tq]
+load Ph1[pq]
+.YB:S1[pqrs] -= 0.5*Dm1[qp] Ph1[rs]
+.YB:S1[pqrs] -= 0.5*Dm1[rs] Ph1[qp]
+drop Ph1[pq]
+alloc I2[pqrs]
+load Fact[]
+.I2[pqrs] += 0.5*Dm1[pq] Dm1[rs]
+.YB:S1[pqrs] += Fact[] I2[pqrs]
+drop Fact[]
+drop I2[pqrs]
+// subtract Fact * Overlap 
+load Fact[], S2B:S1[pqrs]
+.YB:S1[pqrs] -= Fact[] S2B:S1[pqrs]
+drop S2B:S1[pqrs], Fact[]
+drop deltaaa[rs], g:aa[rs], Dm2[pqru], Dm1[pq], D2f[pqrs], D1f[pq]
+store YB:S1[pqrs]
+
+
+---- code("Construct_Offdiag_X")
+// Construct the off-diagonal contributions to the
+// X transfomration matrix (for S1, S0, and I1)
+// X12 = -X1 X1^+ S12 X2
+// SX12 = (S12 X2)
+
+load S3A:S1[pq], S3B:S1[pq]
+load X2B:S1[pqrs], X2A:S1[pqrs], X4A:S1[pqrs], X4B:S1[pqrs]
+
+// S1 residual transformation
+alloc XS12a:S1[rs], XS12b:S1[rs]
+
+//.XS12a:S1[rs] -= .5*S3A:S1[pq] X2A:S1[pqrs]
+.XS12a:S1[rs] -= .25*S3A:S1[pq] X2A:S1[pqrs]
+.XS12a:S1[rs] -= .25*S3B:S1[pq] X4A:S1[pqrs]
+
+//.XS12b:S1[rs] -= .5*S3A:S1[pq] X4B:S1[pqrs]
+.XS12b:S1[rs] -= .25*S3A:S1[pq] X4B:S1[pqrs]
+.XS12b:S1[rs] -= .25*S3B:S1[pq] X2B:S1[pqrs]
+
+store XS12b:S1[rs], XS12a:S1[rs]
+
+// S1 amplitude back transformation
+alloc SX12a:S1[rs], SX12b:S1[rs]
+
+.SX12a:S1[rs] -= .5*S3A:S1[pq] (0.5*X4A:S1[pqrs] + X2A:S1[pqrs])
+.SX12a:S1[rs] -= .5*S3B:S1[pq] (X4A:S1[pqrs] + 0.5*X2A:S1[pqrs])
+
+.SX12b:S1[rs] -= .5*S3A:S1[pq] (0.5*X2B:S1[pqrs] + X4B:S1[pqrs])
+.SX12b:S1[rs] -= .5*S3B:S1[pq] (X2B:S1[pqrs] + 0.5*X4B:S1[pqrs])
+
+store SX12b:S1[rs], SX12a:S1[rs]
+
+drop X4B:S1[pqrs], X4A:S1[pqrs], X2A:S1[pqrs], X2B:S1[pqrs]
+drop S3B:S1[pq], S3A:S1[pq]
+
+
+---- code("Project_Amplitudes")
+// Project (extrapolated) amplitudes to current non-singular space
+alloc Nrm1[], Nrm2[]
+
+// === I1 ===
+load T1:ac[pi]
+load PRJ1:I1[pq]
+alloc R1:ac[pi]
+
+.R1:ac[qi] := T1:ac[pi] PRJ1:I1[pq]
+.T1:ac[pi] := R1:ac[pi]
+
+.Nrm1 += 2*T1:ac[pi] T1:ac[pi]
+
+drop R1:ac[pi]
+drop PRJ1:I1[pq]
+store T1:ac[pi]
+
+
+// === S0 ===
+load T1:ea[ap]
+load PRJ1:S0[pq]
+alloc R1:ea[ap]
+
+.R1:ea[aq] := T1:ea[ap] PRJ1:S0[pq]
+.T1:ea[ap] := R1:ea[ap]
+
+.Nrm1 += 2*T1:ea[ap] T1:ea[ap]
+
+drop R1:ea[ap]
+drop PRJ1:S0[pq]
+store T1:ea[ap]
+
+
+// === S1 singles ===
+load T1:ec[ai]
+
+// Amplitude norm
+.Nrm1 += 2*T1:ec[ai] T1:ec[ai]
+
+drop T1:ec[ai]
+
+
+// === S1 doubles ===
+
+alloc T2:ec[ai] // discard previous content, will be generated by projector
+load T2:eaac[apqi], T2:eaca[apiq]
+alloc R2:eaac[apqi], R2:eaca[apiq]
+
+load PRJ2B:S1[pqrs], PRJ4B:S1[pqrs]
+.R2:eaac[apqi] := (4*T2:eaac[arsi] - 2*T2:eaca[aris]) PRJ2B:S1[rspq]
+.R2:eaac[apqi] += (4*T2:eaca[aris] - 2*T2:eaac[arsi]) PRJ4B:S1[rspq]
+drop PRJ4B:S1[pqrs], PRJ2B:S1[pqrs]
+
+load PRJ2A:S1[pqrs], PRJ4A:S1[pqrs]
+.R2:eaca[apiq] := (4*T2:eaac[arsi] - 2*T2:eaca[aris]) PRJ4A:S1[rspq]
+.R2:eaca[apiq] += (4*T2:eaca[aris] - 2*T2:eaac[arsi]) PRJ2A:S1[rspq]
+drop PRJ4A:S1[pqrs], PRJ2A:S1[pqrs]
+
+.T2:eaac[apqi] := ((1./3.)*R2:eaac[apqi] + (1./6.)*R2:eaca[apiq])
+.T2:eaca[apiq] := ((1./3.)*R2:eaca[apiq] + (1./6.)*R2:eaac[apqi])
+
+// Off-diagonal term  -X1.X1^+ = -0.5, so we only need the overlap
+load S3A:S1[pq], S3B:S1[pq]
+.T2:ec[ai] -= .5*S3B:S1[pq] T2:eaac[apqi]
+.T2:ec[ai] -= .5*S3A:S1[pq] T2:eaca[apiq]
+drop S3B:S1[pq], S3A:S1[pq]
+
+.Nrm2 +=  2*T2:ec[ai] T2:ec[ai]
+.Nrm2 += (2*T2:eaca[apiq]-T2:eaac[apqi]) T2:eaca[apiq]
+.Nrm2 += T2:eaac[apqi] (2*T2:eaac[apqi] -T2:eaca[apiq])
+
+drop R2:eaca[apiq], R2:eaac[apqi]
+store T2:eaca[apiq], T2:eaac[apqi], T2:ec[ai]
+
+
+// === I2 ===
+load T2:aacc[pqij]
+load PRJ2:I2s[pqrs]
+load PRJ2:I2t[pqrs]
+alloc R2:aacc[pqij]
+
+.R2:aacc[pqij] := 0.5*(T2:aacc[rsij] + T2:aacc[srij]) PRJ2:I2s[pqrs]
+.R2:aacc[pqij] += 0.5*(T2:aacc[rsij] - T2:aacc[srij]) PRJ2:I2t[pqrs]
+.T2:aacc[pqij] := R2:aacc[pqij]
+
+.Nrm2 +=  0.25*(T2:aacc[pqij] + T2:aacc[qpij]) (T2:aacc[pqij] + T2:aacc[qpij])
+.Nrm2 +=  0.25*(T2:aacc[pqij] - T2:aacc[qpij]) (T2:aacc[pqij] - T2:aacc[qpij])
+
+drop R2:aacc[pqij]
+drop PRJ2:I2t[pqrs]
+drop PRJ2:I2s[pqrs]
+store T2:aacc[pqij]
+
+
+// === S2 ===
+load T2:eacc[apij]
+load PRJ2:S2[pq]
+alloc R2:eacc[apij]
+
+.R2:eacc[aqij] := T2:eacc[apij] PRJ2:S2[pq]
+.T2:eacc[aqij] := R2:eacc[aqij]
+
+.Nrm2 +=  (2*T2:eacc[apij] - T2:eacc[apji]) T2:eacc[apij]
+
+drop R2:eacc[apij]
+drop PRJ2:S2[pq]
+store T2:eacc[apij]
+
+
+// === P0 ===
+load T2:eeaa[abpq]
+load PRJ2:P0s[pqrs]
+load PRJ2:P0t[pqrs]
+alloc R2:eeaa[abpq]
+
+.R2:eeaa[abpq] := 0.5*(T2:eeaa[abrs] + T2:eeaa[bars]) PRJ2:P0s[pqrs]
+.R2:eeaa[abpq] += 0.5*(T2:eeaa[abrs] - T2:eeaa[bars]) PRJ2:P0t[pqrs]
+.T2:eeaa[abpq] := R2:eeaa[abpq]
+
+.Nrm2 +=  0.25*(T2:eeaa[abpq] + T2:eeaa[bapq]) (T2:eeaa[abpq] + T2:eeaa[bapq])
+.Nrm2 +=  0.25*(T2:eeaa[abpq] - T2:eeaa[bapq]) (T2:eeaa[abpq] - T2:eeaa[bapq])
+
+drop R2:eeaa[abpq]
+drop PRJ2:P0t[pqrs]
+drop PRJ2:P0s[pqrs]
+store T2:eeaa[abpq]
+
+
+// === P1 ===
+load T2:eeac[abpi]
+load PRJ2:P1[pq]
+alloc R2:eeac[abpi]
+
+.R2:eeac[abqi] := T2:eeac[abpi] PRJ2:P1[pq]
+.T2:eeac[abqi] := R2:eeac[abqi]
+
+.Nrm2 +=  (2*T2:eeac[abpi] - T2:eeac[bapi]) T2:eeac[abpi]
+
+drop R2:eeac[abpi]
+drop PRJ2:P1[pq]
+store T2:eeac[abpi]
+
+
+// === P2 ===
+load T2:eecc[abij]
+
+// Amplitude norm
+.Nrm2 +=  (2*T2:eecc[abij] - T2:eecc[baij]) T2:eecc[abij]
+
+drop T2:eecc[abij]
+
+store Nrm2[], Nrm1[]
+
+
+---- code("Sum_T1")                                                                                                                                         
+alloc T1s:ec[ai]                                                                                                                                      
+load T1:ec[ai]                                                                                                                                              
+.T1s:ec[ai] += T1:ec[ai]                                                                                                                                    
+drop T1:ec[ai]                                                                                                                                              
+load T2:ec[ai]                                                                                                                                              
+.T1s:ec[ai] += T2:ec[ai]                                                                                                                                    
+drop T2:ec[ai]                                                                                                                                              
+store T1s:ec[ai]
+
+
+---- end

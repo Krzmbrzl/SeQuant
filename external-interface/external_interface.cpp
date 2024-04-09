@@ -1,9 +1,16 @@
 #include "processing.hpp"
 #include "utils.hpp"
 
+#include <SeQuant/core/context.hpp>
+#include <SeQuant/core/export/itf.hpp>
 #include <SeQuant/core/expr.hpp>
 #include <SeQuant/core/parse_expr.hpp>
+#include <SeQuant/core/runtime.hpp>
+#include <SeQuant/core/tensor_canonicalizer.hpp>
+#include <SeQuant/core/utility/indices.hpp>
 #include <SeQuant/core/utility/string.hpp>
+#include <SeQuant/domain/mbpt/op.hpp>
+#include <SeQuant/domain/mbpt/spin.hpp> // for remove_tensor
 
 #include <CLI/CLI.hpp>
 
@@ -20,11 +27,101 @@
 #include <string_view>
 
 using nlohmann::json;
-using sequant::toUtf16;
+using namespace sequant;
+
+class ItfContext : public itf::Context {
+public:
+	ItfContext(const IndexSpaceMeta &meta) : m_meta(&meta) {}
+
+	int compare(const Index &lhs, const Index &rhs) const override {
+		const std::size_t lhsSize = m_meta->getSize(lhs);
+		const std::size_t rhsSize = m_meta->getSize(rhs);
+
+		// We compare indices based on the size of their associated index spaces
+		// (in descending order)
+		return static_cast< long >(rhsSize) - static_cast< long >(lhsSize);
+	}
+
+	std::wstring get_base_label(const IndexSpace &space) const override { return m_meta->getLabel(space); }
+
+	std::wstring get_tag(const IndexSpace &space) const override { return m_meta->getTag(space); }
+
+	std::wstring get_name(const IndexSpace &space) const override { return m_meta->getName(space); }
+
+private:
+	const IndexSpaceMeta *m_meta;
+};
+
+ProcessingOptions extractProcessingOptions(const json &details) {
+	ProcessingOptions options;
+
+	if (details.contains("density_fitting")) {
+		options.density_fitting = details.at("density_fitting").get< bool >();
+	}
+
+	if (details.contains("spintracing")) {
+		const std::string spintrace = details.at("spintracing").get< std::string >();
+
+		if (spintrace == "none") {
+			options.spintrace = SpinTracing::None;
+		} else if (spintrace == "closed_shell") {
+			options.spintrace = SpinTracing::ClosedShell;
+		} else if (spintrace == "rigorous") {
+			options.spintrace = SpinTracing::Rigorous;
+		} else {
+			throw std::runtime_error("Invalid spintracing option '" + spintrace + "'");
+		}
+	}
+
+	if (details.contains("projection")) {
+		const std::string projection = details.at("projection").get< std::string >();
+
+		if (projection == "primitive") {
+			options.transform = ProjectionTransformation::None;
+		} else if (projection == "biorthogonal") {
+			options.transform = ProjectionTransformation::Biorthogonal;
+		} else {
+			throw std::runtime_error("Invalid projection option '" + projection + "'");
+		}
+	}
+
+	if (details.contains("optimize")) {
+		options.factorize_to_binary = details.at("optimize").get< bool >();
+	}
+
+	return options;
+}
+
+itf::Result toItfResult(std::wstring_view resultName, const ExprPtr &expr, const ItfContext &ctx,
+						bool importResultTensor) {
+	IndexGroups externals = get_unique_indices(expr);
+
+	container::svector< Index > resultIndices;
+	resultIndices.insert(resultIndices.end(), externals.aux.begin(), externals.aux.end());
+	resultIndices.insert(resultIndices.end(), externals.ket.begin(), externals.ket.end());
+	resultIndices.insert(resultIndices.end(), externals.bra.begin(), externals.bra.end());
+
+	//assert(std::is_sorted(resultIndices.begin(), resultIndices.end(), [ctx](const Index &lhs, const Index &rhs) {
+	//	int res = ctx.compare(lhs, rhs);
+	//	return res == 0 ? lhs < rhs : res < 0;
+	//}));
+
+	// TODO: Handle symmetry of result tensor
+	Tensor result(resultName, externals.bra, externals.ket, externals.aux);
+
+	std::wcout << to_latex(ex< Tensor >(result)) << std::endl;
+
+	return itf::Result(expr, result, importResultTensor);
+}
 
 void generateITF(const json &blocks, std::string_view out_file, const IndexSpaceMeta &spaceMeta) {
+	std::vector< itf::CodeBlock > itfBlocks;
+	ItfContext context(spaceMeta);
+
 	for (const json &current_block : blocks) {
 		const std::string block_name = current_block.at("name");
+
+		std::vector< itf::Result > results;
 
 		for (const json &current_result : current_block.at("results")) {
 			const std::string result_name = current_result.at("name");
@@ -41,11 +138,36 @@ void generateITF(const json &blocks, std::string_view out_file, const IndexSpace
 			const std::wstring transcoded_input = toUtf16(input);
 			sequant::ExprPtr expression         = sequant::parse_expr(transcoded_input);
 
-			expression = postProcess(expression, spaceMeta);
+			ProcessingOptions options = extractProcessingOptions(current_result);
 
-			// TODO: Add generated expression to ITF block to generate ITF code from
+			expression = postProcess(expression, spaceMeta, options);
+
+			// std::wcout << to_latex_align(expression) << std::endl;
+
+			std::wstring resultName = toUtf16(current_result.at("name").get< std::string >());
+
+			if (needsSymmetrization(expression)) {
+				std::optional< ExprPtr > symmetrizer = popTensor(expression, L"S");
+				assert(symmetrizer.has_value());
+
+				IndexGroups externals = get_unique_indices(symmetrizer.value());
+				results.push_back(toItfResult(resultName + L"u", expression, context, false));
+
+				ExprPtr symmetrization = generateResultSymmetrization(resultName + L"u", externals);
+				results.push_back(
+					toItfResult(resultName, symmetrization, context, current_result.value("import", true)));
+			} else {
+				results.push_back(toItfResult(resultName, expression, context, current_result.value("import", true)));
+			}
 		}
+
+		itfBlocks.push_back(itf::CodeBlock(toUtf16(current_block.at("name").get< std::string >()), std::move(results)));
 	}
+
+	std::wstring itfCode = to_itf(std::move(itfBlocks), context);
+
+	std::wofstream output(out_file.data());
+	output << itfCode;
 }
 
 void generateCode(const json &details, const IndexSpaceMeta &spaceMeta) {
@@ -59,7 +181,47 @@ void generateCode(const json &details, const IndexSpaceMeta &spaceMeta) {
 	}
 }
 
-void process(const json &driver, const IndexSpaceMeta &spaceMeta) {
+void registerIndexSpaces(const json &spaces, IndexSpaceMeta &meta) {
+	for (std::size_t i = 0; i < spaces.size(); ++i) {
+		const json &current = spaces.at(i);
+		const IndexSpace::Type type(1 << i);
+		const int size = current.at("size");
+
+		if (size <= 0) {
+			throw std::runtime_error("Index space sizes must be > 0");
+		}
+
+		IndexSpaceMeta::Entry entry;
+		entry.size  = static_cast< std::size_t >(size);
+		entry.name  = toUtf16(current.at("name").get< std::string >());
+		entry.label = toUtf16(current.at("label").get< std::string >());
+		entry.tag   = toUtf16(current.at("tag").get< std::string >());
+
+		for (IndexSpace::QuantumNumbers qn : { IndexSpace::nullqns, IndexSpace::alpha, IndexSpace::beta }) {
+			std::wstring label = toUtf16(current.at("label").get< std::string >());
+
+			// Note: For now, we have to use these exact label additions in order for SeQuant to
+			// understand their meaning
+			if (qn == IndexSpace::alpha) {
+				label += L"↑";
+			} else if (qn == IndexSpace::beta) {
+				label += L"↓";
+			}
+
+			IndexSpace::register_instance(label, type, qn);
+
+			meta.registerSpace(Index(label + L"_1").space(), entry);
+		}
+	}
+}
+
+void process(const json &driver, IndexSpaceMeta &spaceMeta) {
+	if (!driver.contains("index_spaces")) {
+		throw std::runtime_error("Missing index_spaces definition");
+	}
+
+	registerIndexSpaces(driver.at("index_spaces"), spaceMeta);
+
 	if (driver.contains("code_generation")) {
 		const json &details = driver.at("code_generation");
 
@@ -67,7 +229,16 @@ void process(const json &driver, const IndexSpaceMeta &spaceMeta) {
 	}
 }
 
+void generalSetup() {
+	TensorCanonicalizer::set_cardinal_tensor_labels(mbpt::cardinal_tensor_labels());
+}
+
 int main(int argc, char **argv) {
+	set_locale();
+	set_default_context(
+		Context(Vacuum::SingleProduct, IndexSpaceMetric::Unit, BraKetSymmetry::conjugate, SPBasis::spinorbital));
+	generalSetup();
+
 	CLI::App app("Interface for reading in equations generated outside of SeQuant");
 	argv = app.ensure_utf8(argv);
 
