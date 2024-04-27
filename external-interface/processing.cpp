@@ -15,7 +15,7 @@
 using namespace sequant;
 
 ExprPtr postProcess(const ExprPtr &expression, const IndexSpaceMeta &spaceMeta, const ProcessingOptions &options) {
-	if (expression.is< Constant>() || expression.is< Variable >()) {
+	if (expression.is< Constant >() || expression.is< Variable >()) {
 		return expression;
 	}
 
