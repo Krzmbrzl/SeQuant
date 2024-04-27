@@ -16,6 +16,8 @@
 
 #include <nlohmann/json.hpp>
 
+#include <spdlog/spdlog.h>
+
 #include <boost/algorithm/string.hpp>
 
 #include <filesystem>
@@ -109,11 +111,15 @@ void generateITF(const json &blocks, std::string_view out_file, const IndexSpace
 	for (const json &current_block : blocks) {
 		const std::string block_name = current_block.at("name");
 
+		spdlog::debug("Processing ITF code block '{}'", block_name);
+
 		std::vector< itf::Result > results;
 
 		for (const json &current_result : current_block.at("results")) {
 			const std::string result_name = current_result.at("name");
 			const std::string input_file  = current_result.at("equation_file");
+
+			spdlog::debug("Processing equations from '{}' to result '{}'", input_file, result_name);
 
 			if (!std::filesystem::exists(input_file)) {
 				throw std::runtime_error("Specified input file '" + input_file + "' does not exist");
@@ -125,11 +131,13 @@ void generateITF(const json &blocks, std::string_view out_file, const IndexSpace
 
 			sequant::ExprPtr expression = sequant::parse_expr(toUtf16(input), Symmetry::antisymm);
 
+			spdlog::debug("Initial equation is:\n{}", toUtf8(deparse_expr(expression)));
+
 			ProcessingOptions options = extractProcessingOptions(current_result);
 
 			expression = postProcess(expression, spaceMeta, options);
 
-			// std::wcout << to_latex_align(expression) << std::endl;
+			spdlog::debug("Fully processed equation is:\n{}", toUtf8(deparse_expr(expression)));
 
 			std::wstring resultName = toUtf16(current_result.at("name").get< std::string >());
 
@@ -137,12 +145,17 @@ void generateITF(const json &blocks, std::string_view out_file, const IndexSpace
 				std::optional< ExprPtr > symmetrizer = popTensor(expression, L"S");
 				assert(symmetrizer.has_value());
 
+				spdlog::debug("After popping S tensor:\n{}", toUtf8(deparse_expr(expression)));
+
 				IndexGroups externals = get_unique_indices(symmetrizer.value());
 				results.push_back(toItfResult(resultName + L"u", expression, context, false));
 
 				ExprPtr symmetrization = generateResultSymmetrization(resultName + L"u", externals);
+
+				spdlog::debug("Result symmetrization via {}", toUtf8(deparse_expr(symmetrization)));
+
 				results.push_back(
-					toItfResult(resultName, symmetrization, context, current_result.value("import", true)));
+					toItfResult(resultName, std::move(symmetrization), context, current_result.value("import", true)));
 			} else {
 				results.push_back(toItfResult(resultName, expression, context, current_result.value("import", true)));
 			}
@@ -183,6 +196,9 @@ void registerIndexSpaces(const json &spaces, IndexSpaceMeta &meta) {
 		entry.name  = toUtf16(current.at("name").get< std::string >());
 		entry.label = toUtf16(current.at("label").get< std::string >());
 		entry.tag   = toUtf16(current.at("tag").get< std::string >());
+
+		spdlog::debug("Registered index space '{}' with label '{}', tag '{}' and size {}", toUtf8(entry.name),
+					  toUtf8(entry.label), toUtf8(entry.tag), entry.size);
 
 		for (IndexSpace::QuantumNumbers qn : { IndexSpace::nullqns, IndexSpace::alpha, IndexSpace::beta }) {
 			std::wstring label = toUtf16(current.at("label").get< std::string >());
@@ -231,11 +247,17 @@ int main(int argc, char **argv) {
 
 	std::string driver;
 	app.add_option("--driver", driver, "Path to the JSON file used to drive the processing")->required();
+	bool verbose = false;
+	app.add_flag("--verbose", verbose, "Whether to enable verbose output");
 
 	CLI11_PARSE(app, argc, argv);
 
 	if (!std::filesystem::exists(driver)) {
 		throw std::runtime_error("Specified driver file '" + driver + "' does not exist");
+	}
+
+	if (verbose) {
+		spdlog::set_level(spdlog::level::debug);
 	}
 
 	IndexSpaceMeta spaceMeta;
@@ -247,7 +269,7 @@ int main(int argc, char **argv) {
 
 		process(driver_info, spaceMeta);
 	} catch (const std::exception &e) {
-		std::wcout << "[ERROR]: " << e.what() << std::endl;
+		spdlog::error("Unexpected error: {}", e.what());
 		return 1;
 	}
 
