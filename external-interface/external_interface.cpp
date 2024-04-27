@@ -96,20 +96,8 @@ itf::Result toItfResult(std::wstring_view resultName, const ExprPtr &expr, const
 						bool importResultTensor) {
 	IndexGroups externals = get_unique_indices(expr);
 
-	container::svector< Index > resultIndices;
-	resultIndices.insert(resultIndices.end(), externals.aux.begin(), externals.aux.end());
-	resultIndices.insert(resultIndices.end(), externals.ket.begin(), externals.ket.end());
-	resultIndices.insert(resultIndices.end(), externals.bra.begin(), externals.bra.end());
-
-	//assert(std::is_sorted(resultIndices.begin(), resultIndices.end(), [ctx](const Index &lhs, const Index &rhs) {
-	//	int res = ctx.compare(lhs, rhs);
-	//	return res == 0 ? lhs < rhs : res < 0;
-	//}));
-
 	// TODO: Handle symmetry of result tensor
 	Tensor result(resultName, externals.bra, externals.ket, externals.aux);
-
-	std::wcout << to_latex(ex< Tensor >(result)) << std::endl;
 
 	return itf::Result(expr, result, importResultTensor);
 }
