@@ -10,9 +10,7 @@
 						"name": "ECC0",
 						"equation_file": "nevpt2_en0.inp",
 						"projection": "primitive",
-						"spintracing": "none",
-						"optimize": false,
-						"density_fitting": false
+						"spintracing": "closed_shell"
 					}
 				]
 			},
@@ -23,9 +21,7 @@
 						"name": "ECC",
 						"equation_file": "nevpt2_en.inp",
 						"projection": "primitive",
-						"spintracing": "closed_shell",
-						"optimize": true,
-						"density_fitting": false
+						"spintracing": "closed_shell"
 					}
 				]
 			},
