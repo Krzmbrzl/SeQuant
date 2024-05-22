@@ -261,10 +261,14 @@ class FullBinaryNode {
   ///
   FullBinaryNode const& left() const { return *checked_ptr_access(left_); }
 
+  FullBinaryNode& left() { return *checked_ptr_access(left_); }
+
   ///
   /// \return Right node if this is an internal node, throws otherwise.
   ///
   FullBinaryNode const& right() const { return *checked_ptr_access(right_); }
+
+  FullBinaryNode& right() { return *checked_ptr_access(right_); }
 
   ///
   /// \brief Check if the object is a leaf node.
@@ -273,6 +277,17 @@ class FullBinaryNode {
   /// \note Left and right children are nullptr like
   ///
   [[nodiscard]] bool leaf() const { return !(left_ || right_); }
+
+  ///
+  /// \return Size of the tree rooted at this node
+  ///
+  [[nodiscard]] std::size_t size() const {
+    if (leaf()) {
+      return 1;
+    }
+
+    return left().size() + right().size() + 1;
+  }
 
   ///
   /// \return Returns the data stored by the node.
