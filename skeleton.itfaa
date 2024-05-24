@@ -35,6 +35,7 @@ tensor: INTkx:eecc[abij], !Create{type:disk}
 tensor: INTkx:eeac[abpj], !Create{type:disk}
 tensor: INTkx:eeaa[abpq], !Create{type:disk}
 tensor: f:ac[pi], f:ac
+tensor: f:ca[ip], f:ca
 tensor: f:ea[ap], f:ea
 tensor: f:aa[pq], f:aa
 tensor: f:ee[ab], f:ee
@@ -143,6 +144,7 @@ tensor: fc:ca[ip], fc:ca
 // Effective Fock matrices
 tensor: g:aa[pq]
 tensor: g:ac[pi]
+tensor: g:ca[ip]
 tensor: g:cc[ij]
 tensor: g:ea[ap]
 tensor: g:ec[ai]
@@ -428,6 +430,15 @@ load deltacc[**], J:ccca[****]
 drop J:ccca[****], deltacc[**]
 store f:ac[**]
 
+// f:ca[ip] = f:ac[pi]
+// Needed because order of occupied and active index spaces
+// is not quite clear
+alloc f:ca[ip]
+load f:ac[pi]
+.f:ca[ip] := f:ac[pi]
+drop f:ac[pi]
+store f:ca[ip]
+
 alloc f:ec[**]
 load fc:ec[**]
 .f:ec[ai] += fc:ec[ai]
@@ -487,6 +498,15 @@ load J:caaa[****], Dm1[**]
 .g:ac[pi] += (J:caaa[ipqr] - .5*J:caaa[irqp]) Dm1[qr]
 drop Dm1[**], J:caaa[****]
 store g:ac[**]
+
+// g:ca[ip] = g:ac[pi]
+// Needed because order of occupied and active index spaces
+// is not quite clear
+alloc g:ca[ip]
+load g:ac[pi]
+.g:ca[ip] := g:ac[pi]
+drop g:ac[pi]
+store g:ca[ip]
 
 alloc g:ec[**]
 load f:ec[**]
