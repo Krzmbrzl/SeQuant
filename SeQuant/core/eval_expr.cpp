@@ -97,7 +97,7 @@ EvalExpr::EvalExpr(Tensor const& tnsr)
     : op_type_{EvalOp::Id},
       result_type_{ResultType::Tensor},
       hash_value_{hash_terminal_tensor(tnsr)},
-      id_{},
+      id_{++global_id_},
       expr_{tnsr.clone()},
       tot_{is_tot(tnsr)} {}
 
@@ -105,7 +105,7 @@ EvalExpr::EvalExpr(Constant const& c)
     : op_type_{EvalOp::Id},
       result_type_{ResultType::Scalar},
       hash_value_{hash::value(c)},
-      id_{},
+      id_{++global_id_},
       expr_{c.clone()},
       tot_{false} {}
 
@@ -113,7 +113,7 @@ EvalExpr::EvalExpr(Variable const& v)
     : op_type_{EvalOp::Id},
       result_type_{ResultType::Scalar},
       hash_value_{hash::value(v)},
-      id_{},
+      id_{++global_id_},
       expr_{v.clone()},
       tot_{false} {}
 
