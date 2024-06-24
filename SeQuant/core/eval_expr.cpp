@@ -295,8 +295,18 @@ target_braket(Tensor const& t1, Tensor const& t2) noexcept {
   }
   // the result is now in left
 
-  return {keys(left) | ranges::to<index_container>,
-          values(left) | ranges::to<index_container>};
+  auto bra = keys(left) | ranges::to<index_container>;
+  auto ket = values(left) | ranges::to<index_container>;
+
+  // We are generating an index sequence for an intermediate.
+  // Since an intermediate is an object that we make up,
+  // we can choose the indexing however we please.
+  // By sorting bra and ket indices, we ensure that intermediates
+  // with the same indices share the exact same indexing.
+  std::sort(bra.begin(), bra.end());
+  std::sort(ket.begin(), ket.end());
+
+  return {std::move(bra), std::move(ket)};
 }
 
 Symmetry tensor_symmetry_sum(EvalExpr const& left,
