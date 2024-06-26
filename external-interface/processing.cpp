@@ -45,6 +45,19 @@ ExprPtr postProcess(const ExprPtr &expression, const IndexSpaceMeta &spaceMeta, 
 		spdlog::debug("Fully expanding all antisymmetrizers before spintracing...");
 		processed = simplify(expand_A_op(processed));
 		spdlog::debug("Expanded expression:\n{}", processed);
+
+		// If there is a symmetrizer present, getExternalIndexPairs does some special handling
+		// we want to do our own special-casing though
+
+		auto groups = get_unique_indices(processed);
+		externals.clear();
+		for (std::size_t i = 0; i < groups.bra.size(); ++i) {
+			externals.push_back({groups.bra[i], groups.ket[i]});
+		}
+		// TODO: Pairing obtained through above function is arbitrary
+		// and swapping leads to inverse results
+		std::swap(externals[0][1], externals[1][1]);
+		spdlog::debug("Externals are {}", externals);
 	}
 
 	switch (options.spintrace) {
