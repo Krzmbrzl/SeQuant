@@ -1,13 +1,13 @@
-#ifndef SEQUANT_PARSE_EXPR_HPP
-#define SEQUANT_PARSE_EXPR_HPP
+#ifndef SEQUANT_PARSE_HPP
+#define SEQUANT_PARSE_HPP
 
 #include <SeQuant/core/attr.hpp>
 #include <SeQuant/core/expr.hpp>
+#include <SeQuant/core/result_expr.hpp>
 
-#include <string>
-#include <string_view>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 
 ///
 ///  Create SeQuant expression from string input.
@@ -19,10 +19,10 @@
 namespace sequant {
 
 struct ParseError : std::runtime_error {
-	std::size_t offset;
-	std::size_t length;
+  std::size_t offset;
+  std::size_t length;
 
-	ParseError(std::size_t offset, std::size_t length, std::string message);
+  ParseError(std::size_t offset, std::size_t length, std::string message);
 };
 
 // clang-format off
@@ -55,6 +55,9 @@ struct ParseError : std::runtime_error {
 ExprPtr parse_expr(std::wstring_view raw,
                    Symmetry tensor_sym = Symmetry::nonsymm);
 
+ResultExpr parse_result_expr(std::wstring_view raw,
+                             Symmetry tensor_sym = Symmetry::nonsymm);
+
 ///
 /// Get a parsable string from an expression.
 ///
@@ -70,8 +73,16 @@ ExprPtr parse_expr(std::wstring_view raw,
 /// \param annot_sym Whether to add sequant::Symmetry annotation
 ///                  to each Tensor string.
 /// \return wstring of the expression.
-std::wstring deparse_expr(ExprPtr expr, bool annot_sym = true);
+std::wstring deparse(const ResultExpr &result, bool annot_sym = true);
+std::wstring deparse(const ExprPtr &expr, bool annot_sym = true);
+std::wstring deparse(const Expr &expr, bool annot_sym = true);
+std::wstring deparse(const Product &product, bool annot_sym);
+std::wstring deparse(const Sum &sum, bool annot_sym);
+std::wstring deparse(const Tensor &tensor, bool annot_sym = true);
+std::wstring deparse(const Variable &variable);
+std::wstring deparse(const Constant &constant);
+std::wstring deparse(const Index &index);
 
 }  // namespace sequant
 
-#endif  // SEQUANT_PARSE_EXPR_HPP
+#endif  // SEQUANT_PARSE_HPP

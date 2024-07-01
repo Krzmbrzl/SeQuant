@@ -216,6 +216,8 @@ set(SeQuant_src
         SeQuant/core/parse_expr.hpp
         SeQuant/core/ranges.hpp
         SeQuant/core/rational.hpp
+        SeQuant/core/result_expr.cpp
+        SeQuant/core/result_expr.hpp
         SeQuant/core/runtime.cpp
         SeQuant/core/runtime.hpp
         SeQuant/core/space.cpp

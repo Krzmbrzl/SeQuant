@@ -22,25 +22,6 @@ namespace sequant {
 
 namespace details {
 
-std::wstring deparse_index(const Index& index) {
-  std::wstring deparsed(index.label());
-
-  if (index.has_proto_indices()) {
-    deparsed += L"<";
-    const auto& protos = index.proto_indices();
-    for (std::size_t i = 0; i < protos.size(); ++i) {
-      deparsed += protos[i].label();
-
-      if (i + 1 < protos.size()) {
-        deparsed += L",";
-      }
-    }
-    deparsed += L">";
-  }
-
-  return deparsed;
-}
-
 template <typename Range>
 std::wstring deparse_indices(const Range& indices) {
   std::wstring deparsed;
@@ -70,27 +51,6 @@ std::wstring deparse_sym(Symmetry sym) {
 
   assert(false);
   return L"INVALIDANDUNREACHABLE";
-}
-
-std::wstring deparse_expr(Tensor const& tensor, bool annot_sym) {
-  std::wstring deparsed(tensor.label());
-  deparsed += L"{" + deparse_indices(tensor.bra());
-  if (tensor.ket_rank() > 0) {
-    deparsed += L";" + deparse_indices(tensor.ket());
-  }
-  if (tensor.auxiliary_rank() > 0) {
-    if (tensor.ket_rank() == 0) {
-      deparsed += L";";
-    }
-    deparsed += L";" + deparse_indices(tensor.auxiliary());
-  }
-  deparsed += L"}";
-
-  if (annot_sym) {
-    deparsed += L":" + deparse_sym(tensor.symmetry());
-  }
-
-  return deparsed;
 }
 
 std::wstring deparse_scalar(const Constant::scalar_type& scalar) {
@@ -133,20 +93,79 @@ std::wstring deparse_scalar(const Constant::scalar_type& scalar) {
   SEQUANT_PRAGMA_GCC(diagnostic pop)
 }
 
-std::wstring deparse_expr(const Constant& constant) {
-  return deparse_scalar(constant.value());
+}  // namespace details
+
+std::wstring deparse_expr(ExprPtr expr, bool annot_sym) {
+  using namespace details;
+  if (expr->is<Tensor>())
+    return deparse(expr->as<Tensor>(), annot_sym);
+  else if (expr->is<Sum>())
+    return deparse(expr->as<Sum>(), annot_sym);
+  else if (expr->is<Product>())
+    return deparse(expr->as<Product>(), annot_sym);
+  else if (expr->is<Constant>())
+    return deparse(expr->as<Constant>());
+  else if (expr->is<Variable>())
+    return deparse(expr->as<Variable>());
+  else
+    throw std::runtime_error("Unsupported expr type for deparse!");
 }
 
-std::wstring deparse_expr(const Variable& variable) {
+std::wstring deparse(const Index& index) {
+  std::wstring deparsed(index.label());
+
+  if (index.has_proto_indices()) {
+    deparsed += L"<";
+    const auto& protos = index.proto_indices();
+    for (std::size_t i = 0; i < protos.size(); ++i) {
+      deparsed += protos[i].label();
+
+      if (i + 1 < protos.size()) {
+        deparsed += L",";
+      }
+    }
+    deparsed += L">";
+  }
+
+  return deparsed;
+}
+
+
+std::wstring deparse(Tensor const& tensor, bool annot_sym) {
+  std::wstring deparsed(tensor.label());
+  deparsed += L"{" + details::deparse_indices(tensor.bra());
+  if (tensor.ket_rank() > 0) {
+    deparsed += L";" + details::deparse_indices(tensor.ket());
+  }
+  if (tensor.auxiliary_rank() > 0) {
+    if (tensor.ket_rank() == 0) {
+      deparsed += L";";
+    }
+    deparsed += L";" + details::deparse_indices(tensor.auxiliary());
+  }
+  deparsed += L"}";
+
+  if (annot_sym) {
+    deparsed += L":" + details::deparse_sym(tensor.symmetry());
+  }
+
+  return deparsed;
+}
+
+std::wstring deparse(const Constant& constant) {
+  return details::deparse_scalar(constant.value());
+}
+
+std::wstring deparse(const Variable& variable) {
   return std::wstring(variable.label());
 }
 
-std::wstring deparse_expr(Product const& prod, bool annot_sym) {
+std::wstring deparse(Product const& prod, bool annot_sym) {
   std::wstring deparsed;
 
   const auto& scal = prod.scalar();
   if (scal != Product::scalar_type{1}) {
-    deparsed += deparse_scalar(scal) + L" ";
+    deparsed += details::deparse_scalar(scal) + L" ";
   }
 
   for (std::size_t i = 0; i < prod.size(); ++i) {
@@ -171,7 +190,7 @@ std::wstring deparse_expr(Product const& prod, bool annot_sym) {
   return deparsed;
 }
 
-std::wstring deparse_expr(Sum const& sum, bool annot_sym) {
+std::wstring deparse(Sum const& sum, bool annot_sym) {
   std::wstring deparsed;
 
   for (std::size_t i = 0; i < sum.size(); ++i) {
@@ -199,24 +218,6 @@ std::wstring deparse_expr(Sum const& sum, bool annot_sym) {
     }
   }
   return deparsed;
-}
-
-}  // namespace details
-
-std::wstring deparse_expr(ExprPtr expr, bool annot_sym) {
-  using namespace details;
-  if (expr->is<Tensor>())
-    return deparse_expr(expr->as<Tensor>(), annot_sym);
-  else if (expr->is<Sum>())
-    return deparse_expr(expr->as<Sum>(), annot_sym);
-  else if (expr->is<Product>())
-    return deparse_expr(expr->as<Product>(), annot_sym);
-  else if (expr->is<Constant>())
-    return deparse_expr(expr->as<Constant>());
-  else if (expr->is<Variable>())
-    return deparse_expr(expr->as<Variable>());
-  else
-    throw std::runtime_error("Unsupported expr type for deparse!");
 }
 
 }  // namespace sequant

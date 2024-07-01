@@ -1,6 +1,6 @@
 #include "catch.hpp"
 
-#include <SeQuant/core/parse_expr.hpp>
+#include <SeQuant/core/parse.hpp>
 #include <SeQuant/core/tensor.hpp>
 #include <SeQuant/core/attr.hpp>
 #include <SeQuant/core/complex.hpp>
@@ -72,7 +72,7 @@ ParseErrorMatcher parseErrorMatches(std::size_t offset, std::size_t length,
   return ParseErrorMatcher{offset, length, std::move(messageFragment)};
 }
 
-TEST_CASE("TEST_PARSE_EXPR", "[parse_expr]") {
+TEST_CASE("Parsing", "[parse]") {
   using namespace sequant;
   SECTION("Scalar tensor") {
     auto expr = parse_expr(L"t{}");
