@@ -8,6 +8,7 @@
 #include <SeQuant/core/expr.hpp>
 #include <SeQuant/core/index.hpp>
 #include <SeQuant/core/rational.hpp>
+#include <SeQuant/core/result_expr.hpp>
 #include <SeQuant/core/tensor.hpp>
 #include <SeQuant/core/utility/string.hpp>
 
@@ -124,6 +125,21 @@ template<> struct fmt::formatter< sequant::ExprPtr > : fmt::formatter< std::stri
 	template< typename FormatContext >
 	auto format(const sequant::ExprPtr &expr, FormatContext &ctx) const -> decltype(ctx.out()) {
 		return format_to(ctx.out(), "{}", *expr);
+	}
+};
+
+// ResultExpr
+template<> struct fmt::formatter< sequant::ResultExpr > : fmt::formatter< std::string_view > {
+	template< typename FormatContext >
+	auto format(const sequant::ResultExpr &result, FormatContext &ctx) -> decltype(ctx.out()) {
+		std::string label = result.has_label() ? sequant::toUtf8(result.label()) : "?";
+
+		if (result.bra().empty() && result.ket().empty() && result.auxiliary().empty()) {
+			return format_to(ctx.out(), "{} =\n{}", label, result.expression());
+		}
+
+		return format_to(ctx.out(), "{}[{};{};{}] =\n{}", label, fmt::join(result.bra(), ", "), fmt::join(result.ket(), ", "),
+						 fmt::join(result.auxiliary(), ", "), result.expression());
 	}
 };
 
