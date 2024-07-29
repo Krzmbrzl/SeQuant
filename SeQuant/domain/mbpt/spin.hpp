@@ -308,7 +308,7 @@ ExprPtr closed_shell_spintrace(
     const ExprPtr& expr,
     const container::svector<container::svector<Index>>& ext_index_groups = {});
 
-ResultExpr closed_shell_spintrace(ResultExpr expr);
+container::svector<ResultExpr> closed_shell_spintrace(ResultExpr expr);
 
 ///
 /// \brief Given a OpType::A or OpType::S tensor, generates a list of external
