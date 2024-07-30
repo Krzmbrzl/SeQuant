@@ -1107,6 +1107,7 @@ container::svector<ResultExpr> closed_shell_spintrace(ResultExpr expr) {
     }, true);
 
 	expression *= ex<Constant>(currentSign);
+	expression = simplify(expression);
 
     ResultExpr result = [&]() {
       assert(expr.has_label());
