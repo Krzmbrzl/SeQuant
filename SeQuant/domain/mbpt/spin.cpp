@@ -1038,7 +1038,7 @@ container::svector<ResultExpr> closed_shell_spintrace(ResultExpr expr) {
          expr.symmetry() == Symmetry::symm);
 
   // TODO: Do we have to track the sign?
-  const bool permuteBra = expr.bra().size() >= expr.ket().size();
+  const bool permuteBra = expr.bra().size() > expr.ket().size();
   auto permIndices = permuteBra ? expr.bra() : expr.ket();
   const std::size_t unchangedSize =
       permuteBra ? expr.ket().size() : expr.bra().size();
