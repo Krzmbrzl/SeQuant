@@ -71,13 +71,13 @@
 						"projection": "biorthogonal",
 						"expand_symmetrizer": true
 					},
-					//{
-					//	"name": "R2",
-					//	"equation_file": "nevpt2_res2_s1.inp",
-					//	"spintracing": "closed_shell",
-					//	"projection": "primitive",
-					//	"expand_symmetrizer": true
-					//},
+					{
+						"name": "R2",
+						"equation_file": "nevpt2_res2_s1.inp",
+						"spintracing": "closed_shell",
+						"projection": "biorthogonal",
+						"expand_symmetrizer": true
+					},
 					{
 						"name": "R2",
 						"equation_file": "nevpt2_res2_s2.inp",
