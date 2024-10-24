@@ -48,6 +48,12 @@
 					},
 					{
 						"name": "R2",
+						"equation_file": "nevpt2_res2_s1_singles.inp",
+						"spintracing": "closed_shell",
+						"projection": "biorthogonal"
+					},
+					{
+						"name": "R2",
 						"equation_file": "nevpt2_res2_p0.inp",
 						"spintracing": "closed_shell",
 						"projection": "biorthogonal"
