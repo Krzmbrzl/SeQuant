@@ -2,6 +2,10 @@
 	"code_generation": {
 		"output_format": "itf",
 		"output_path": "nevpt2.itfaa",
+		"default_options": {
+			"projection": "biorthogonal",
+			"spintracing": "closed_shell"
+		},
 		"code_blocks": [
 			{
 				"name": "Energy0",
@@ -9,8 +13,7 @@
 					{
 						"name": "ECC0",
 						"equation_file": "nevpt2_en0.inp",
-						"projection": "primitive",
-						"spintracing": "closed_shell"
+						"projection": "primitive"
 					}
 				]
 			},
@@ -20,8 +23,7 @@
 					{
 						"name": "ECC",
 						"equation_file": "nevpt2_en.inp",
-						"projection": "primitive",
-						"spintracing": "closed_shell"
+						"projection": "primitive"
 					}
 				]
 			},
@@ -30,65 +32,45 @@
 				"results": [
 					{
 						"name": "R1",
-						"equation_file": "nevpt2_res1_i1.inp",
-						"spintracing": "closed_shell",
-						"projection": "biorthogonal"
+						"equation_file": "nevpt2_res1_i1.inp"
 					},
 					{
 						"name": "R1",
-						"equation_file": "nevpt2_res1_s0.inp",
-						"spintracing": "closed_shell",
-						"projection": "biorthogonal"
+						"equation_file": "nevpt2_res1_s0.inp"
 					},
 					{
 						"name": "R1",
-						"equation_file": "nevpt2_res1_s1.inp",
-						"spintracing": "closed_shell",
-						"projection": "biorthogonal"
+						"equation_file": "nevpt2_res1_s1.inp"
 					},
 					{
 						"name": "R2",
-						"equation_file": "nevpt2_res2_s1_singles.inp",
-						"spintracing": "closed_shell",
-						"projection": "biorthogonal"
+						"equation_file": "nevpt2_res2_s1_singles.inp"
 					},
 					{
 						"name": "R2",
-						"equation_file": "nevpt2_res2_p0.inp",
-						"spintracing": "closed_shell",
-						"projection": "biorthogonal"
+						"equation_file": "nevpt2_res2_p0.inp"
 					},
 					{
 						"name": "R2",
-						"equation_file": "nevpt2_res2_p2.inp",
-						"spintracing": "closed_shell",
-						"projection": "biorthogonal"
+						"equation_file": "nevpt2_res2_p2.inp"
 					},
 					{
 						"name": "R2",
-						"equation_file": "nevpt2_res2_i2.inp",
-						"spintracing": "closed_shell",
-						"projection": "biorthogonal"
+						"equation_file": "nevpt2_res2_i2.inp"
 					},
 					{
 						"name": "R2",
 						"equation_file": "nevpt2_res2_p1.inp",
-						"spintracing": "closed_shell",
-						"projection": "biorthogonal",
 						"expand_symmetrizer": true
 					},
 					{
 						"name": "R2",
 						"equation_file": "nevpt2_res2_s1.inp",
-						"spintracing": "closed_shell",
-						"projection": "biorthogonal",
 						"expand_symmetrizer": true
 					},
 					{
 						"name": "R2",
 						"equation_file": "nevpt2_res2_s2.inp",
-						"spintracing": "closed_shell",
-						"projection": "biorthogonal",
 						"expand_symmetrizer": true
 					}
 				]
