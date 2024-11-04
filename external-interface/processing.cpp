@@ -14,6 +14,8 @@
 
 #include <spdlog/spdlog.h>
 
+#include <cassert>
+
 using namespace sequant;
 
 void custom_biorthogonalize(container::svector< ResultExpr > &exprs) {
@@ -112,7 +114,26 @@ container::svector< ResultExpr > postProcess(ResultExpr result, const IndexSpace
 
 
 	if (options.density_fitting) {
-		throw std::runtime_error("DF insertion not yet implemented");
+		result.expression()->visit(
+			[](ExprPtr &expr) {
+				// TODO: Get rid of hard-coded 2-electron tensor and aux index label
+				if (expr->is< Tensor >() && expr->as< Tensor >().label() == L"g") {
+					assert(expr->as< Tensor >().symmetry() == Symmetry::antisymm);
+					const auto &bras = expr->as< Tensor >().bra();
+					const auto &kets = expr->as< Tensor >().ket();
+					assert(bras.size() == 2);
+					assert(kets.size() == 2);
+					expr = ex< Tensor >(L"DF", IndexList{ bras[0] }, IndexList{ kets[0] }, IndexList{ Index(L"F_1") })
+							   * ex< Tensor >(L"DF", IndexList{ bras[1] }, IndexList{ kets[1] },
+											  IndexList{ Index(L"F_1") })
+						   - ex< Tensor >(L"DF", IndexList{ bras[0] }, IndexList{ kets[1] }, IndexList{ Index(L"F_1") })
+								 * ex< Tensor >(L"DF", IndexList{ bras[1] }, IndexList{ kets[0] },
+												IndexList{ Index(L"F_1") });
+				}
+			},
+			true);
+
+		result.expression() = simplify(expand(result.expression()));
 	}
 
 	switch (options.spintrace) {
