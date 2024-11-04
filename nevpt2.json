@@ -4,7 +4,8 @@
 		"output_path": "nevpt2.itfaa",
 		"default_options": {
 			"projection": "biorthogonal",
-			"spintracing": "closed_shell"
+			"spintracing": "closed_shell",
+			"density_fitting": true
 		},
 		"code_blocks": [
 			{
@@ -95,6 +96,12 @@
 			"tag": "c",
 			"label": "i",
 			"size": 10
+		},
+		{
+			"name": "auxiliary",
+			"tag": "F",
+			"label": "F",
+			"size": 150
 		},
 		{
 			"name": "dummy",
