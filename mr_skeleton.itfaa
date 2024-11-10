@@ -60,6 +60,9 @@ tensor: J:eeaa[abpq], J:eeaa
 tensor: DF:Fec[Fai], !Create{type:disk}, DF:Fec // = Jmh[BA] (A|1/r|ai)
 tensor: DF:Fcc[Fji], !Create{type:disk}, DF:Fcc // = Jmh[BA] (A|1/r|ji)
 tensor: DF:Fee[Fab], !Create{type:disk}, DF:Fee // = Jmh[BA] (A|1/r|ab)
+tensor: DF:Fea[Fap], !Create{type:disk}, DF:Fea // = Jmh[BA] (A|1/r|ap)
+tensor: DF:Fca[Fip], !Create{type:disk}, DF:Fca // = Jmh[BA] (A|1/r|ip)
+tensor: DF:Faa[Fqp], !Create{type:disk}, DF:Faa // = Jmh[BA] (A|1/r|qp)
 
 // DF precursers:
 // integral driver
@@ -70,13 +73,18 @@ tensor: Jmh[FF], !Create{type:disk; sym:+01} // J^{-1/2}
 // first trafo
 tensor: DFt1[FSi], !Create{type:plain} // = (A|1/r|Ni)
 tensor: DFt1[FSa], !Create{type:plain} // = (A|1/r|Na)
+tensor: DFt1[FSp], !Create{type:plain} // = (A|1/r|Np)
 // second trafo
 tensor: DFt2[Fai],  !Create{type:disk} // (F|ai)
 tensor: DFt2[Fji],  !Create{type:disk} // (F|ji)
 tensor: DFt2[Fab],  !Create{type:disk} // (F|ab)
+tensor: DFt2[Fip],  !Create{type:disk} // (F|ip)
+tensor: DFt2[Fap],  !Create{type:disk} // (F|ap)
+tensor: DFt2[Fqp],  !Create{type:disk} // (F|qp)
 
 tensor: Orb:Ac[Ri], Orb:Ac
 tensor: Orb:Ae[Ra], Orb:Ae
+tensor: Orb:Aa[Rp], Orb:Aa
 
 
 // Special integral tensors
@@ -1964,7 +1972,7 @@ store Nrm2[], Nrm1[]
 ---- code("Make_DF_Tensors")
 // create integral and transform to MO basis
 
-load Orb:Ac[Ri], Orb:Ae[Ra]
+load Orb:Ac[Ri], Orb:Ae[Ra], Orb:Aa[Rp]
 
 for [F]:
    load iDrvK1[RSF]
@@ -1986,6 +1994,19 @@ for [F]:
    store DFt2[Fab]
    drop DFt1[FSa]
 
+   alloc DFt1[FSp]
+   .DFt1[FSp] += iDrvK1[RSF] Orb:Aa[Rp]
+   alloc DFt2[Fip]
+   .DFt2[Fip] += DFt1[FSp] Orb:Ac[Si]
+   store DFt2[Fip]
+   alloc DFt2[Fap]
+   .DFt2[Fap] += DFt1[FSp] Orb:Ae[Sa]
+   store DFt2[Fap]
+   alloc DFt2[Fqp]
+   .DFt2[Fqp] += DFt1[FSp] Orb:Aa[Sq]
+   store DFt2[Fqp]
+   drop DFt1[FSp]
+
    drop iDrvK1[RSF]
 
 for [G]:
@@ -1996,21 +2017,44 @@ for [G]:
       .DF:Fec[Gai] += DFt2[Fai] Jmh[FG]
       drop DFt2[Fai]
       store DF:Fec[Gai]
+
    for [i,j]:
       alloc DF:Fcc[Gji]
       load DFt2[Fji]
       .DF:Fcc[Gji] += DFt2[Fji] Jmh[FG]
       drop DFt2[Fji]
       store DF:Fcc[Gji]
+
    for [b]:
       alloc DF:Fee[Gab]
       load DFt2[Fab]
       .DF:Fee[Gab] += DFt2[Fab] Jmh[FG]
       drop DFt2[Fab]
       store DF:Fee[Gab]
+
+   for [p]:
+      alloc DF:Fea[Gap]
+      load DFt2[Fap]
+      .DF:Fea[Gap] += DFt2[Fap] Jmh[FG]
+      drop DFt2[Fap]
+      store DF:Fea[Gap]
+
+      alloc DF:Fca[Gip]
+      load DFt2[Fip]
+      .DF:Fca[Gip] += DFt2[Fip] Jmh[FG]
+      drop DFt2[Fip]
+      store DF:Fca[Gip]
+
+   for [p,q]:
+      alloc DF:Faa[Gpq]
+      load DFt2[Fpq]
+      .DF:Faa[Gpq] += DFt2[Fpq] Jmh[FG]
+      drop DFt2[Fpq]
+      store DF:Faa[Gpq]
+
    drop Jmh[FG]
 
-drop Orb:Ae[Ra], Orb:Ac[Ri]
+drop Orb:Aa[Rp], Orb:Ae[Ra], Orb:Ac[Ri]
 
 
 ---- end
