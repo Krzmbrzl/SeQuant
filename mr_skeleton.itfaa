@@ -7,9 +7,10 @@ index-space: mno        , Internal, i
 index-space: CD         , Core    , C
 
 index-space: IJK        , ConfigI0, I
-index-space: MN         , OrthActPair, K
+index-space: MN         , OrthActPair, U
 
 index-space: FGH        , BasisMp2Fit, F
+index-space: L          , BasisJkFit, K
 index-space: RST        , BasisAo, A
 
 index-space: P          , ConfigP2, P
