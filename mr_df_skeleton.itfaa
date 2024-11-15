@@ -17,34 +17,6 @@ index-space: P          , ConfigP2, P
 
 
 
-// Integral tensors to be removed
-tensor: K:ccaa[ijpq], K:ccaa
-tensor: K:ecaa[aipq], K:ecaa
-tensor: K:aaaa[pqrs], K:aaaa
-tensor: K:aaac[qpri], K:aaac
-tensor: K:aacc[pqij], K:aacc
-tensor: K:ccca[kijp], K:ccca
-tensor: K:cccc[klij], K:cccc
-tensor: K:eaaa[cqpr], K:eaaa
-tensor: K:eaac[cpqi], K:eaac
-tensor: K:eaca[cqkr], K:eaca
-tensor: K:eacc[cqkj], K:eacc
-tensor: K:eccc[clkj], K:eccc
-tensor: K:eeaa[cdpq], K:eeaa
-tensor: K:eeac[dcqk], K:eeac
-tensor: K:eecc[cdkl], K:eecc
-tensor: J:eacc[apij], J:eacc
-tensor: J:ecca[aijp], J:ecca
-tensor: J:ecaa[aipq], J:ecaa
-tensor: J:eaaa[apqr], J:eaaa
-tensor: J:ccaa[ijpq], J:ccaa
-tensor: J:caaa[ipqr], J:caaa
-tensor: J:ccca[ijkp], J:ccca
-tensor: J:eccc[aijk], J:eccc
-tensor: J:eecc[abij], J:eecc
-tensor: J:eeaa[abpq], J:eeaa
-
-
 tensor: INTkx:eecc[abij], !Create{type:disk}
 tensor: INTkx:eeac[abpj], !Create{type:disk}
 tensor: INTkx:eeaa[abpq], !Create{type:disk}
@@ -88,9 +60,14 @@ tensor: Orb:Ae[Ra], Orb:Ae
 tensor: Orb:Aa[Rp], Orb:Aa
 
 
-// Intermediates required in Generate_Fock_Matrices
-tensor: dfint[F],   !Create{type:plain}
-tensor: dfint[Fij], !Create{type:plain}
+// Intermediates required in order to make hand-written code work with density-fitting
+tensor: dfint[F],    !Create{type:plain}
+tensor: dfint[Fij],  !Create{type:plain}
+tensor: dfint[Fjp],  !Create{type:plain}
+tensor: dfint[Fbi],  !Create{type:plain}
+tensor: dfint[Fpq],  !Create{type:plain}
+tensor: dfint[Fap],  !Create{type:plain}
+tensor: dfint[pqrs], !Create{type:plain; sym:01/23}
 
 
 // Special integral tensors
@@ -550,65 +527,155 @@ load f:ac[pi]
 drop f:ac[pi]
 store f:ca[ip]
 
+
 alloc f:ec[**]
 load fc:ec[**]
 .f:ec[ai] += fc:ec[ai]
 drop fc:ec[**]
-load deltacc[**], J:eccc[****]
-.f:ec[ai] += (2.*J:eccc[aijk] - J:eccc[ajik]) deltacc[kj]
-drop J:eccc[****], deltacc[**]
-store f:ec[**]
+
+alloc dfint[F]
+load DF:Fcc[Fjk], deltacc[kj]
+.dfint[F] += DF:Fcc[Fjk] deltacc[kj]
+drop deltacc[kj], DF:Fcc[Fjk]
+load DF:Fec[Fai]
+.f:ec[ai] += 2*dfint[F] DF:Fec[Fai]
+drop DF:Fec[Fai]
+drop dfint[F]
+
+alloc dfint[Fij]
+load DF:Fcc[Fik], deltacc[kj]
+.dfint[Fij] += DF:Fcc[Fik] deltacc[kj]
+drop deltacc[kj], DF:Fcc[Fik]
+load DF:Fec[Faj]
+.f:ec[ai] -= dfint[Fij] DF:Fec[Faj]
+drop DF:Fec[Faj]
+drop dfint[Fij]
+
+store f:ec[ai]
+
 
 alloc f:cc[**]
 load fc:cc[**]
 .f:cc[ij] := fc:cc[ij]
 drop fc:cc[**]
-load deltacc[**], K:cccc[****]
-.f:cc[ij] += (2.*K:cccc[jkil] - K:cccc[jkli]) deltacc[lk]
-drop K:cccc[****], deltacc[**]
-store f:cc[**]
+
+load DF:Fcc[Fkl], deltacc[lk]
+alloc dfint[F]
+.dfint[F] += DF:Fcc[Fkl] deltacc[lk]
+.f:cc[ij] += 2 * dfint[F] DF:Fcc[Fji]
+drop dfint[F]
+alloc dfint[Fjk]
+.dfint[Fjk] := DF:Fcc[Fjl] deltacc[lk]
+.f:cc[ij] -= dfint[Fjk] DF:Fcc[Fki]
+drop dfint[Fjk]
+drop deltacc[lk], DF:Fcc[Fkl]
+
+store f:cc[ij]
+
 
 alloc f:ea[**]
 load fc:ea[**]
 .f:ea[ap] := fc:ea[ap]
 drop fc:ea[**]
-load deltacc[**]
-load J:eacc[****], J:ecca[****]
-.f:ea[ap] += (2.*J:eacc[apij] - J:ecca[ajip])  deltacc[ji]
-drop J:ecca[****], J:eacc[****]
-drop deltacc[**]
-store f:ea[**]
+
+alloc dfint[F]
+load DF:Fcc[Fij], deltacc[ji]
+.dfint[F] += DF:Fcc[Fij] deltacc[ji]
+drop deltacc[ji], DF:Fcc[Fij]
+load DF:Fea[Fap]
+.f:ea[ap] += 2 * dfint[F] DF:Fea[Fap]
+drop DF:Fea
+drop dfint[F]
+
+alloc dfint[Fjp]
+load DF:Fca[Fip], deltacc[ji]
+.dfint[Fjp] += DF:Fca[Fip] deltacc[ji]
+drop deltacc[ji], DF:Fca[Fip]
+load DF:Fec[Faj]
+.f:ea[ap] -= dfint[Fjp] DF:Fec[Faj]
+drop DF:Fec[Faj]
+drop dfint[Fjp]
+
+store f:ea[ap]
+
 
 alloc f:ee[**]
 load fc:ee[**]
 .f:ee[ab] := fc:ee[ab]
 drop fc:ee[**]
-load deltacc[**]
-load J:eecc[****], K:eecc[****]
-.f:ee[ab] += (2.*J:eecc[baij] - K:eecc[baji]) deltacc[ji]
-drop K:eecc[****], J:eecc[****]
-drop deltacc[**]
-store f:ee[**]
+
+alloc dfint[F]
+load DF:Fcc[Fij], deltacc[ji]
+.dfint[F] += DF:Fcc[Fij] deltacc[ji]
+drop deltacc[ji], DF:Fcc[Fij]
+load DF:Fee[Fba]
+.f:ee[ab] += 2 * dfint[F] DF:Fee[Fba]
+drop DF:Fee[Fba]
+drop dfint[F]
+
+alloc dfint[Fbi]
+load DF:Fec[Fbj]
+load deltacc[ji]
+.dfint[Fbi] += DF:Fec[Fbj] deltacc[ji]
+drop deltacc[ji]
+.f:ee[ab] -= dfint[Fbi] DF:Fec[Fai]
+drop DF:Fec[Fbj]
+drop dfint[Fbi]
+
+store f:ee[ab]
+
 
 alloc f:aa[**]
 load fc:aa[**]
 .f:aa[pq] := fc:aa[pq]
 drop fc:aa[**]
-load deltacc[**]
-load J:ccaa[****], K:ccaa[****]
-.f:aa[pq] += (2.*J:ccaa[ijqp] - K:ccaa[jiqp]) deltacc[ji]
-drop K:ccaa[****], J:ccaa[****]
-drop deltacc[**]
-store f:aa[**]
+
+alloc dfint[F]
+load DF:Fcc[Fij], deltacc[ij]
+.dfint[F] += DF:Fcc[Fij] deltacc[ij]
+drop deltacc[ij], DF:Fcc[Fij]
+load DF:Faa[Fqp]
+.f:aa[pq] += 2 * dfint[F] DF:Faa[Fqp]
+drop DF:Faa[Fqp]
+drop dfint[F]
+
+alloc dfint[Fiq]
+load DF:Fca[Fjq]
+load deltacc[ji]
+.dfint[Fiq] += DF:Fca[Fjq] deltacc[ji]
+drop deltacc[[ji]
+.f:aa[pq] -= dfint[Fiq] DF:Fca[Fip]
+drop DF:Fca[Fjq]
+drop dfint[Fiq]
+
+store f:aa[pq]
+
 
 alloc g:ac[**]
 load f:ac[**]
 .g:ac[pi] := f:ac[pi]
 drop f:ac[**]
-load J:caaa[****], Dm1[**]
-.g:ac[pi] += (J:caaa[ipqr] - .5*J:caaa[irqp]) Dm1[qr]
-drop Dm1[**], J:caaa[****]
-store g:ac[**]
+
+alloc dfint[F]
+load DF:Faa[Fqr], Dm1[qr]
+.dfint[F] += DF:Faa[Fqr] Dm1[qr]
+drop Dm1[qr], DF:Faa[Fqr]
+load DF:Fca[Fip]
+.g:ac[pi] += dfint[F] DF:Fca[Fip]
+drop DF:Fca[Fip]
+drop dfint[F]
+
+alloc dfint[Fiq]
+load DF:Fca[Fir], Dm1[qr]
+.dfint[Fiq] += DF:Fca[Fir] Dm1[qr]
+drop Dm1[qr], DF:Fca[Fir]
+load DF:Faa[Fqp]
+.g:ac[pi] -= 0.5 * dfint[Fiq] DF:Faa[Fqp]
+drop DF:Faa[Fqp]
+drop dfint[Fiq]
+
+store g:ac[pi]
+
 
 // g:ca[ip] = g:ac[pi]
 // Needed because order of occupied and active index spaces
@@ -619,66 +686,149 @@ load g:ac[pi]
 drop g:ac[pi]
 store g:ca[ip]
 
+
 alloc g:ec[**]
 load f:ec[**]
 .g:ec[ai] := f:ec[ai]
 drop f:ec[**]
-load Dm1[**]
-load J:ecaa[****], K:ecaa[****]
-.g:ec[ai] += (J:ecaa[aipq] - .5*K:ecaa[aipq]) Dm1[pq]
-drop K:ecaa[****], J:ecaa[****]
-drop Dm1[**]
-store g:ec[**]
+
+alloc dfint[F]
+load DF:Faa[Fpq], Dm1[pq]
+.dfint[F] += DF:Faa[Fpq] Dm1[pq]
+drop Dm1[pq], DF:Faa[Fpq]
+load DF:Fec[Fai]
+.g:ec[ai] += dfint[F] DF:Fec[Fai]
+drop DF:Fec[Fai]
+drop dfint[F]
+
+alloc dfint[Fip]
+load DF:Fca[Fiq], Dm1[pq]
+.dfint[Fip] += DF:Fca[Fiq] Dm1[pq]
+drop Dm1[pq], DF:Fca[Fiq]
+load DF:Fea[Fap]
+.g:ec[ai] -= 0.5 * dfint[Fip] DF:Fea[Fap]
+drop DF:Fea[Fap]
+drop dfint[Fip]
+
+store g:ec[ai]
+
 
 alloc g:cc[**]
 load f:cc[**]
 .g:cc[ij] := f:cc[ij]
 drop f:cc[**]
-load Dm1[**]
-load J:ccaa[****], K:ccaa[****]
-.g:cc[ij] += (J:ccaa[jipq] - .5*K:ccaa[jiqp]) Dm1[pq]
-drop K:ccaa[****], J:ccaa[****]
-drop Dm1[**]
-store g:cc[**]
+
+alloc dfint[F]
+load DF:Faa[Fpq], Dm1[pq]
+.dfint[F] += DF:Faa[Fpq] Dm1[pq]
+drop Dm1[pq], DF:Faa[Fpq]
+load DF:Fcc[Fji]
+.g:cc[ij] += dfint[F] DF:Fcc[Fji]
+drop DF:Fcc[Fji]
+drop dfint[F]
+
+alloc dfint[Fjp]
+load DF:Fca[Fjq]
+load Dm1[pq]
+.dfint[Fjp] += DF:Fca[Fjq] Dm1[pq]
+drop Dm1[pq]
+.g:cc[ij] -= 0.5 * dfint[Fjp] DF:Fca[Fip]
+drop DF:Fca[Fjq]
+drop dfint[Fjp]
+
+store g:cc[ij]
+
 
 alloc g:ea[**]
 load f:ea[**]
 .g:ea[ap] := f:ea[ap]
 drop f:ea[**]
-load J:eaaa[****], Dm1[**]
-.g:ea[ap] += (J:eaaa[apqr] - .5*J:eaaa[arqp]) Dm1[qr]
-drop Dm1[**], J:eaaa[****]
-store g:ea[**]
+
+alloc dfint[F]
+load DF:Faa[Fqr], Dm1[qr]
+.dfint[F] += DF:Faa[Fqr] Dm1[qr]
+drop Dm1[qr], DF:Faa[Fqr]
+load DF:Fea[Fap]
+.g:ea[ap] += dfint[F] DF:Fea[Fap]
+drop DF:Fea[Fap]
+drop dfint[F]
+
+alloc dfint[Fpr]
+load DF:Faa[Fpq], Dm1[qr]
+.dfint[Fpr] += DF:Faa[Fpq] Dm1[qr]
+drop Dm1[qr], DF:Faa[Fpq]
+load DF:Fea[Far]
+.g:ea[ap] -= 0.5 * dfint[Fpr] DF:Fea[Far]
+drop DF:Fea[Far]
+drop dfint[Fpr]
+
+store g:ea[ap]
+
 
 alloc g:ee[**]
 load f:ee[**]
 .g:ee[ab] := f:ee[ab]
 drop f:ee[**]
-load Dm1[**]
-load J:eeaa[****], K:eeaa[****]
-.g:ee[ab] += (J:eeaa[bapq] - .5*K:eeaa[baqp]) Dm1[pq]
-drop K:eeaa[****], J:eeaa[****]
-drop Dm1[**]
-store g:ee[**]
+
+alloc dfint[F]
+load DF:Faa[Fpq], Dm1[pq]
+.dfint[F] += DF:Faa[Fpq] Dm1[pq]
+drop Dm1[pq], DF:Faa[Fpq]
+load DF:Fee[Fba]
+.g:ee[ab] += dfint[F] DF:Fee[Fba]
+drop DF:Fee[Fba]
+drop dfint[F]
+
+alloc dfint[Fbp]
+load DF:Fea[Fbq]
+load Dm1[pq]
+.dfint[Fbp] += DF:Fea[Fbq] Dm1[pq]
+drop Dm1[pq]
+.g:ee[ab] -= 0.5 * dfint[Fbp] DF:Fea[Fap]
+drop DF:Fea[Fap]
+drop dfint[Fbp]
+
+store g:ee[ab]
+
 
 alloc g:aa[**]
 load f:aa[**]
 .g:aa[pq] := f:aa[pq]
 drop f:aa[**]
-load Dm1[**]
-load K:aaaa[****]
-.g:aa[pq] += (K:aaaa[qrps] - .5*K:aaaa[qrsp])  Dm1[rs]
-drop K:aaaa[****]
-drop Dm1[**]
-store g:aa[**]
+
+alloc dfint[F]
+load DF:Faa[Frs]
+load Dm1[rs]
+.dfint[F] += DF:Faa[Frs] Dm1[rs]
+drop Dm1[rs]
+.g:aa[pq] += dfint[F] DF:Faa[Fqp]
+drop DF:Faa[Frs]
+drop dfint[F]
+
+alloc dfint[Fqr]
+load DF:Faa[Fqr]
+load Dm1[rs]
+.dfint[Fqr] += DF:Faa[Fqs] Dm1[rs]
+drop Dm1[rs]
+.g:aa[pq] -= 0.5 * dfint[Fqr] DF:Faa[Frp]
+drop DF:Faa[Fqr]
+drop dfint[Fqr]
+
+store g:aa[pq]
+
+
 
 // Construct active preconditoner blocks
 alloc A1[**]
-load f:aa[**], Dm1[**], K:aaaa[pqrs]
+load f:aa[**], Dm1[**]
 .A1[pq] += 2.*f:aa[pq]
 .A1[ps] -= f:aa[pq] Dm1[qs]
-.A1[pq] += K:aaaa[pqrs] Dm1[rs]
-drop K:aaaa[pqrs], Dm1[**], f:aa[**]
+alloc dfint[Fps]
+load DF:Faa[Fpr]
+.dfint[Fps] += DF:Faa[Fpr] Dm1[rs]
+.A1[pq] += dfint[Fps] DF:Faa[Fqs]
+drop DF:Faa[Fpr], dfint[Fps]
+drop Dm1[**], f:aa[**]
 store A1[**]
 
 alloc A4[**]
@@ -706,9 +856,17 @@ load f:aa[pq], Dm1[pq]
 .EActiv[] += Dm1[pq] f:aa[pq]
 drop Dm1[pq], f:aa[pq]
 
-load K:aaaa[pqrs], Dm2[pqrs]
-.EActiv[] += 0.5*Dm2[qprs] K:aaaa[pqrs]
-drop Dm2[pqrs], K:aaaa[pqrs]
+alloc dfint[pqrs]
+load DF:Faa[Fpq]
+.dfint[pqrs] := DF:Faa[Fpr] DF:Faa[Fqs]
+
+load Dm2[pqrs]
+.EActiv[] += 0.5*Dm2[qprs] dfint[pqrs]
+drop Dm2[pqrs]
+
+drop DF:Faa[Fpq]
+drop dfint[pqrs]
+
 store EActiv[]
 
 
@@ -756,9 +914,17 @@ load Heff[IJ]
 load f:aa[pq], CcI0I0ac[IJpq]
 .Heff[IJ] += 2.0*f:aa[pq] CcI0I0ac[IJpq]
 drop CcI0I0ac[IJpq], f:aa[pq]
-load K:aaaa[pqrs], CcI0I0aacc[IJpqrs]
-.Heff[IJ] += CcI0I0aacc[IJpqrs] (2*K:aaaa[pqrs] - K:aaaa[pqsr])
-drop CcI0I0aacc[IJpqrs], K:aaaa[pqrs]
+
+alloc dfint[pqrs]
+load DF:Faa[Fpq]
+.dfint[pqrs] := DF:Faa[Fpr] DF:Faa[Fqs]
+drop DF:Faa[Fpq]
+
+load CcI0I0aacc[IJpqrs]
+.Heff[IJ] += CcI0I0aacc[IJpqrs] (2*dfint[pqrs] - dfint[pqsr])
+drop CcI0I0aacc[IJpqrs]
+
+drop dfint[pqrs]
 
 // compute energy with current Ref and corresp. residual
 load CR0[I]
