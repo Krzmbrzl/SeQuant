@@ -1,0 +1,113 @@
+{
+	"code_generation": {
+		"output_format": "itf",
+		"output_path": "mrcepa0.itfaa",
+		"default_options": {
+			"projection": "biorthogonal",
+			"spintracing": "closed_shell",
+			"density_fitting": false
+		},
+		"code_blocks": [
+			{
+				"name": "Energy0",
+				"results": [
+					{
+						"name": "ECC0",
+						"equation_file": "mrcepa0_en0.inp",
+						"projection": "primitive"
+					}
+				]
+			},
+			{
+				"name": "Energy",
+				"results": [
+					{
+						"name": "ECC",
+						"equation_file": "mrcepa0_en.inp",
+						"projection": "primitive"
+					}
+				]
+			},
+			{
+				"name": "Residual",
+				"results": [
+					{
+						"name": "R1",
+						"equation_file": "mrcepa0_res1_i1.inp"
+					},
+					{
+						"name": "R1",
+						"equation_file": "mrcepa0_res1_s0.inp"
+					},
+					{
+						"name": "R1",
+						"equation_file": "mrcepa0_res1_s1.inp"
+					},
+					{
+						"name": "R2",
+						"equation_file": "mrcepa0_res2_s1_singles.inp"
+					},
+					{
+						"name": "R2",
+						"equation_file": "mrcepa0_res2_p0.inp"
+					},
+					{
+						"name": "R2",
+						"equation_file": "mrcepa0_res2_p2.inp"
+					},
+					{
+						"name": "R2",
+						"equation_file": "mrcepa0_res2_i2.inp"
+					},
+					{
+						"name": "R2",
+						"equation_file": "mrcepa0_res2_p1.inp",
+						"expand_symmetrizer": true
+					},
+					{
+						"name": "R2",
+						"equation_file": "mrcepa0_res2_s1.inp",
+						"expand_symmetrizer": true
+					},
+					{
+						"name": "R2",
+						"equation_file": "mrcepa0_res2_s2.inp",
+						"expand_symmetrizer": true
+					}
+				]
+			}
+		]
+	},
+	"index_spaces": [
+		{
+			"name": "virtual",
+			"tag": "e",
+			"label": "a",
+			"size": 100
+		},
+		{
+			"name": "active",
+			"tag": "a",
+			"label": "u",
+			"size": 5
+		},
+		{
+			"name": "occupied",
+			"tag": "c",
+			"label": "i",
+			"size": 10
+		},
+		{
+			"name": "auxiliary",
+			"tag": "F",
+			"label": "F",
+			"size": 150
+		},
+		{
+			"name": "dummy",
+			"tag": "D",
+			"label": "p",
+			"size": 42
+		}
+	]
+}

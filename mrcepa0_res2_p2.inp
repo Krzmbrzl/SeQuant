@@ -1,0 +1,34 @@
+R2{a1,a2;i1,i2} = 
+  + 1/4 A{i1,i2;a1,a2} g{a1,a2;i1,i2} 
+  - 1/2 A{i1,i2;a1,a2} g{a1,a2;u1,i1} T1{u1;i2} 
+  + 1/2 A{i1,i2;a1,a2} g{a1,a2;u2,i1} GAM0{u2;u1} T1{u1;i2} 
+  - 1/2 A{i1,i2;a1,a2} INT3axt{a2;u1} g{a1,u1;i1,i2} 
+  + A{i1,i2;a1,a2} f{a1;i1} INT3axt{a2;i2} 
+  + 1/2 A{i1,i2;a1,a2} g{i3,a1;i1,i2} INT3axt{a2;i3} 
+  - 1/2 A{i1,i2;a1,a2} g{a1,a2;a3,i1} INT3axt{a3;i2} 
+  + A{i1,i2;a1,a2} INT3axt{a2,u2;u1,i2} g{a1,u1;u2,i1} 
+  + 1/2 A{i1,i2;a1,a2} INTkx{a1,a2;u1,i1} f{u1;i2} 
+  - 1/4 A{i1,i2;a1,a2} INTkx{a1,a2;u1,i3} g{i3,u1;i1,i2} 
+  + A{i1,i2;a1,a2} INTkx{a2,a3;u1,i2} g{a1,u1;a3,i1} 
+  + 1/2 1/2 A{i1,i2;a1,a2} GAM0{u3,u4;u1,u2} g{u1,u2;u3,i2} T2g{a1,a2;u4,i1} 
+  + 1/2 1/4 A{i1,i2;a1,a2} INTkx{a1,a2;u1,u2} g{u1,u2;i1,i2} 
+  + 1/4 A{i1,i2;a1,a2} H INTkx{a1,a2;i1,i2} 
+  - 1/2 A{i1,i2;a1,a2} f{i3;i2} INTkx{a1,a2;i1,i3} 
+  + 1/2 A{i1,i2;a1,a2} f{a2;a3} INTkx{a1,a3;i1,i2} 
+  + 1/4 A{i1,i2;a1,a2} GAM0{u2;u1} f{u1;u2} T2g{a1,a2;i1,i2} 
+  + 1/2 1/4 A{i1,i2;a1,a2} g{i3,i4;i1,i2} INTkx{a1,a2;i3,i4} 
+  + A{i1,i2;a1,a2} g{i3,a2;a3,i2} INTkx{a1,a3;i1,i3} 
+  + 1/2 A{i1,i2;a1,a2} GAM0{u2;u1} g{i3,u1;u2,i2} T2g{a1,a2;i1,i3} 
+  + 1/2 1/4 A{i1,i2;a1,a2} g{a1,a2;a3,a4} INTkx{a3,a4;i1,i2} 
+  + 1/2 A{i1,i2;a1,a2} GAM0{u2;u1} g{a2,u1;a3,u2} T2g{a1,a3;i1,i2} 
+  + 1/4 1/4 A{i1,i2;a1,a2} GAM0{u3,u4;u1,u2} g{u1,u2;u3,u4} T2g{a1,a2;i1,i2} 
+  + 1/2 1/4 A{i1,i2;a1,a2} g{a1,a2;u1,u2} T2g{u1,u2;i1,i2} 
+  - 1/4 A{i1,i2;a1,a2} g{a1,a2;u1,u3} GAM0{u3;u2} T2g{u1,u2;i1,i2} 
+  + 1/4 1/4 A{i1,i2;a1,a2} g{a1,a2;u3,u4} GAM0{u3,u4;u1,u2} T2g{u1,u2;i1,i2} 
+  + 1/2 A{i1,i2;a1,a2} f{a2;u1} INT3axt{a1,u1;i1,i2} 
+  - A{i1,i2;a1,a2} g{i3,a1;u1,i2} INT3axt{a2,u1;i1,i3} 
+  + 1/4 A{i1,i2;a1,a2} g{a1,a2;a3,u1} INT3axt{a3,u1;i1,i2} 
+  + 1/2 A{i1,i2;a1,a2} GAM0{u3;u1} g{a2,u1;u2,u3} T2g{a1,u2;i1,i2} 
+  + 1/2 1/2 A{i1,i2;a1,a2} GAM0{u3,u4;u1,u2} g{a2,u1;u3,u4} T2g{a1,u2;i1,i2} 
+  - 1/4 A{i1,i2;a1,a2} ECEPA INTkx{a1,a2;i1,i2} 
+
