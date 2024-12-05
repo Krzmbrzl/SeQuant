@@ -57,4 +57,12 @@ R2{a1,u2;u1,i1} =
   - GAM0{u4;u1} g{i2,u2;u3,u4} T2g{a1,u3;i1,i2} 
   - 1/2 GAM0{u4,u5;u1,u3} g{i2,u2;u4,u5} T2g{a1,u3;i1,i2} 
   - GAM0{u2,u5;u1,u3} g{i2,u3;u4,u5} T2g{a1,u4;i1,i2} 
-
+  + GAM0{u3;u1} f{a1;u3} T1{u2;i1} 
+  + 1/2 GAM0{u4,u5;u1,u3} g{a1,u3;u4,u5} T1{u2;i1} 
+  + INT3axt{a1;u1} f{u2;i1} 
+  - INT3axt{a1,u2;u1,u3} f{u3;i1} 
+  + GAM0{u4;u1} g{i2,a1;u3,u4} T2g{u2,u3;i1,i2} 
+  + 1/2 GAM0{u4,u5;u1,u3} g{i2,a1;u4,u5} T2g{u2,u3;i1,i2} 
+  + GAM0{u3;u1} f{i2;u3} T2g{a1,u2;i1,i2} 
+  - GAM0{u3;u1} g{i2,a1;a2,u3} T2g{a2,u2;i1,i2} 
+  + 1/2 GAM0{u4,u5;u1,u3} g{i2,u3;u4,u5} T2g{a1,u2;i1,i2}
