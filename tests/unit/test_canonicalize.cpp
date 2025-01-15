@@ -104,8 +104,8 @@ TEST_CASE("Canonicalizer", "[algorithms]") {
                      Symmetry::nonsymm);
       canonicalize(input);
       REQUIRE(to_latex(input) ==
-              L"{{S^{{i_1}{i_2}}_{{a_1}{a_3}}}{f^{{i_3}}_{{"
-              L"a_2}}}{t^{{a_3}}_{{i_3}}}{t^{{a_1}{a_2}}_{{i_1}{i_2}}}}");
+              L"{{S^{{i_1}{i_2}}_{{a_1}{a_2}}}{f^{{i_3}}_{{"
+              L"a_3}}}{t^{{a_2}}_{{i_3}}}{t^{{a_1}{a_3}}_{{i_1}{i_2}}}}");
     }
     {
       auto input =
@@ -193,8 +193,8 @@ TEST_CASE("Canonicalizer", "[algorithms]") {
       canonicalize(input);
       REQUIRE(to_latex(input) ==
               L"{ "
-              L"\\bigl({{g^{{p_1}{p_4}}_{{p_2}{p_3}}}{t^{{p_2}}_{{p_1}}}{t^{{"
-              L"p_3}}_{{p_4}}}}\\bigr) }");
+              L"\\bigl({{g^{{p_2}{p_3}}_{{p_1}{p_4}}}{t^{{p_1}}_{{p_2}}}{t^{{p_"
+              L"4}}_{{p_3}}}}\\bigr) }");
     }
 
     // CASE 2: Symmetric tensors
