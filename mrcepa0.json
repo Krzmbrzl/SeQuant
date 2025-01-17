@@ -32,6 +32,36 @@
 				"name": "Residual",
 				"results": [
 					{
+						"name": "INT3ext",
+						"equation_file": "mrcepa0_int3ext_s0.inp",
+						"expand_symmetrizer": true,
+						"import": false
+					},
+					{
+						"name": "INT3ext",
+						"equation_file": "mrcepa0_int3ext_s0_singles.inp",
+						"expand_symmetrizer": true,
+						"import": false
+					},
+					{
+						"name": "INT3ext",
+						"equation_file": "mrcepa0_int3ext_s1.inp",
+						"expand_symmetrizer": true,
+						"import": false
+					},
+					{
+						"name": "INT3ext",
+						"equation_file": "mrcepa0_int3ext_s1_singles.inp",
+						"expand_symmetrizer": true,
+						"import": false
+					},
+					{
+						"name": "INT3ext",
+						"equation_file": "mrcepa0_int3ext_s2.inp",
+						"expand_symmetrizer": true,
+						"import": false
+					},
+					{
 						"name": "R1",
 						"equation_file": "mrcepa0_res1_i1.inp"
 					},
