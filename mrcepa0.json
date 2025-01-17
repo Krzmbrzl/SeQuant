@@ -75,6 +75,24 @@
 						"expand_symmetrizer": true
 					}
 				]
+			},
+			{
+				"name": "Update_INTkx",
+				"results": [
+					{
+						"name": "INTkx",
+						"equation_file": "mrcepa0_intkx_p0.inp"
+					},
+					{
+						"name": "INTkx",
+						"equation_file": "mrcepa0_intkx_p1.inp",
+						"expand_symmetrizer": true
+					},
+					{
+						"name": "INTkx",
+						"equation_file": "mrcepa0_intkx_p2.inp"
+					}
+				]
 			}
 		]
 	},
