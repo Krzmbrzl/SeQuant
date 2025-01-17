@@ -81,16 +81,19 @@
 				"results": [
 					{
 						"name": "INTkx",
-						"equation_file": "mrcepa0_intkx_p0.inp"
+						"equation_file": "mrcepa0_intkx_p0.inp",
+						"import": false
 					},
 					{
 						"name": "INTkx",
 						"equation_file": "mrcepa0_intkx_p1.inp",
-						"expand_symmetrizer": true
+						"expand_symmetrizer": true,
+						"import": false
 					},
 					{
 						"name": "INTkx",
-						"equation_file": "mrcepa0_intkx_p2.inp"
+						"equation_file": "mrcepa0_intkx_p2.inp",
+						"import": false
 					}
 				]
 			}
