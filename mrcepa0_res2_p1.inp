@@ -2,12 +2,12 @@ R2{a1,a2;u1,i1} =
   + 1/2 A{;a1,a2} GAM0{u2;u1} g{a1,a2;u2,i1} 
   - 1/2 A{;a1,a2} GAM0{u3;u1} g{a1,a2;u2,u3} T1{u2;i1} 
   - 1/2 1/2 A{;a1,a2} GAM0{u3,u4;u1,u2} g{a1,a2;u3,u4} T1{u2;i1} 
-  - A{;a1,a2} INT3axt{a2;u1} f{a1;i1} 
-  + 1/2 A{;a1,a2} INT3axt{a3;u1} g{a1,a2;a3,i1} 
-  + A{;a1,a2} INT3axt{a2,u3;u1,u2} g{a1,u2;u3,i1} 
-  + A{;a1,a2} INT3axt{a1,u2;u1,i1} f{a2;u2} 
-  + A{;a1,a2} INT3axt{a1,u2;u1,i3} g{i3,a2;u2,i1} 
-  + 1/2 A{;a1,a2} INT3axt{a3,u2;u1,i1} g{a1,a2;a3,u2} 
+  - A{;a1,a2} INT3ext{a2;u1} f{a1;i1} 
+  + 1/2 A{;a1,a2} INT3ext{a3;u1} g{a1,a2;a3,i1} 
+  + A{;a1,a2} INT3ext{a2,u3;u1,u2} g{a1,u2;u3,i1} 
+  + A{;a1,a2} INT3ext{a1,u2;u1,i1} f{a2;u2} 
+  + A{;a1,a2} INT3ext{a1,u2;u1,i3} g{i3,a2;u2,i1} 
+  + 1/2 A{;a1,a2} INT3ext{a3,u2;u1,i1} g{a1,a2;a3,u2} 
   - 1/2 A{;a1,a2} GAM0{u3,u4;u1,u2} g{a2,u2;u3,u4} T1s{a1;i1} 
   + 1/2 A{;a1,a2} INTkx{a1,a2;u1,i1} H 
   - 1/2 A{;a1,a2} INTkx{a1,a2;u1,i3} f{i3;i1} 

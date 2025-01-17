@@ -1,7 +1,7 @@
 R2{a1,a2;u1,u2} = 
   + 1/2 1/4 A{u1,u2;a1,a2} GAM0{u3,u4;u1,u2} g{a1,a2;u3,u4} 
-  - 1/2 A{u1,u2;a1,a2} INT3axt{a2,u3;u1,u2} f{a1;u3} 
-  + 1/4 A{u1,u2;a1,a2} INT3axt{a3,u3;u1,u2} g{a1,a2;a3,u3} 
+  - 1/2 A{u1,u2;a1,a2} INT3ext{a2,u3;u1,u2} f{a1;u3} 
+  + 1/4 A{u1,u2;a1,a2} INT3ext{a3,u3;u1,u2} g{a1,a2;a3,u3} 
   + 1/2 1/2 A{u1,u2;a1,a2} GAM0{u3,u4;u1,u2} g{i3,a1;u3,u4} T1s{a2;i3} 
   + 1/4 A{u1,u2;a1,a2} GAM0{u3,u4;u1,u2} f{i3;u3} T2g{a1,a2;u4,i3} 
   + 1/2 A{u1,u2;a1,a2} GAM0{u3,u4;u1,u2} g{i3,a1;a3,u3} T2g{a2,a3;u4,i3} 
