@@ -44,6 +44,15 @@ def main():
     itf += skeleton[skeleton.index("---- code"):]
     itf += "\n\n"
     itf += raw[raw.index("---- code"):]
+    itf += "\n"
+
+    if not "code(\"Update_INTkx\")" in itf:
+        itf += "\n---- code(\"Update_INTkx\")\n"
+        itf += "# Set INTkx tensors to zero\n"
+        itf += "alloc INTkx:eeaa[abuv]\nstore INTkx:eeaa[abuv]\n\n"
+        itf += "alloc INTkx:eeac[abui]\nstore INTkx:eeac[abui]\n\n"
+        itf += "alloc INTkx:eecc[abij]\nstore INTkx:eecc[abij]\n\n"
+
     itf += "\n\n---- end\n"
 
     print(itf)

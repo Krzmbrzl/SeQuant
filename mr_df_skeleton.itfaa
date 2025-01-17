@@ -419,31 +419,6 @@ drop T2:ec[ai]
 store T1s:ec[ai]
 
 
----- code("Update_INTkx")
-alloc INTkx:eeaa[abpq]
-alloc ITIN[abpq]
-load T2:eeaa[abrs], Ym2[rspq]
-.ITIN[abpq] += 0.5*T2:eeaa[abrs] Ym2[rspq]
-drop Ym2[rspq], T2:eeaa[abrs]
-.INTkx:eeaa[abpq] += (ITIN[abpq] + ITIN[baqp])
-drop ITIN[abpq]
-store INTkx:eeaa[abpq]
-
-alloc INTkx:eeac[abpi]
-load T2:eeac[abqi], Ym1[qp]
-.INTkx:eeac[abpi] += T2:eeac[abqi] Ym1[qp]
-drop Ym1[qp], T2:eeac[abqi]
-store INTkx:eeac[abpi]
-
-alloc INTkx:eecc[abij]
-alloc ITIN[abij]
-load T2:eecc[abij]
-.ITIN[abij] += 0.5*T2:eecc[abij]
-drop T2:eecc[abij]
-.INTkx:eecc[abij] += (ITIN[abij] + ITIN[baji])
-drop ITIN[abij]
-store INTkx:eecc[abij]
-
 ---- code("Transform_K")
 // Transform output form Kext into separate blocks
 alloc K4E:eecc[abij], K4E:eeac[abpi], K4E:eeaa[abpq]
