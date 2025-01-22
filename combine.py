@@ -34,7 +34,7 @@ def main():
         if not line.startswith("tensor:"):
             continue
 
-        tensor_spec = line[:line.index("[")]
+        tensor_spec = line[:line.index("[") + 1]
         
         if not tensor_spec in declarations:
             declarations += "\n" + line
