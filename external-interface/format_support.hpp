@@ -138,8 +138,8 @@ template<> struct fmt::formatter< sequant::ResultExpr > : fmt::formatter< std::s
 			return format_to(ctx.out(), "{} =\n{}", label, result.expression());
 		}
 
-		return format_to(ctx.out(), "{}[{};{};{}] =\n{}", label, fmt::join(result.bra(), ", "), fmt::join(result.ket(), ", "),
-						 fmt::join(result.auxiliary(), ", "), result.expression());
+		return format_to(ctx.out(), "{}[{};{};{}] =\n{}", label, fmt::join(result.bra(), ", "),
+						 fmt::join(result.ket(), ", "), fmt::join(result.auxiliary(), ", "), result.expression());
 	}
 };
 
