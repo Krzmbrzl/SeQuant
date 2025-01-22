@@ -5,7 +5,8 @@
 		"default_options": {
 			"projection": "biorthogonal",
 			"spintracing": "closed_shell",
-			"density_fitting": false
+			"density_fitting": false,
+			"term_by_term": true
 		},
 		"code_blocks": [
 			{
