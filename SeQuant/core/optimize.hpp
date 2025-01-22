@@ -315,11 +315,14 @@ ExprPtr single_term_opt(Product const& prod, IdxToSz const& idxsz) {
       result.push_back(tensors.at(i));
     }
 
-  auto& p_ = (*result.rbegin()).as<Product>();
-  for (auto&& v : prod | reverse | filter(&Expr::template is<Variable>))
-    p_.prepend(1, v, Product::Flatten::No);
+  for (ExprPtr& expr : prod | reverse | filter([](const ExprPtr& expr) {
+                         return !expr.is<Tensor>();
+                       })) {
+    result.push_back(ex<Product>(1, ExprPtrList{expr, *result.rbegin()},
+                                 Product::Flatten::No));
+  }
 
-  p_.scale(prod.scalar());
+  result.rbegin()->as<Product>().scale(prod.scalar());
   return *result.rbegin();
 }
 
@@ -351,7 +354,7 @@ template <typename IdxToSize,
               std::enable_if_t<std::is_invocable_r_v<size_t, IdxToSize, Index>>>
 ExprPtr optimize(ExprPtr const& expr, IdxToSize const& idx2size) {
   using ranges::views::transform;
-  if (expr->is<Tensor>())
+  if (expr->is<Tensor>() || expr->is<Constant>() || expr->is<Variable>())
     return expr->clone();
   else if (expr->is<Product>())
     return opt::single_term_opt(expr->as<Product>(), idx2size);
