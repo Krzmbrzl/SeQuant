@@ -260,6 +260,14 @@ TEST_CASE("Spin", "[spin]") {
     REQUIRE(to_latex(result) == L"{{{\\frac{1}{4}}}}");
     REQUIRE(to_latex(swap_spin(exprPtr)) == L"{{{\\frac{1}{4}}}}");
   }
+  SECTION("Variable") {
+    auto exprPtr = ex<Variable>(L"Var");
+    auto result = spintrace(exprPtr);
+    REQUIRE(result->is<Variable>());
+    REQUIRE(result->is_atom());
+    REQUIRE(result->as<Variable>().label() == L"Var");
+    REQUIRE(to_latex(swap_spin(exprPtr->clone())) == to_latex(exprPtr));
+  }
 
   SECTION("Tensor") {
     const auto expr =
@@ -304,6 +312,27 @@ TEST_CASE("Spin", "[spin]") {
           L"{{{2}}{g^{{a_1}{a_2}}_{{i_1}{i_2}}}{t^{{i_1}}_{{a_1}}}{t^{{i_2}}_{"
           L"{a_2}}}}\\bigr) }");
     }
+  }
+
+  SECTION("Scaled Product with variable") {
+    ExprPtr expr = parse_expr(L"1/2 Var g{i1,i2;a1,a2}:A t{a1;i1} t{a2;i2}");
+    auto result = spintrace(expr, {{L"i_1", L"a_1"}});
+    canonicalize(result);
+    REQUIRE(
+        deparse(result) ==
+        std::wstring(
+            L"2 Var * g{i_1,i_2;a_1,a_2}:N * t{a_1;i_1}:N * t{a_2;i_2}:N"
+            " - 1 Var * g{i_1,i_2;a_1,a_2}:N * t{a_1;i_2}:N * t{a_2;i_1}:N"));
+  }
+
+  SECTION("Tensor times variable") {
+    ResultExpr expr = parse_result_expr(
+        L"R2{a1,a2;i1,i2}:A = 1/4 A{i1,i2;a1,a2}:A INTkx{a1,a2;i1,i2}:A H");
+    auto results = closed_shell_spintrace(expr);
+    REQUIRE(deparse(results.at(0)) ==
+            std::wstring(L"R2{a_1,a_2;i_1,i_2}:N = -1 H * S{i_1,i_2;a_1,a_2}:N "
+                         L"* INTkx{a_1,a_2;i_2,i_1}:N + 2 H * "
+                         L"S{i_1,i_2;a_1,a_2}:N * INTkx{a_1,a_2;i_1,i_2}:N"));
   }
 
   SECTION("Sum") {
@@ -1654,9 +1683,9 @@ SECTION("ResultExpr") {
         result.expression().clone(),
         {{L"i_1", L"a_1"}, {L"i_2", L"a_2"}, {L"i_3", L"a_3"}});
 
-	container::svector<ResultExpr> traced = closed_shell_spintrace(result);
+    container::svector<ResultExpr> traced = closed_shell_spintrace(result);
 
-	REQUIRE(traced.size() == 1);
+    REQUIRE(traced.size() == 1);
     REQUIRE(traced[0].expression() == expected);
     REQUIRE(traced[0].symmetry() == Symmetry::nonsymm);
     REQUIRE(traced[0].particle_symmetry() == ParticleSymmetry::symm);
