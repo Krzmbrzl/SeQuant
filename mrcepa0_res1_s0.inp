@@ -3,7 +3,6 @@ R1{a1;u1} =
   + 1/2 GAM0{u3,u4;u1,u2} g{a1,u2;u3,u4} 
   + GAM0{u3;u1} g{i2,a1;u2,u3} T1{u2;i2} 
   + 1/2 GAM0{u3,u4;u1,u2} g{i2,a1;u3,u4} T1{u2;i2} 
-  + INT3ext{a1;u1} H
   + INT3ext{a2;u1} f{a1;a2} 
   + INT3ext{a1,u3;u1,u2} f{u2;u3} 
   + INT3ext{a2,u3;u1,u2} g{a1,u2;a2,u3} 

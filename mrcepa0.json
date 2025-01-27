@@ -33,6 +33,12 @@
 				"name": "Residual",
 				"results": [
 					{
+						"name": "ECEPA",
+						"equation_file": "mrcepa0_ecepa.inp",
+						"projection": "primitive",
+						"import": false
+					},
+					{
 						"name": "INT3ext",
 						"equation_file": "mrcepa0_int3ext_s0.inp",
 						"expand_symmetrizer": true,

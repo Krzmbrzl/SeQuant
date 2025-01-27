@@ -13,7 +13,6 @@ R2{a1,u2;u1,i1} =
   + INT3ext{a2;u1} g{a1,u2;a2,i1} 
   - INT3ext{a2,u2;u1,u3} g{a1,u3;a2,i1} 
   - INT3ext{a1,u4;u1,u3} g{u2,u3;u4,i1} 
-  + INT3ext{a1,u2;u1,i1} H
   - INT3ext{a1,u2;u1,i2} f{i2;i1} 
   + INT3ext{a2,u2;u1,i1} f{a1;a2} 
   + INT3ext{a1,u3;u1,i1} f{u2;u3} 

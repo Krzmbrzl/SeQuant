@@ -1,0 +1,3 @@
+ECEPA = 
+  + GAM0{u2;u1} f{u1;u2} 
+  + 1/4 GAM0{u3,u4;u1,u2} g{u1,u2;u3,u4}
