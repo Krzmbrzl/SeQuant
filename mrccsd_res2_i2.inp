@@ -1,0 +1,417 @@
+R2{u1,u2;i1,i2} = 
+  + 1/4 A{i1,i2;u1,u2} g{u1,u2;i1,i2} 
+  - 1/2 A{i1,i2;u1,u2} GAM0{u2;u3} g{u1,u3;i1,i2} 
+  + 1/2 1/4 A{i1,i2;u1,u2} GAM0{u1,u2;u3,u4} g{u3,u4;i1,i2} 
+  + 1/2 A{i1,i2;u1,u2} g{i3,u1;i1,i2} T1{u2;i3} 
+  - 1/2 A{i1,i2;u1,u2} g{i3,u1;i1,i2} GAM0{u2;u3} T1{u3;i3} 
+  - 1/2 A{i1,i2;u1,u2} GAM0{u1;u3} g{i3,u3;i1,i2} T1{u2;i3} 
+  + 1/4 A{i1,i2;u1,u2} GAM0{u1,u2;u3,u4} g{i3,u3;i1,i2} T1{u4;i3} 
+  - 1/2 A{i1,i2;u1,u2} g{u1,u2;u3,i1} T1{u3;i2} 
+  + A{i1,i2;u1,u2} GAM0{u2;u3} g{u1,u3;u4,i1} T1{u4;i2} 
+  - 1/2 1/2 A{i1,i2;u1,u2} GAM0{u1,u2;u3,u4} g{u3,u4;u5,i1} T1{u5;i2} 
+  - 1/2 A{i1,i2;u1,u2} g{u1,u2;a3,i1} INT3ext{a3;i2} 
+  - A{i1,i2;u1,u2} GAM0{u2;u3} g{u1,u3;a3,i2} T1s{a3;i1} 
+  - 1/2 1/2 A{i1,i2;u1,u2} GAM0{u1,u2;u3,u4} g{u3,u4;a3,i1} T1s{a3;i2} 
+  - 1/2 A{i1,i2;u1,u2} f{i3;i2} T2g{u1,u2;i1,i3} 
+  + A{i1,i2;u1,u2} f{i3;i2} GAM0{u2;u3} T2g{u1,u3;i1,i3} 
+  + 1/2 1/2 A{i1,i2;u1,u2} f{i3;i1} GAM0{u1,u2;u3,u4} T2g{u3,u4;i2,i3} 
+  + 1/2 A{i1,i2;u1,u2} f{u2;u3} T2g{u1,u3;i1,i2} 
+  - 1/2 A{i1,i2;u1,u2} f{u1;u3} GAM0{u2;u4} T2g{u3,u4;i1,i2} 
+  - 1/2 A{i1,i2;u1,u2} GAM0{u2;u3} f{u3;u4} T2g{u1,u4;i1,i2} 
+  - 1/4 A{i1,i2;u1,u2} GAM0{u1,u2;u3,u4} f{u3;u5} T2g{u4,u5;i1,i2} 
+  + 1/2 1/4 A{i1,i2;u1,u2} g{i3,i4;i1,i2} T2g{u1,u2;i3,i4} 
+  + 1/2 1/2 A{i1,i2;u1,u2} g{i3,i4;i1,i2} GAM0{u1;u3} T2g{u2,u3;i3,i4} 
+  + 1/4 1/4 A{i1,i2;u1,u2} g{i3,i4;i1,i2} GAM0{u1,u2;u3,u4} T2g{u3,u4;i3,i4} 
+  + A{i1,i2;u1,u2} g{i3,u2;u3,i2} T2g{u1,u3;i1,i3} 
+  + A{i1,i2;u1,u2} g{i3,u1;u3,i1} GAM0{u2;u4} T2g{u3,u4;i2,i3} 
+  - A{i1,i2;u1,u2} g{i3,u2;u4,i2} GAM0{u4;u3} T2g{u1,u3;i1,i3} 
+  + 1/2 A{i1,i2;u1,u2} g{i3,u1;u5,i1} GAM0{u2,u5;u3,u4} T2g{u3,u4;i2,i3} 
+  - A{i1,i2;u1,u2} GAM0{u2;u3} g{i3,u3;u4,i2} T2g{u1,u4;i1,i3} 
+  + 1/2 A{i1,i2;u1,u2} GAM0{u1,u2;u3,u4} g{i3,u3;u5,i1} T2g{u4,u5;i2,i3} 
+  + 1/2 A{i1,i2;u1,u2} GAM0{u4;u3} g{i3,u3;u4,i2} T2g{u1,u2;i1,i3} 
+  + A{i1,i2;u1,u2} GAM0{u2,u5;u3,u4} g{i3,u3;u5,i2} T2g{u1,u4;i1,i3} 
+  + 1/2 1/4 A{i1,i2;u1,u2} g{u1,u2;u3,u4} T2g{u3,u4;i1,i2} 
+  - 1/4 A{i1,i2;u1,u2} g{u1,u2;u3,u5} GAM0{u5;u4} T2g{u3,u4;i1,i2} 
+  - 1/2 1/2 A{i1,i2;u1,u2} GAM0{u2;u3} g{u1,u3;u4,u5} T2g{u4,u5;i1,i2} 
+  + 1/2 A{i1,i2;u1,u2} GAM0{u5;u3} g{u2,u3;u4,u5} T2g{u1,u4;i1,i2} 
+  - 1/2 A{i1,i2;u1,u2} GAM0{u2,u6;u3,u4} g{u1,u3;u5,u6} T2g{u4,u5;i1,i2} 
+  + 1/4 1/4 A{i1,i2;u1,u2} GAM0{u1,u2;u3,u4} g{u3,u4;u5,u6} T2g{u5,u6;i1,i2} 
+  - 1/2 1/2 A{i1,i2;u1,u2} GAM0{u2,u6;u3,u4} g{u3,u4;u5,u6} T2g{u1,u5;i1,i2} 
+  + A{i1,i2;u1,u2} GAM0{u4;u3} g{u1,u3;a3,i2} T2g{a3,u2;u4,i1} 
+  - A{i1,i2;u1,u2} GAM0{u2,u5;u3,u4} g{u1,u3;a3,i1} T2g{a3,u4;u5,i2} 
+  + 1/2 A{i1,i2;u1,u2} GAM0{u1,u5;u3,u4} g{u3,u4;a3,i1} T2g{a3,u2;u5,i2} 
+  - 1/2 A{i1,i2;u1,u2} f{u2;a3} T2g{a3,u1;i1,i2} 
+  - 1/2 A{i1,i2;u1,u2} f{u1;a3} GAM0{u2;u3} T2g{a3,u3;i1,i2} 
+  + 1/2 A{i1,i2;u1,u2} GAM0{u2;u3} f{u3;a3} T2g{a3,u1;i1,i2} 
+  + 1/4 A{i1,i2;u1,u2} GAM0{u1,u2;u3,u4} f{u3;a3} T2g{a3,u4;i1,i2} 
+  - A{i1,i2;u1,u2} g{i3,u2;a3,i2} T2g{a3,u1;i1,i3} 
+  + A{i1,i2;u1,u2} g{i3,u1;a3,i1} GAM0{u2;u3} T2g{a3,u3;i2,i3} 
+  + A{i1,i2;u1,u2} GAM0{u2;u3} g{i3,u3;a3,i2} T2g{a3,u1;i1,i3} 
+  - 1/2 A{i1,i2;u1,u2} GAM0{u1,u2;u3,u4} g{i3,u3;a3,i1} T2g{a3,u4;i2,i3} 
+  + 1/4 A{i1,i2;u1,u2} g{u1,u2;a3,u3} INT3ext{a3,u3;i1,i2} 
+  - 1/2 A{i1,i2;u1,u2} GAM0{u2;u3} g{u1,u3;a3,u4} T2g{a3,u4;i1,i2} 
+  - 1/2 A{i1,i2;u1,u2} GAM0{u4;u3} g{u2,u3;a3,u4} T2g{a3,u1;i1,i2} 
+  + 1/2 A{i1,i2;u1,u2} GAM0{u2,u5;u3,u4} g{u1,u3;a3,u5} T2g{a3,u4;i1,i2} 
+  + 1/2 1/4 A{i1,i2;u1,u2} GAM0{u1,u2;u3,u4} g{u3,u4;a3,u5} T2g{a3,u5;i1,i2} 
+  + 1/2 1/2 A{i1,i2;u1,u2} GAM0{u2,u5;u3,u4} g{u3,u4;a3,u5} T2g{a3,u1;i1,i2} 
+  + 1/2 1/4 A{i1,i2;u1,u2} g{u1,u2;a3,a4} INTkx{a3,a4;i1,i2} 
+  - 1/2 1/2 A{i1,i2;u1,u2} GAM0{u2;u3} g{u1,u3;a3,a4} T2g{a3,a4;i1,i2} 
+  + 1/4 1/4 A{i1,i2;u1,u2} GAM0{u1,u2;u3,u4} g{u3,u4;a3,a4} T2g{a3,a4;i1,i2} 
+  - 1/2 1/2 A{i1,i2;u1,u2} g{i3,i4;i1,i2} T1{u2;i3} T1{u1;i4} 
+  + 1/2 A{i1,i2;u1,u2} g{i3,i4;i1,i2} T1{u2;i3} GAM0{u1;u3} T1{u3;i4} 
+  + 1/2 1/4 A{i1,i2;u1,u2} g{i3,i4;i1,i2} GAM0{u1,u2;u3,u4} T1{u3;i3} T1{u4;i4} 
+  - A{i1,i2;u1,u2} g{i3,u1;u3,i1} T1{u3;i2} T1{u2;i3} 
+  + A{i1,i2;u1,u2} g{i3,u1;u3,i1} T1{u3;i2} GAM0{u2;u4} T1{u4;i3} 
+  + A{i1,i2;u1,u2} GAM0{u1;u3} g{i3,u3;u4,i1} T1{u4;i2} T1{u2;i3} 
+  - 1/2 A{i1,i2;u1,u2} GAM0{u1,u2;u3,u5} g{i3,u3;u4,i1} T1{u4;i2} T1{u5;i3} 
+  - 1/2 1/2 A{i1,i2;u1,u2} g{u1,u2;u3,u4} T1{u3;i2} T1{u4;i1} 
+  - 1/2 A{i1,i2;u1,u2} GAM0{u2;u3} g{u1,u3;u4,u5} T1{u4;i1} T1{u5;i2} 
+  + 1/4 1/2 A{i1,i2;u1,u2} GAM0{u1,u2;u3,u4} g{u3,u4;u5,u6} T1{u5;i1} T1{u6;i2} 
+  + 1/2 A{i1,i2;u1,u2} GAM0{u2;u3} g{u1,u3;a3,i1} T1{a3;u4} T1{u4;i2} 
+  - 1/4 1/2 A{i1,i2;u1,u2} GAM0{u1,u2;u3,u4} g{u3,u4;a3,i1} T1{a3;u5} T1{u5;i2} 
+  + A{i1,i2;u1,u2} g{i3,u1;a3,i2} T1{u2;i3} T1s{a3;i1} 
+  - A{i1,i2;u1,u2} g{i3,u1;a3,i2} GAM0{u2;u3} T1{u3;i3} T1s{a3;i1} 
+  - A{i1,i2;u1,u2} GAM0{u2;u3} g{i3,u3;a3,i1} T1{u1;i3} T1s{a3;i2} 
+  - 1/2 A{i1,i2;u1,u2} GAM0{u1,u2;u3,u4} g{i3,u3;a3,i1} T1{u4;i3} T1s{a3;i2} 
+  - A{i1,i2;u1,u2} GAM0{u2;u3} g{u1,u3;a3,u4} T1{u4;i2} T1s{a3;i1} 
+  - 1/2 1/2 A{i1,i2;u1,u2} GAM0{u1,u2;u3,u4} g{u3,u4;a3,u5} T1{u5;i1} T1s{a3;i2} 
+  + 1/2 A{i1,i2;u1,u2} GAM0{u2;u3} g{u1,u3;a3,a4} T1s{a3;i2} T1s{a4;i1} 
+  + 1/4 1/2 A{i1,i2;u1,u2} GAM0{u1,u2;u3,u4} g{u3,u4;a3,a4} T1s{a3;i1} T1s{a4;i2} 
+  - 1/2 A{i1,i2;u1,u2} f{i3;u3} T1{u3;i2} T2g{u1,u2;i1,i3} 
+  + A{i1,i2;u1,u2} f{i3;u3} T1{u3;i2} GAM0{u2;u4} T2g{u1,u4;i1,i3} 
+  + 1/2 1/2 A{i1,i2;u1,u2} f{i3;u3} T1{u3;i1} GAM0{u1,u2;u4,u5} T2g{u4,u5;i2,i3} 
+  - 1/2 A{i1,i2;u1,u2} f{i3;u3} T1{u2;i3} T2g{u1,u3;i1,i2} 
+  + 1/2 A{i1,i2;u1,u2} f{i3;u3} T1{u1;i3} GAM0{u2;u4} T2g{u3,u4;i1,i2} 
+  + 1/2 A{i1,i2;u1,u2} f{i3;u4} GAM0{u2;u3} T1{u3;i3} T2g{u1,u4;i1,i2} 
+  - 1/4 A{i1,i2;u1,u2} f{i3;u4} GAM0{u1,u2;u3,u5} T1{u3;i3} T2g{u4,u5;i1,i2} 
+  - 1/2 A{i1,i2;u1,u2} g{i3,i4;u3,i2} T1{u3;i3} T2g{u1,u2;i1,i4} 
+  + A{i1,i2;u1,u2} g{i3,i4;u3,i2} T1{u3;i3} GAM0{u2;u4} T2g{u1,u4;i1,i4} 
+  + 1/2 1/2 A{i1,i2;u1,u2} g{i3,i4;u3,i1} T1{u3;i3} GAM0{u1,u2;u4,u5} T2g{u4,u5;i2,i4} 
+  - 1/2 1/2 A{i1,i2;u1,u2} g{i3,i4;u3,i1} T1{u3;i2} T2g{u1,u2;i3,i4} 
+  - 1/2 A{i1,i2;u1,u2} g{i3,i4;u3,i1} T1{u3;i2} GAM0{u1;u4} T2g{u2,u4;i3,i4} 
+  - 1/4 1/2 A{i1,i2;u1,u2} g{i3,i4;u3,i1} T1{u3;i2} GAM0{u1,u2;u4,u5} T2g{u4,u5;i3,i4} 
+  + A{i1,i2;u1,u2} g{i3,i4;u3,i2} T1{u2;i3} T2g{u1,u3;i1,i4} 
+  - A{i1,i2;u1,u2} g{i3,i4;u3,i1} T1{u2;i3} GAM0{u1;u4} T2g{u3,u4;i2,i4} 
+  - A{i1,i2;u1,u2} g{i3,i4;u4,i2} T1{u2;i3} GAM0{u4;u3} T2g{u1,u3;i1,i4} 
+  - 1/2 A{i1,i2;u1,u2} g{i3,i4;u5,i1} T1{u2;i3} GAM0{u1,u5;u3,u4} T2g{u3,u4;i2,i4} 
+  - A{i1,i2;u1,u2} g{i3,i4;u4,i2} GAM0{u2;u3} T1{u3;i3} T2g{u1,u4;i1,i4} 
+  - 1/2 A{i1,i2;u1,u2} g{i3,i4;u4,i1} GAM0{u1,u2;u3,u5} T1{u3;i3} T2g{u4,u5;i2,i4} 
+  + 1/2 A{i1,i2;u1,u2} g{i3,i4;u4,i2} GAM0{u4;u3} T1{u3;i3} T2g{u1,u2;i1,i4} 
+  + A{i1,i2;u1,u2} g{i3,i4;u5,i2} GAM0{u2,u5;u3,u4} T1{u3;i3} T2g{u1,u4;i1,i4} 
+  + 1/2 A{i1,i2;u1,u2} g{i3,u2;u3,u4} T1{u3;i3} T2g{u1,u4;i1,i2} 
+  - 1/2 A{i1,i2;u1,u2} g{i3,u1;u3,u4} T1{u3;i3} GAM0{u2;u5} T2g{u4,u5;i1,i2} 
+  - A{i1,i2;u1,u2} g{i3,u2;u3,u4} T1{u3;i2} T2g{u1,u4;i1,i3} 
+  - A{i1,i2;u1,u2} g{i3,u1;u3,u4} T1{u3;i1} GAM0{u2;u5} T2g{u4,u5;i2,i3} 
+  + A{i1,i2;u1,u2} g{i3,u2;u3,u5} T1{u3;i2} GAM0{u5;u4} T2g{u1,u4;i1,i3} 
+  - 1/2 A{i1,i2;u1,u2} g{i3,u1;u3,u6} T1{u3;i1} GAM0{u2,u6;u4,u5} T2g{u4,u5;i2,i3} 
+  + 1/2 1/2 A{i1,i2;u1,u2} g{i3,u1;u3,u4} T1{u2;i3} T2g{u3,u4;i1,i2} 
+  - 1/2 A{i1,i2;u1,u2} g{i3,u1;u3,u5} T1{u2;i3} GAM0{u5;u4} T2g{u3,u4;i1,i2} 
+  - 1/2 1/2 A{i1,i2;u1,u2} g{i3,u1;u4,u5} GAM0{u2;u3} T1{u3;i3} T2g{u4,u5;i1,i2} 
+  + 1/2 A{i1,i2;u1,u2} g{i3,u2;u4,u5} GAM0{u5;u3} T1{u3;i3} T2g{u1,u4;i1,i2} 
+  + 1/2 A{i1,i2;u1,u2} g{i3,u1;u4,u6} GAM0{u2,u6;u3,u5} T1{u3;i3} T2g{u4,u5;i1,i2} 
+  - 1/2 A{i1,i2;u1,u2} GAM0{u2;u3} g{i3,u3;u4,u5} T1{u4;i3} T2g{u1,u5;i1,i2} 
+  - 1/4 A{i1,i2;u1,u2} GAM0{u1,u2;u3,u5} g{i3,u3;u4,u6} T1{u4;i3} T2g{u5,u6;i1,i2} 
+  + A{i1,i2;u1,u2} GAM0{u2;u3} g{i3,u3;u4,u5} T1{u4;i2} T2g{u1,u5;i1,i3} 
+  - 1/2 A{i1,i2;u1,u2} GAM0{u1,u2;u3,u5} g{i3,u3;u4,u6} T1{u4;i1} T2g{u5,u6;i2,i3} 
+  - 1/2 A{i1,i2;u1,u2} GAM0{u5;u3} g{i3,u3;u4,u5} T1{u4;i2} T2g{u1,u2;i1,i3} 
+  - A{i1,i2;u1,u2} GAM0{u2,u6;u3,u5} g{i3,u3;u4,u6} T1{u4;i2} T2g{u1,u5;i1,i3} 
+  + 1/2 1/2 A{i1,i2;u1,u2} GAM0{u2;u3} g{i3,u3;u4,u5} T1{u1;i3} T2g{u4,u5;i1,i2} 
+  - 1/2 A{i1,i2;u1,u2} GAM0{u5;u3} g{i3,u3;u4,u5} T1{u2;i3} T2g{u1,u4;i1,i2} 
+  + 1/2 A{i1,i2;u1,u2} GAM0{u2,u6;u3,u4} g{i3,u3;u5,u6} T1{u1;i3} T2g{u4,u5;i1,i2} 
+  + 1/2 1/4 A{i1,i2;u1,u2} GAM0{u1,u2;u3,u4} g{i3,u3;u5,u6} T1{u4;i3} T2g{u5,u6;i1,i2} 
+  - 1/2 A{i1,i2;u1,u2} GAM0{u2,u6;u3,u4} g{i3,u3;u5,u6} T1{u4;i3} T2g{u1,u5;i1,i2} 
+  + 1/2 1/2 A{i1,i2;u1,u2} f{u2;a3} T1{a3;u3} T2g{u1,u3;i1,i2} 
+  - 1/2 1/2 A{i1,i2;u1,u2} f{u1;a3} T1{a3;u3} GAM0{u2;u4} T2g{u3,u4;i1,i2} 
+  - 1/2 1/2 A{i1,i2;u1,u2} GAM0{u2;u3} f{u3;a3} T1{a3;u4} T2g{u1,u4;i1,i2} 
+  - 1/2 1/4 A{i1,i2;u1,u2} GAM0{u1,u2;u3,u4} f{u3;a3} T1{a3;u5} T2g{u4,u5;i1,i2} 
+  + 1/2 A{i1,i2;u1,u2} g{i3,u2;a3,i2} T1{a3;u3} T2g{u1,u3;i1,i3} 
+  + 1/2 A{i1,i2;u1,u2} g{i3,u1;a3,i1} T1{a3;u3} GAM0{u2;u4} T2g{u3,u4;i2,i3} 
+  - A{i1,i2;u1,u2} g{i3,u2;a3,i2} INT3ext{a3;u3} T2g{u1,u3;i1,i3} 
+  - 1/2 A{i1,i2;u1,u2} g{i3,u1;a3,i1} INT3ext{a3,u2;u3,u4} T2g{u3,u4;i2,i3} 
+  - 1/2 A{i1,i2;u1,u2} GAM0{u2;u3} g{i3,u3;a3,i2} T1{a3;u4} T2g{u1,u4;i1,i3} 
+  + 1/2 1/2 A{i1,i2;u1,u2} GAM0{u1,u2;u3,u4} g{i3,u3;a3,i1} T1{a3;u5} T2g{u4,u5;i2,i3} 
+  + 1/2 A{i1,i2;u1,u2} INT3ext{a3;u3} g{i3,u3;a3,i2} T2g{u1,u2;i1,i3} 
+  - A{i1,i2;u1,u2} INT3ext{a3,u2;u3,u4} g{i3,u3;a3,i2} T2g{u1,u4;i1,i3} 
+  + 1/2 1/2 A{i1,i2;u1,u2} GAM0{u2;u3} g{u1,u3;a3,u4} T1{a3;u5} T2g{u4,u5;i1,i2} 
+  + 1/2 1/2 A{i1,i2;u1,u2} GAM0{u5;u3} g{u2,u3;a3,u5} T1{a3;u4} T2g{u1,u4;i1,i2} 
+  - 1/2 1/2 A{i1,i2;u1,u2} GAM0{u2,u6;u3,u4} g{u1,u3;a3,u6} T1{a3;u5} T2g{u4,u5;i1,i2} 
+  - 1/2 A{i1,i2;u1,u2} INT3ext{a3;u3} g{u2,u3;a3,u4} T2g{u1,u4;i1,i2} 
+  - 1/2 A{i1,i2;u1,u2} INT3ext{a3,u2;u3,u4} g{u1,u3;a3,u5} T2g{u4,u5;i1,i2} 
+  - 1/4 1/4 A{i1,i2;u1,u2} GAM0{u1,u2;u3,u4} g{u3,u4;a3,u5} T1{a3;u6} T2g{u5,u6;i1,i2} 
+  - 1/4 1/2 A{i1,i2;u1,u2} GAM0{u2,u6;u3,u4} g{u3,u4;a3,u6} T1{a3;u5} T2g{u1,u5;i1,i2} 
+  - 1/2 1/2 A{i1,i2;u1,u2} INT3ext{a3,u2;u3,u4} g{u3,u4;a3,u5} T2g{u1,u5;i1,i2} 
+  - 1/2 A{i1,i2;u1,u2} f{i3;a3} T2g{u1,u2;i1,i3} T1s{a3;i2} 
+  + A{i1,i2;u1,u2} f{i3;a3} GAM0{u2;u3} T2g{u1,u3;i1,i3} T1s{a3;i2} 
+  - 1/2 1/2 A{i1,i2;u1,u2} f{i3;a3} GAM0{u1,u2;u3,u4} T2g{u3,u4;i1,i3} T1s{a3;i2} 
+  + 1/2 A{i1,i2;u1,u2} g{i3,i4;a3,i2} T2g{u1,u2;i1,i3} T1s{a3;i4} 
+  - A{i1,i2;u1,u2} g{i3,i4;a3,i2} GAM0{u2;u3} T2g{u1,u3;i1,i3} T1s{a3;i4} 
+  - 1/2 1/2 A{i1,i2;u1,u2} g{i3,i4;a3,i1} GAM0{u1,u2;u3,u4} T2g{u3,u4;i2,i3} T1s{a3;i4} 
+  - 1/2 1/2 A{i1,i2;u1,u2} g{i3,i4;a3,i1} T2g{u1,u2;i3,i4} T1s{a3;i2} 
+  + 1/2 A{i1,i2;u1,u2} g{i3,i4;a3,i1} GAM0{u2;u3} T2g{u1,u3;i3,i4} T1s{a3;i2} 
+  - 1/4 1/2 A{i1,i2;u1,u2} g{i3,i4;a3,i1} GAM0{u1,u2;u3,u4} T2g{u3,u4;i3,i4} T1s{a3;i2} 
+  + 1/2 A{i1,i2;u1,u2} g{i3,u2;a3,u3} T2g{u1,u3;i1,i2} T1s{a3;i3} 
+  - 1/2 A{i1,i2;u1,u2} g{i3,u1;a3,u3} GAM0{u2;u4} T2g{u3,u4;i1,i2} T1s{a3;i3} 
+  - A{i1,i2;u1,u2} g{i3,u2;a3,u3} T2g{u1,u3;i1,i3} T1s{a3;i2} 
+  - A{i1,i2;u1,u2} g{i3,u1;a3,u3} GAM0{u2;u4} T2g{u3,u4;i2,i3} T1s{a3;i1} 
+  + A{i1,i2;u1,u2} g{i3,u2;a3,u4} GAM0{u4;u3} T2g{u1,u3;i1,i3} T1s{a3;i2} 
+  - 1/2 A{i1,i2;u1,u2} g{i3,u1;a3,u5} GAM0{u2,u5;u3,u4} T2g{u3,u4;i2,i3} T1s{a3;i1} 
+  - 1/2 A{i1,i2;u1,u2} GAM0{u2;u3} g{i3,u3;a3,u4} T2g{u1,u4;i1,i2} T1s{a3;i3} 
+  - 1/4 A{i1,i2;u1,u2} GAM0{u1,u2;u3,u4} g{i3,u3;a3,u5} T2g{u4,u5;i1,i2} T1s{a3;i3} 
+  + A{i1,i2;u1,u2} GAM0{u2;u3} g{i3,u3;a3,u4} T2g{u1,u4;i1,i3} T1s{a3;i2} 
+  + 1/2 A{i1,i2;u1,u2} GAM0{u1,u2;u3,u4} g{i3,u3;a3,u5} T2g{u4,u5;i1,i3} T1s{a3;i2} 
+  - 1/2 A{i1,i2;u1,u2} GAM0{u4;u3} g{i3,u3;a3,u4} T2g{u1,u2;i1,i3} T1s{a3;i2} 
+  - A{i1,i2;u1,u2} GAM0{u2,u5;u3,u4} g{i3,u3;a3,u5} T2g{u1,u4;i1,i3} T1s{a3;i2} 
+  - A{i1,i2;u1,u2} g{i3,u1;a3,i2} T1{u2;i3} GAM0{u4;u3} T2g{a3,u3;u4,i1} 
+  + A{i1,i2;u1,u2} g{i3,u1;a3,i2} GAM0{u4;u3} T1{u3;i3} T2g{a3,u2;u4,i1} 
+  - A{i1,i2;u1,u2} g{i3,u1;a3,i1} GAM0{u2,u5;u3,u4} T1{u3;i3} T2g{a3,u4;u5,i2} 
+  + A{i1,i2;u1,u2} GAM0{u4;u3} g{i3,u3;a3,i1} T1{u1;i3} T2g{a3,u2;u4,i2} 
+  - A{i1,i2;u1,u2} GAM0{u1,u5;u3,u4} g{i3,u3;a3,i1} T1{u2;i3} T2g{a3,u4;u5,i2} 
+  + A{i1,i2;u1,u2} GAM0{u1,u5;u3,u4} g{i3,u3;a3,i1} T1{u4;i3} T2g{a3,u2;u5,i2} 
+  + A{i1,i2;u1,u2} GAM0{u5;u3} g{u1,u3;a3,u4} T1{u4;i2} T2g{a3,u2;u5,i1} 
+  - A{i1,i2;u1,u2} GAM0{u2,u6;u3,u5} g{u1,u3;a3,u4} T1{u4;i1} T2g{a3,u5;u6,i2} 
+  + 1/2 A{i1,i2;u1,u2} GAM0{u1,u6;u3,u4} g{u3,u4;a3,u5} T1{u5;i1} T2g{a3,u2;u6,i2} 
+  - A{i1,i2;u1,u2} GAM0{u4;u3} g{u1,u3;a3,a4} T2g{a3,u2;u4,i2} T1s{a4;i1} 
+  - A{i1,i2;u1,u2} GAM0{u2,u5;u3,u4} g{u1,u3;a3,a4} T2g{a3,u4;u5,i2} T1s{a4;i1} 
+  - 1/2 A{i1,i2;u1,u2} GAM0{u2,u5;u3,u4} g{u3,u4;a3,a4} T2g{a3,u1;u5,i2} T1s{a4;i1} 
+  + 1/2 A{i1,i2;u1,u2} f{i3;a3} T1{u2;i3} T2g{a3,u1;i1,i2} 
+  + 1/2 A{i1,i2;u1,u2} f{i3;a3} T1{u1;i3} GAM0{u2;u3} T2g{a3,u3;i1,i2} 
+  - 1/2 A{i1,i2;u1,u2} f{i3;a3} GAM0{u2;u3} T1{u3;i3} T2g{a3,u1;i1,i2} 
+  - 1/4 A{i1,i2;u1,u2} f{i3;a3} GAM0{u1,u2;u3,u4} T1{u3;i3} T2g{a3,u4;i1,i2} 
+  - A{i1,i2;u1,u2} g{i3,i4;a3,i2} T1{u2;i3} T2g{a3,u1;i1,i4} 
+  - A{i1,i2;u1,u2} g{i3,i4;a3,i1} T1{u2;i3} GAM0{u1;u3} T2g{a3,u3;i2,i4} 
+  + A{i1,i2;u1,u2} g{i3,i4;a3,i2} GAM0{u2;u3} T1{u3;i3} T2g{a3,u1;i1,i4} 
+  - 1/2 A{i1,i2;u1,u2} g{i3,i4;a3,i1} GAM0{u1,u2;u3,u4} T1{u3;i3} T2g{a3,u4;i2,i4} 
+  + 1/2 A{i1,i2;u1,u2} g{i3,u2;a3,u3} T1{u3;i3} T2g{a3,u1;i1,i2} 
+  + 1/2 A{i1,i2;u1,u2} g{i3,u1;a3,u3} T1{u3;i3} GAM0{u2;u4} T2g{a3,u4;i1,i2} 
+  - A{i1,i2;u1,u2} g{i3,u2;a3,u3} T1{u3;i2} T2g{a3,u1;i1,i3} 
+  + A{i1,i2;u1,u2} g{i3,u1;a3,u3} T1{u3;i1} GAM0{u2;u4} T2g{a3,u4;i2,i3} 
+  + 1/2 A{i1,i2;u1,u2} g{i3,u1;a3,u3} T1{u2;i3} T2g{a3,u3;i1,i2} 
+  - 1/2 A{i1,i2;u1,u2} g{i3,u1;a3,u4} T1{u2;i3} GAM0{u4;u3} T2g{a3,u3;i1,i2} 
+  - 1/2 A{i1,i2;u1,u2} g{i3,u1;a3,u4} GAM0{u2;u3} T1{u3;i3} T2g{a3,u4;i1,i2} 
+  - 1/2 A{i1,i2;u1,u2} g{i3,u2;a3,u4} GAM0{u4;u3} T1{u3;i3} T2g{a3,u1;i1,i2} 
+  + 1/2 A{i1,i2;u1,u2} g{i3,u1;a3,u5} GAM0{u2,u5;u3,u4} T1{u3;i3} T2g{a3,u4;i1,i2} 
+  - 1/2 A{i1,i2;u1,u2} GAM0{u2;u3} g{i3,u3;a3,u4} T1{u4;i3} T2g{a3,u1;i1,i2} 
+  - 1/4 A{i1,i2;u1,u2} GAM0{u1,u2;u3,u5} g{i3,u3;a3,u4} T1{u4;i3} T2g{a3,u5;i1,i2} 
+  + A{i1,i2;u1,u2} GAM0{u2;u3} g{i3,u3;a3,u4} T1{u4;i2} T2g{a3,u1;i1,i3} 
+  - 1/2 A{i1,i2;u1,u2} GAM0{u1,u2;u3,u5} g{i3,u3;a3,u4} T1{u4;i1} T2g{a3,u5;i2,i3} 
+  + 1/2 A{i1,i2;u1,u2} GAM0{u2;u3} g{i3,u3;a3,u4} T1{u1;i3} T2g{a3,u4;i1,i2} 
+  + 1/2 A{i1,i2;u1,u2} GAM0{u4;u3} g{i3,u3;a3,u4} T1{u2;i3} T2g{a3,u1;i1,i2} 
+  - 1/2 A{i1,i2;u1,u2} GAM0{u2,u5;u3,u4} g{i3,u3;a3,u5} T1{u1;i3} T2g{a3,u4;i1,i2} 
+  + 1/4 A{i1,i2;u1,u2} GAM0{u1,u2;u3,u4} g{i3,u3;a3,u5} T1{u4;i3} T2g{a3,u5;i1,i2} 
+  + 1/2 A{i1,i2;u1,u2} GAM0{u2,u5;u3,u4} g{i3,u3;a3,u5} T1{u4;i3} T2g{a3,u1;i1,i2} 
+  + 1/2 1/2 A{i1,i2;u1,u2} GAM0{u2;u3} g{u1,u3;a3,a4} T1{a3;u4} T2g{a4,u4;i1,i2} 
+  - 1/2 A{i1,i2;u1,u2} INT3ext{a4;u3} g{u2,u3;a3,a4} T2g{a3,u1;i1,i2} 
+  - 1/2 A{i1,i2;u1,u2} INT3ext{a4,u2;u3,u4} g{u1,u3;a3,a4} T2g{a3,u4;i1,i2} 
+  - 1/4 1/4 A{i1,i2;u1,u2} GAM0{u1,u2;u3,u4} g{u3,u4;a3,a4} T1{a3;u5} T2g{a4,u5;i1,i2} 
+  - 1/2 1/2 A{i1,i2;u1,u2} INT3ext{a4,u2;u3,u4} g{u3,u4;a3,a4} T2g{a3,u1;i1,i2} 
+  + 1/2 A{i1,i2;u1,u2} g{i3,u2;a3,a4} T2g{a3,u1;i1,i2} T1s{a4;i3} 
+  + 1/2 A{i1,i2;u1,u2} g{i3,u1;a3,a4} GAM0{u2;u3} T2g{a3,u3;i1,i2} T1s{a4;i3} 
+  - A{i1,i2;u1,u2} g{i3,u2;a3,a4} T2g{a3,u1;i1,i3} T1s{a4;i2} 
+  + A{i1,i2;u1,u2} g{i3,u1;a3,a4} GAM0{u2;u3} T2g{a3,u3;i2,i3} T1s{a4;i1} 
+  - 1/2 A{i1,i2;u1,u2} GAM0{u2;u3} g{i3,u3;a3,a4} T2g{a3,u1;i1,i2} T1s{a4;i3} 
+  - 1/4 A{i1,i2;u1,u2} GAM0{u1,u2;u3,u4} g{i3,u3;a3,a4} T2g{a3,u4;i1,i2} T1s{a4;i3} 
+  + A{i1,i2;u1,u2} GAM0{u2;u3} g{i3,u3;a3,a4} T2g{a3,u1;i1,i3} T1s{a4;i2} 
+  + 1/2 A{i1,i2;u1,u2} GAM0{u1,u2;u3,u4} g{i3,u3;a3,a4} T2g{a3,u4;i1,i3} T1s{a4;i2} 
+  + 1/2 1/2 A{i1,i2;u1,u2} g{i3,u1;a3,a4} T1{u2;i3} T2g{a3,a4;i1,i2} 
+  - 1/2 1/2 A{i1,i2;u1,u2} g{i3,u1;a3,a4} GAM0{u2;u3} T1{u3;i3} T2g{a3,a4;i1,i2} 
+  + 1/2 1/2 A{i1,i2;u1,u2} GAM0{u2;u3} g{i3,u3;a3,a4} T1{u1;i3} T2g{a3,a4;i1,i2} 
+  + 1/2 1/4 A{i1,i2;u1,u2} GAM0{u1,u2;u3,u4} g{i3,u3;a3,a4} T1{u4;i3} T2g{a3,a4;i1,i2} 
+  + 1/2 A{i1,i2;u1,u2} f{u1;a3} T2g{a3,u2;u3,i2} T1{u3;i1} 
+  + 1/2 A{i1,i2;u1,u2} f{u1;a3} GAM0{u2;u3} T2g{a3,u3;u4,i1} T1{u4;i2} 
+  - 1/2 A{i1,i2;u1,u2} GAM0{u2;u3} f{u3;a3} T2g{a3,u1;u4,i1} T1{u4;i2} 
+  - 1/2 1/2 A{i1,i2;u1,u2} GAM0{u1,u2;u3,u4} f{u3;a3} T2g{a3,u4;u5,i1} T1{u5;i2} 
+  + 1/2 A{i1,i2;u1,u2} g{i3,u1;a3,i2} T2g{a3,u2;u3,i3} T1{u3;i1} 
+  - 1/2 A{i1,i2;u1,u2} g{i3,u1;a3,i2} T2g{a3,u2;u3,i1} T1{u3;i3} 
+  + 1/2 A{i1,i2;u1,u2} g{i3,u1;a3,i1} GAM0{u2;u3} T2g{a3,u3;u4,i3} T1{u4;i2} 
+  - 1/2 A{i1,i2;u1,u2} g{i3,u1;a3,i1} GAM0{u2;u3} T2g{a3,u3;u4,i2} T1{u4;i3} 
+  + 1/2 A{i1,i2;u1,u2} GAM0{u1;u3} g{i3,u3;a3,i1} T2g{a3,u2;u4,i3} T1{u4;i2} 
+  - 1/2 A{i1,i2;u1,u2} GAM0{u1;u3} g{i3,u3;a3,i1} T2g{a3,u2;u4,i2} T1{u4;i3} 
+  - 1/2 1/2 A{i1,i2;u1,u2} GAM0{u1,u2;u3,u4} g{i3,u3;a3,i1} T2g{a3,u4;u5,i3} T1{u5;i2} 
+  + 1/2 1/2 A{i1,i2;u1,u2} GAM0{u1,u2;u3,u4} g{i3,u3;a3,i1} T2g{a3,u4;u5,i2} T1{u5;i3} 
+  + 1/2 A{i1,i2;u1,u2} GAM0{u2;u3} g{u1,u3;a3,u4} T2g{a3,u4;u5,i1} T1{u5;i2} 
+  + 1/2 A{i1,i2;u1,u2} GAM0{u5;u3} g{u1,u3;a3,u5} T2g{a3,u2;u4,i2} T1{u4;i1} 
+  - 1/2 A{i1,i2;u1,u2} GAM0{u2,u6;u3,u4} g{u1,u3;a3,u6} T2g{a3,u4;u5,i1} T1{u5;i2} 
+  - 1/4 1/2 A{i1,i2;u1,u2} GAM0{u1,u2;u3,u4} g{u3,u4;a3,u5} T2g{a3,u5;u6,i1} T1{u6;i2} 
+  - 1/4 A{i1,i2;u1,u2} GAM0{u2,u6;u3,u4} g{u3,u4;a3,u6} T2g{a3,u1;u5,i1} T1{u5;i2} 
+  + 1/4 A{i1,i2;u1,u2} GAM0{u2;u3} g{u1,u3;a3,a4} T2g{a3,a4;u4,i1} T1{u4;i2} 
+  - 1/8 1/2 A{i1,i2;u1,u2} GAM0{u1,u2;u3,u4} g{u3,u4;a3,a4} T2g{a3,a4;u5,i1} T1{u5;i2} 
+  + 1/2 1/2 A{i1,i2;u1,u2} g{i3,i4;u3,u4} T2g{u3,u4;i2,i3} T2g{u1,u2;i1,i4} 
+  - 1/2 A{i1,i2;u1,u2} g{i3,i4;u3,u4} T2g{u3,u4;i2,i3} GAM0{u2;u5} T2g{u1,u5;i1,i4} 
+  - 1/4 1/2 A{i1,i2;u1,u2} g{i3,i4;u3,u4} T2g{u3,u4;i1,i3} GAM0{u1,u2;u5,u6} T2g{u5,u6;i2,i4} 
+  + 1/4 1/4 A{i1,i2;u1,u2} g{i3,i4;u3,u4} T2g{u3,u4;i1,i2} T2g{u1,u2;i3,i4} 
+  + 1/4 1/2 A{i1,i2;u1,u2} g{i3,i4;u3,u4} T2g{u3,u4;i1,i2} GAM0{u1;u5} T2g{u2,u5;i3,i4} 
+  + 1/8 1/4 A{i1,i2;u1,u2} g{i3,i4;u3,u4} T2g{u3,u4;i1,i2} GAM0{u1,u2;u5,u6} T2g{u5,u6;i3,i4} 
+  + 1/2 1/2 A{i1,i2;u1,u2} g{i3,i4;u3,u4} T2g{u2,u3;i3,i4} T2g{u1,u4;i1,i2} 
+  - 1/2 1/2 A{i1,i2;u1,u2} g{i3,i4;u3,u4} T2g{u1,u3;i3,i4} GAM0{u2;u5} T2g{u4,u5;i1,i2} 
+  + 1/2 A{i1,i2;u1,u2} g{i3,i4;u3,u4} T2g{u1,u3;i1,i3} T2g{u2,u4;i2,i4} 
+  + A{i1,i2;u1,u2} g{i3,i4;u3,u4} T2g{u1,u3;i1,i3} GAM0{u2;u5} T2g{u4,u5;i2,i4} 
+  - A{i1,i2;u1,u2} g{i3,i4;u3,u5} T2g{u1,u3;i1,i3} GAM0{u5;u4} T2g{u2,u4;i2,i4} 
+  + 1/2 A{i1,i2;u1,u2} g{i3,i4;u3,u6} T2g{u1,u3;i1,i3} GAM0{u2,u6;u4,u5} T2g{u4,u5;i2,i4} 
+  - 1/2 1/2 A{i1,i2;u1,u2} g{i3,i4;u3,u4} T2g{u1,u3;i1,i2} GAM0{u2;u5} T2g{u4,u5;i3,i4} 
+  + 1/2 1/2 A{i1,i2;u1,u2} g{i3,i4;u3,u5} T2g{u1,u3;i1,i2} GAM0{u5;u4} T2g{u2,u4;i3,i4} 
+  - 1/4 1/2 A{i1,i2;u1,u2} g{i3,i4;u3,u6} T2g{u1,u3;i1,i2} GAM0{u2,u6;u4,u5} T2g{u4,u5;i3,i4} 
+  - 1/2 1/4 A{i1,i2;u1,u2} g{i3,i4;u3,u5} GAM0{u1,u2;u4,u6} T2g{u3,u4;i3,i4} T2g{u5,u6;i1,i2} 
+  + 1/2 1/2 A{i1,i2;u1,u2} g{i3,i4;u3,u5} GAM0{u1,u2;u4,u6} T2g{u3,u4;i1,i3} T2g{u5,u6;i2,i4} 
+  - 1/2 A{i1,i2;u1,u2} g{i3,i4;u3,u5} GAM0{u5;u4} T2g{u3,u4;i2,i3} T2g{u1,u2;i1,i4} 
+  - A{i1,i2;u1,u2} g{i3,i4;u3,u6} GAM0{u2,u6;u4,u5} T2g{u3,u4;i2,i3} T2g{u1,u5;i1,i4} 
+  - 1/2 1/4 A{i1,i2;u1,u2} g{i3,i4;u3,u5} GAM0{u5;u4} T2g{u3,u4;i1,i2} T2g{u1,u2;i3,i4} 
+  + 1/2 1/2 A{i1,i2;u1,u2} g{i3,i4;u3,u6} GAM0{u1,u6;u4,u5} T2g{u3,u4;i1,i2} T2g{u2,u5;i3,i4} 
+  - 1/4 1/2 A{i1,i2;u1,u2} g{i3,i4;u5,u6} T2g{u1,u2;i1,i3} GAM0{u5,u6;u3,u4} T2g{u3,u4;i2,i4} 
+  + 1/4 A{i1,i2;u1,u2} g{i3,i4;u5,u6} GAM0{u5,u6;u3,u4} T2g{u1,u3;i1,i3} T2g{u2,u4;i2,i4} 
+  - 1/2 1/2 A{i1,i2;u1,u2} f{i3;a3} T2g{a3,u2;u3,i3} T2g{u1,u3;i1,i2} 
+  + 1/2 1/2 A{i1,i2;u1,u2} f{i3;a3} T2g{a3,u1;u3,i3} GAM0{u2;u4} T2g{u3,u4;i1,i2} 
+  + 1/2 A{i1,i2;u1,u2} f{i3;a3} T2g{a3,u2;u3,i2} T2g{u1,u3;i1,i3} 
+  + 1/2 A{i1,i2;u1,u2} f{i3;a3} T2g{a3,u1;u3,i1} GAM0{u2;u4} T2g{u3,u4;i2,i3} 
+  - A{i1,i2;u1,u2} f{i3;a3} T2g{a3,u2;u4,i2} GAM0{u4;u3} T2g{u1,u3;i1,i3} 
+  + 1/2 A{i1,i2;u1,u2} f{i3;a3} T2g{a3,u1;u5,i1} GAM0{u2,u5;u3,u4} T2g{u3,u4;i2,i3} 
+  + 1/2 1/2 A{i1,i2;u1,u2} f{i3;a3} GAM0{u2;u3} T2g{a3,u3;u4,i3} T2g{u1,u4;i1,i2} 
+  + 1/2 1/4 A{i1,i2;u1,u2} f{i3;a3} GAM0{u1,u2;u3,u4} T2g{a3,u3;u5,i3} T2g{u4,u5;i1,i2} 
+  - 1/2 A{i1,i2;u1,u2} f{i3;a3} GAM0{u2;u3} T2g{a3,u3;u4,i2} T2g{u1,u4;i1,i3} 
+  + 1/2 1/2 A{i1,i2;u1,u2} f{i3;a3} GAM0{u1,u2;u3,u4} T2g{a3,u3;u5,i1} T2g{u4,u5;i2,i3} 
+  + 1/2 A{i1,i2;u1,u2} f{i3;a3} GAM0{u4;u3} T2g{a3,u3;u4,i2} T2g{u1,u2;i1,i3} 
+  + A{i1,i2;u1,u2} f{i3;a3} GAM0{u2,u5;u3,u4} T2g{a3,u3;u5,i2} T2g{u1,u4;i1,i3} 
+  + 1/2 A{i1,i2;u1,u2} g{i3,i4;a3,i2} T2g{a3,u2;u3,i3} T2g{u1,u3;i1,i4} 
+  - 1/2 A{i1,i2;u1,u2} g{i3,i4;a3,i1} T2g{a3,u2;u3,i3} GAM0{u1;u4} T2g{u3,u4;i2,i4} 
+  - A{i1,i2;u1,u2} g{i3,i4;a3,i2} T2g{a3,u2;u4,i3} GAM0{u4;u3} T2g{u1,u3;i1,i4} 
+  - 1/2 A{i1,i2;u1,u2} g{i3,i4;a3,i1} T2g{a3,u2;u5,i3} GAM0{u1,u5;u3,u4} T2g{u3,u4;i2,i4} 
+  + 1/4 A{i1,i2;u1,u2} g{i3,i4;a3,i1} T2g{a3,u2;u3,i2} T2g{u1,u3;i3,i4} 
+  + 1/4 A{i1,i2;u1,u2} g{i3,i4;a3,i1} T2g{a3,u2;u3,i2} GAM0{u1;u4} T2g{u3,u4;i3,i4} 
+  - 1/2 A{i1,i2;u1,u2} g{i3,i4;a3,i1} T2g{a3,u2;u4,i2} GAM0{u4;u3} T2g{u1,u3;i3,i4} 
+  + 1/4 A{i1,i2;u1,u2} g{i3,i4;a3,i1} T2g{a3,u2;u5,i2} GAM0{u1,u5;u3,u4} T2g{u3,u4;i3,i4} 
+  - 1/2 A{i1,i2;u1,u2} g{i3,i4;a3,i2} GAM0{u2;u3} T2g{a3,u3;u4,i3} T2g{u1,u4;i1,i4} 
+  + 1/2 1/2 A{i1,i2;u1,u2} g{i3,i4;a3,i1} GAM0{u1,u2;u3,u4} T2g{a3,u3;u5,i3} T2g{u4,u5;i2,i4} 
+  + 1/2 A{i1,i2;u1,u2} g{i3,i4;a3,i2} GAM0{u4;u3} T2g{a3,u3;u4,i3} T2g{u1,u2;i1,i4} 
+  + A{i1,i2;u1,u2} g{i3,i4;a3,i2} GAM0{u2,u5;u3,u4} T2g{a3,u3;u5,i3} T2g{u1,u4;i1,i4} 
+  + 1/4 A{i1,i2;u1,u2} g{i3,i4;a3,i1} GAM0{u1;u3} T2g{a3,u3;u4,i2} T2g{u2,u4;i3,i4} 
+  - 1/4 1/2 A{i1,i2;u1,u2} g{i3,i4;a3,i1} GAM0{u1,u2;u3,u4} T2g{a3,u3;u5,i2} T2g{u4,u5;i3,i4} 
+  + 1/2 1/2 A{i1,i2;u1,u2} g{i3,i4;a3,i1} GAM0{u4;u3} T2g{a3,u3;u4,i2} T2g{u1,u2;i3,i4} 
+  - 1/2 A{i1,i2;u1,u2} g{i3,i4;a3,i1} GAM0{u1,u5;u3,u4} T2g{a3,u3;u5,i2} T2g{u2,u4;i3,i4} 
+  - 1/2 1/2 A{i1,i2;u1,u2} g{i3,u2;a3,u3} T2g{a3,u3;u4,i3} T2g{u1,u4;i1,i2} 
+  + 1/2 1/2 A{i1,i2;u1,u2} g{i3,u1;a3,u3} T2g{a3,u3;u4,i3} GAM0{u2;u5} T2g{u4,u5;i1,i2} 
+  + 1/2 A{i1,i2;u1,u2} g{i3,u2;a3,u3} T2g{a3,u3;u4,i2} T2g{u1,u4;i1,i3} 
+  + 1/2 A{i1,i2;u1,u2} g{i3,u1;a3,u3} T2g{a3,u3;u4,i1} GAM0{u2;u5} T2g{u4,u5;i2,i3} 
+  - A{i1,i2;u1,u2} g{i3,u2;a3,u3} T2g{a3,u3;u5,i2} GAM0{u5;u4} T2g{u1,u4;i1,i3} 
+  + 1/2 A{i1,i2;u1,u2} g{i3,u1;a3,u3} T2g{a3,u3;u6,i1} GAM0{u2,u6;u4,u5} T2g{u4,u5;i2,i3} 
+  - 1/2 1/2 A{i1,i2;u1,u2} g{i3,u1;a3,u3} T2g{a3,u2;u4,i3} T2g{u3,u4;i1,i2} 
+  - 1/2 1/2 A{i1,i2;u1,u2} g{i3,u1;a3,u5} T2g{a3,u2;u3,i3} GAM0{u5;u4} T2g{u3,u4;i1,i2} 
+  + 1/2 A{i1,i2;u1,u2} g{i3,u1;a3,u3} T2g{a3,u2;u5,i3} GAM0{u5;u4} T2g{u3,u4;i1,i2} 
+  + 1/2 A{i1,i2;u1,u2} g{i3,u1;a3,u3} T2g{a3,u2;u4,i2} T2g{u3,u4;i1,i3} 
+  + 1/2 A{i1,i2;u1,u2} g{i3,u1;a3,u5} T2g{a3,u2;u3,i2} GAM0{u5;u4} T2g{u3,u4;i1,i3} 
+  - A{i1,i2;u1,u2} g{i3,u1;a3,u3} T2g{a3,u2;u5,i2} GAM0{u5;u4} T2g{u3,u4;i1,i3} 
+  + 1/2 A{i1,i2;u1,u2} g{i3,u1;a3,u5} T2g{a3,u2;u6,i2} GAM0{u5,u6;u3,u4} T2g{u3,u4;i1,i3} 
+  + 1/2 1/2 A{i1,i2;u1,u2} g{i3,u1;a3,u4} GAM0{u2;u3} T2g{a3,u3;u5,i3} T2g{u4,u5;i1,i2} 
+  + 1/2 1/2 A{i1,i2;u1,u2} g{i3,u2;a3,u5} GAM0{u5;u3} T2g{a3,u3;u4,i3} T2g{u1,u4;i1,i2} 
+  - 1/2 1/2 A{i1,i2;u1,u2} g{i3,u1;a3,u6} GAM0{u2,u6;u3,u4} T2g{a3,u3;u5,i3} T2g{u4,u5;i1,i2} 
+  - 1/2 A{i1,i2;u1,u2} g{i3,u2;a3,u4} GAM0{u5;u3} T2g{a3,u3;u5,i3} T2g{u1,u4;i1,i2} 
+  - 1/2 A{i1,i2;u1,u2} g{i3,u1;a3,u4} GAM0{u2,u6;u3,u5} T2g{a3,u3;u6,i3} T2g{u4,u5;i1,i2} 
+  + 1/2 A{i1,i2;u1,u2} g{i3,u1;a3,u4} GAM0{u2;u3} T2g{a3,u3;u5,i1} T2g{u4,u5;i2,i3} 
+  - 1/2 A{i1,i2;u1,u2} g{i3,u2;a3,u5} GAM0{u5;u3} T2g{a3,u3;u4,i2} T2g{u1,u4;i1,i3} 
+  - 1/2 A{i1,i2;u1,u2} g{i3,u1;a3,u6} GAM0{u2,u6;u3,u4} T2g{a3,u3;u5,i1} T2g{u4,u5;i2,i3} 
+  + A{i1,i2;u1,u2} g{i3,u2;a3,u4} GAM0{u5;u3} T2g{a3,u3;u5,i2} T2g{u1,u4;i1,i3} 
+  - A{i1,i2;u1,u2} g{i3,u1;a3,u4} GAM0{u2,u6;u3,u5} T2g{a3,u3;u6,i1} T2g{u4,u5;i2,i3} 
+  + A{i1,i2;u1,u2} g{i3,u2;a3,u5} GAM0{u5,u6;u3,u4} T2g{a3,u3;u6,i2} T2g{u1,u4;i1,i3} 
+  + 1/2 1/2 A{i1,i2;u1,u2} GAM0{u2;u3} g{i3,u3;a3,u4} T2g{a3,u4;u5,i3} T2g{u1,u5;i1,i2} 
+  + 1/2 1/4 A{i1,i2;u1,u2} GAM0{u1,u2;u3,u5} g{i3,u3;a3,u4} T2g{a3,u4;u6,i3} T2g{u5,u6;i1,i2} 
+  - 1/2 A{i1,i2;u1,u2} GAM0{u2;u3} g{i3,u3;a3,u4} T2g{a3,u4;u5,i2} T2g{u1,u5;i1,i3} 
+  + 1/2 1/2 A{i1,i2;u1,u2} GAM0{u1,u2;u3,u5} g{i3,u3;a3,u4} T2g{a3,u4;u6,i1} T2g{u5,u6;i2,i3} 
+  + 1/2 A{i1,i2;u1,u2} GAM0{u5;u3} g{i3,u3;a3,u4} T2g{a3,u4;u5,i2} T2g{u1,u2;i1,i3} 
+  + A{i1,i2;u1,u2} GAM0{u2,u6;u3,u5} g{i3,u3;a3,u4} T2g{a3,u4;u6,i2} T2g{u1,u5;i1,i3} 
+  - 1/2 1/2 A{i1,i2;u1,u2} GAM0{u2;u3} g{i3,u3;a3,u4} T2g{a3,u1;u5,i3} T2g{u4,u5;i1,i2} 
+  - 1/2 1/2 A{i1,i2;u1,u2} GAM0{u5;u3} g{i3,u3;a3,u5} T2g{a3,u2;u4,i3} T2g{u1,u4;i1,i2} 
+  + 1/2 1/2 A{i1,i2;u1,u2} GAM0{u2,u6;u3,u4} g{i3,u3;a3,u6} T2g{a3,u1;u5,i3} T2g{u4,u5;i1,i2} 
+  + 1/2 A{i1,i2;u1,u2} GAM0{u5;u3} g{i3,u3;a3,u4} T2g{a3,u2;u5,i3} T2g{u1,u4;i1,i2} 
+  - 1/2 A{i1,i2;u1,u2} GAM0{u2,u6;u3,u4} g{i3,u3;a3,u5} T2g{a3,u1;u6,i3} T2g{u4,u5;i1,i2} 
+  - 1/2 A{i1,i2;u1,u2} GAM0{u2;u3} g{i3,u3;a3,u4} T2g{a3,u1;u5,i1} T2g{u4,u5;i2,i3} 
+  + 1/2 A{i1,i2;u1,u2} GAM0{u5;u3} g{i3,u3;a3,u5} T2g{a3,u2;u4,i2} T2g{u1,u4;i1,i3} 
+  + 1/2 A{i1,i2;u1,u2} GAM0{u2,u6;u3,u4} g{i3,u3;a3,u6} T2g{a3,u1;u5,i1} T2g{u4,u5;i2,i3} 
+  - A{i1,i2;u1,u2} GAM0{u5;u3} g{i3,u3;a3,u4} T2g{a3,u2;u5,i2} T2g{u1,u4;i1,i3} 
+  - A{i1,i2;u1,u2} GAM0{u2,u6;u3,u4} g{i3,u3;a3,u5} T2g{a3,u1;u6,i1} T2g{u4,u5;i2,i3} 
+  - A{i1,i2;u1,u2} GAM0{u5,u6;u3,u4} g{i3,u3;a3,u5} T2g{a3,u2;u6,i2} T2g{u1,u4;i1,i3} 
+  - 1/2 1/4 A{i1,i2;u1,u2} GAM0{u1,u2;u3,u4} g{i3,u3;a3,u5} T2g{a3,u4;u6,i3} T2g{u5,u6;i1,i2} 
+  - 1/2 1/2 A{i1,i2;u1,u2} GAM0{u2,u6;u3,u4} g{i3,u3;a3,u6} T2g{a3,u4;u5,i3} T2g{u1,u5;i1,i2} 
+  + 1/2 A{i1,i2;u1,u2} GAM0{u2,u6;u3,u4} g{i3,u3;a3,u5} T2g{a3,u4;u6,i3} T2g{u1,u5;i1,i2} 
+  - 1/2 1/2 A{i1,i2;u1,u2} GAM0{u1,u2;u3,u4} g{i3,u3;a3,u5} T2g{a3,u4;u6,i1} T2g{u5,u6;i2,i3} 
+  + 1/2 A{i1,i2;u1,u2} GAM0{u2,u6;u3,u4} g{i3,u3;a3,u6} T2g{a3,u4;u5,i2} T2g{u1,u5;i1,i3} 
+  - A{i1,i2;u1,u2} GAM0{u2,u6;u3,u4} g{i3,u3;a3,u5} T2g{a3,u4;u6,i2} T2g{u1,u5;i1,i3} 
+  + 1/2 A{i1,i2;u1,u2} GAM0{u5,u6;u3,u4} g{i3,u3;a3,u5} T2g{a3,u4;u6,i2} T2g{u1,u2;i1,i3} 
+  + 1/2 A{i1,i2;u1,u2} g{i3,i4;a3,u3} T2g{a3,u3;i2,i3} T2g{u1,u2;i1,i4} 
+  - A{i1,i2;u1,u2} g{i3,i4;a3,u3} T2g{a3,u3;i2,i3} GAM0{u2;u4} T2g{u1,u4;i1,i4} 
+  - 1/2 1/2 A{i1,i2;u1,u2} g{i3,i4;a3,u3} T2g{a3,u3;i1,i3} GAM0{u1,u2;u4,u5} T2g{u4,u5;i2,i4} 
+  + 1/2 1/4 A{i1,i2;u1,u2} g{i3,i4;a3,u3} T2g{a3,u3;i1,i2} T2g{u1,u2;i3,i4} 
+  + 1/2 1/2 A{i1,i2;u1,u2} g{i3,i4;a3,u3} T2g{a3,u3;i1,i2} GAM0{u1;u4} T2g{u2,u4;i3,i4} 
+  + 1/4 1/4 A{i1,i2;u1,u2} g{i3,i4;a3,u3} T2g{a3,u3;i1,i2} GAM0{u1,u2;u4,u5} T2g{u4,u5;i3,i4} 
+  - 1/2 1/2 A{i1,i2;u1,u2} g{i3,i4;a3,u3} T2g{a3,u2;i3,i4} T2g{u1,u3;i1,i2} 
+  + 1/2 1/2 A{i1,i2;u1,u2} g{i3,i4;a3,u3} T2g{a3,u1;i3,i4} GAM0{u2;u4} T2g{u3,u4;i1,i2} 
+  - A{i1,i2;u1,u2} g{i3,i4;a3,u3} T2g{a3,u1;i1,i3} T2g{u2,u3;i2,i4} 
+  - A{i1,i2;u1,u2} g{i3,i4;a3,u3} T2g{a3,u1;i1,i3} GAM0{u2;u4} T2g{u3,u4;i2,i4} 
+  + A{i1,i2;u1,u2} g{i3,i4;a3,u4} T2g{a3,u1;i1,i3} GAM0{u4;u3} T2g{u2,u3;i2,i4} 
+  - 1/2 A{i1,i2;u1,u2} g{i3,i4;a3,u5} T2g{a3,u1;i1,i3} GAM0{u2,u5;u3,u4} T2g{u3,u4;i2,i4} 
+  + 1/2 1/2 A{i1,i2;u1,u2} g{i3,i4;a3,u3} T2g{a3,u1;i1,i2} T2g{u2,u3;i3,i4} 
+  + 1/2 1/2 A{i1,i2;u1,u2} g{i3,i4;a3,u3} T2g{a3,u1;i1,i2} GAM0{u2;u4} T2g{u3,u4;i3,i4} 
+  - 1/2 1/2 A{i1,i2;u1,u2} g{i3,i4;a3,u4} T2g{a3,u1;i1,i2} GAM0{u4;u3} T2g{u2,u3;i3,i4} 
+  + 1/4 1/2 A{i1,i2;u1,u2} g{i3,i4;a3,u5} T2g{a3,u1;i1,i2} GAM0{u2,u5;u3,u4} T2g{u3,u4;i3,i4} 
+  + 1/2 1/2 A{i1,i2;u1,u2} g{i3,i4;a3,u4} GAM0{u2;u3} T2g{a3,u3;i3,i4} T2g{u1,u4;i1,i2} 
+  - 1/2 1/4 A{i1,i2;u1,u2} g{i3,i4;a3,u4} GAM0{u1,u2;u3,u5} T2g{a3,u3;i3,i4} T2g{u4,u5;i1,i2} 
+  + A{i1,i2;u1,u2} g{i3,i4;a3,u4} GAM0{u2;u3} T2g{a3,u3;i2,i3} T2g{u1,u4;i1,i4} 
+  + 1/2 A{i1,i2;u1,u2} g{i3,i4;a3,u4} GAM0{u1,u2;u3,u5} T2g{a3,u3;i1,i3} T2g{u4,u5;i2,i4} 
+  - 1/2 A{i1,i2;u1,u2} g{i3,i4;a3,u4} GAM0{u4;u3} T2g{a3,u3;i2,i3} T2g{u1,u2;i1,i4} 
+  - A{i1,i2;u1,u2} g{i3,i4;a3,u5} GAM0{u2,u5;u3,u4} T2g{a3,u3;i2,i3} T2g{u1,u4;i1,i4} 
+  - 1/2 1/2 A{i1,i2;u1,u2} g{i3,i4;a3,u4} GAM0{u1;u3} T2g{a3,u3;i1,i2} T2g{u2,u4;i3,i4} 
+  - 1/2 1/4 A{i1,i2;u1,u2} g{i3,i4;a3,u4} GAM0{u1,u2;u3,u5} T2g{a3,u3;i1,i2} T2g{u4,u5;i3,i4} 
+  - 1/2 1/4 A{i1,i2;u1,u2} g{i3,i4;a3,u4} GAM0{u4;u3} T2g{a3,u3;i1,i2} T2g{u1,u2;i3,i4} 
+  + 1/2 1/2 A{i1,i2;u1,u2} g{i3,i4;a3,u5} GAM0{u1,u5;u3,u4} T2g{a3,u3;i1,i2} T2g{u2,u4;i3,i4} 
+  - 1/8 1/2 A{i1,i2;u1,u2} GAM0{u2;u3} g{u1,u3;a3,a4} T2g{a3,a4;u4,u5} T2g{u4,u5;i1,i2} 
+  + 1/4 1/2 A{i1,i2;u1,u2} GAM0{u5;u3} g{u2,u3;a3,a4} T2g{a3,a4;u4,u5} T2g{u1,u4;i1,i2} 
+  - 1/4 1/2 A{i1,i2;u1,u2} GAM0{u2,u6;u3,u4} g{u1,u3;a3,a4} T2g{a3,a4;u5,u6} T2g{u4,u5;i1,i2} 
+  + 1/16 1/4 A{i1,i2;u1,u2} GAM0{u1,u2;u3,u4} g{u3,u4;a3,a4} T2g{a3,a4;u5,u6} T2g{u5,u6;i1,i2} 
+  - 1/8 1/2 A{i1,i2;u1,u2} GAM0{u2,u6;u3,u4} g{u3,u4;a3,a4} T2g{a3,a4;u5,u6} T2g{u1,u5;i1,i2} 
+  - 1/4 1/2 A{i1,i2;u1,u2} g{i3,u2;a3,a4} T2g{a3,a4;u3,i3} T2g{u1,u3;i1,i2} 
+  + 1/4 1/2 A{i1,i2;u1,u2} g{i3,u1;a3,a4} T2g{a3,a4;u3,i3} GAM0{u2;u4} T2g{u3,u4;i1,i2} 
+  + 1/4 A{i1,i2;u1,u2} g{i3,u2;a3,a4} T2g{a3,a4;u3,i2} T2g{u1,u3;i1,i3} 
+  + 1/4 A{i1,i2;u1,u2} g{i3,u1;a3,a4} T2g{a3,a4;u3,i1} GAM0{u2;u4} T2g{u3,u4;i2,i3} 
+  - 1/2 A{i1,i2;u1,u2} g{i3,u2;a3,a4} T2g{a3,a4;u4,i2} GAM0{u4;u3} T2g{u1,u3;i1,i3} 
+  + 1/4 A{i1,i2;u1,u2} g{i3,u1;a3,a4} T2g{a3,a4;u5,i1} GAM0{u2,u5;u3,u4} T2g{u3,u4;i2,i3} 
+  + 1/4 1/2 A{i1,i2;u1,u2} GAM0{u2;u3} g{i3,u3;a3,a4} T2g{a3,a4;u4,i3} T2g{u1,u4;i1,i2} 
+  + 1/4 1/4 A{i1,i2;u1,u2} GAM0{u1,u2;u3,u4} g{i3,u3;a3,a4} T2g{a3,a4;u5,i3} T2g{u4,u5;i1,i2} 
+  - 1/4 A{i1,i2;u1,u2} GAM0{u2;u3} g{i3,u3;a3,a4} T2g{a3,a4;u4,i2} T2g{u1,u4;i1,i3} 
+  + 1/4 1/2 A{i1,i2;u1,u2} GAM0{u1,u2;u3,u4} g{i3,u3;a3,a4} T2g{a3,a4;u5,i1} T2g{u4,u5;i2,i3} 
+  + 1/2 1/2 A{i1,i2;u1,u2} GAM0{u4;u3} g{i3,u3;a3,a4} T2g{a3,a4;u4,i2} T2g{u1,u2;i1,i3} 
+  + 1/2 A{i1,i2;u1,u2} GAM0{u2,u5;u3,u4} g{i3,u3;a3,a4} T2g{a3,a4;u5,i2} T2g{u1,u4;i1,i3} 
+  + 1/2 1/2 A{i1,i2;u1,u2} g{i3,i4;a3,a4} T2g{a3,a4;i2,i3} T2g{u1,u2;i1,i4} 
+  - 1/2 A{i1,i2;u1,u2} g{i3,i4;a3,a4} T2g{a3,a4;i2,i3} GAM0{u2;u3} T2g{u1,u3;i1,i4} 
+  - 1/4 1/2 A{i1,i2;u1,u2} g{i3,i4;a3,a4} T2g{a3,a4;i1,i3} GAM0{u1,u2;u3,u4} T2g{u3,u4;i2,i4} 
+  + 1/4 1/4 A{i1,i2;u1,u2} g{i3,i4;a3,a4} T2g{a3,a4;i1,i2} T2g{u1,u2;i3,i4} 
+  + 1/4 1/2 A{i1,i2;u1,u2} g{i3,i4;a3,a4} T2g{a3,a4;i1,i2} GAM0{u1;u3} T2g{u2,u3;i3,i4} 
+  + 1/8 1/4 A{i1,i2;u1,u2} g{i3,i4;a3,a4} T2g{a3,a4;i1,i2} GAM0{u1,u2;u3,u4} T2g{u3,u4;i3,i4} 
+  + 1/2 A{i1,i2;u1,u2} GAM0{u5;u3} g{u1,u3;a3,a4} T2g{a3,u2;u4,i2} T2g{a4,u4;u5,i1} 
+  + A{i1,i2;u1,u2} GAM0{u5,u6;u3,u4} g{u1,u3;a3,a4} T2g{a3,u2;u5,i2} T2g{a4,u4;u6,i1} 
+  - 1/2 A{i1,i2;u1,u2} GAM0{u2,u6;u3,u4} g{u1,u3;a3,a4} T2g{a3,u4;u5,i1} T2g{a4,u5;u6,i2} 
+  - 1/4 A{i1,i2;u1,u2} GAM0{u2,u6;u3,u4} g{u3,u4;a3,a4} T2g{a3,u1;u5,i1} T2g{a4,u5;u6,i2} 
+  - 1/4 A{i1,i2;u1,u2} GAM0{u5,u6;u3,u4} g{u3,u4;a3,a4} T2g{a3,u1;u5,i2} T2g{a4,u2;u6,i1} 
+  + A{i1,i2;u1,u2} g{i3,u2;a3,a4} T2g{a3,u1;i1,i3} GAM0{u4;u3} T2g{a4,u3;u4,i2} 
+  - 1/2 A{i1,i2;u1,u2} g{i3,u2;a3,a4} T2g{a3,u1;i1,i2} GAM0{u4;u3} T2g{a4,u3;u4,i3} 
+  - A{i1,i2;u1,u2} g{i3,u1;a3,a4} GAM0{u4;u3} T2g{a3,u3;i2,i3} T2g{a4,u2;u4,i1} 
+  + A{i1,i2;u1,u2} g{i3,u1;a3,a4} GAM0{u2,u5;u3,u4} T2g{a3,u3;i1,i3} T2g{a4,u4;u5,i2} 
+  - 1/2 A{i1,i2;u1,u2} g{i3,u1;a3,a4} GAM0{u4;u3} T2g{a3,u3;i1,i2} T2g{a4,u2;u4,i3} 
+  - 1/2 A{i1,i2;u1,u2} g{i3,u1;a3,a4} GAM0{u2,u5;u3,u4} T2g{a3,u3;i1,i2} T2g{a4,u4;u5,i3} 
+  - A{i1,i2;u1,u2} GAM0{u4;u3} g{i3,u3;a3,a4} T2g{a3,u1;i1,i3} T2g{a4,u2;u4,i2} 
+  - A{i1,i2;u1,u2} GAM0{u2,u5;u3,u4} g{i3,u3;a3,a4} T2g{a3,u1;i1,i3} T2g{a4,u4;u5,i2} 
+  + 1/2 A{i1,i2;u1,u2} GAM0{u4;u3} g{i3,u3;a3,a4} T2g{a3,u1;i1,i2} T2g{a4,u2;u4,i3} 
+  + 1/2 A{i1,i2;u1,u2} GAM0{u2,u5;u3,u4} g{i3,u3;a3,a4} T2g{a3,u1;i1,i2} T2g{a4,u4;u5,i3} 
+  - A{i1,i2;u1,u2} GAM0{u1,u5;u3,u4} g{i3,u3;a3,a4} T2g{a3,u4;i1,i3} T2g{a4,u2;u5,i2} 
+  + 1/2 A{i1,i2;u1,u2} GAM0{u1,u5;u3,u4} g{i3,u3;a3,a4} T2g{a3,u4;i1,i2} T2g{a4,u2;u5,i3} 
+  - 1/2 1/2 A{i1,i2;u1,u2} g{i3,u1;a3,a4} T2g{a3,u2;u3,i3} T2g{a4,u3;i1,i2} 
+  + 1/2 A{i1,i2;u1,u2} g{i3,u1;a3,a4} T2g{a3,u2;u3,i2} T2g{a4,u3;i1,i3} 
+  + 1/2 1/2 A{i1,i2;u1,u2} g{i3,u1;a3,a4} GAM0{u2;u3} T2g{a3,u3;u4,i3} T2g{a4,u4;i1,i2} 
+  + 1/2 A{i1,i2;u1,u2} g{i3,u1;a3,a4} GAM0{u2;u3} T2g{a3,u3;u4,i1} T2g{a4,u4;i2,i3} 
+  - 1/2 1/2 A{i1,i2;u1,u2} GAM0{u2;u3} g{i3,u3;a3,a4} T2g{a3,u1;u4,i3} T2g{a4,u4;i1,i2} 
+  - 1/2 A{i1,i2;u1,u2} GAM0{u2;u3} g{i3,u3;a3,a4} T2g{a3,u1;u4,i1} T2g{a4,u4;i2,i3} 
+  - 1/2 1/4 A{i1,i2;u1,u2} GAM0{u1,u2;u3,u4} g{i3,u3;a3,a4} T2g{a3,u4;u5,i3} T2g{a4,u5;i1,i2} 
+  - 1/2 1/2 A{i1,i2;u1,u2} GAM0{u1,u2;u3,u4} g{i3,u3;a3,a4} T2g{a3,u4;u5,i1} T2g{a4,u5;i2,i3} 
+  + 1/2 1/2 A{i1,i2;u1,u2} g{i3,i4;a3,a4} T2g{a3,u2;i3,i4} T2g{a4,u1;i1,i2} 
+  + 1/2 1/2 A{i1,i2;u1,u2} g{i3,i4;a3,a4} T2g{a3,u1;i3,i4} GAM0{u2;u3} T2g{a4,u3;i1,i2} 
+  + 1/2 A{i1,i2;u1,u2} g{i3,i4;a3,a4} T2g{a3,u1;i1,i3} T2g{a4,u2;i2,i4} 
+  - A{i1,i2;u1,u2} g{i3,i4;a3,a4} T2g{a3,u1;i1,i3} GAM0{u2;u3} T2g{a4,u3;i2,i4} 
+  + 1/2 1/2 A{i1,i2;u1,u2} g{i3,i4;a3,a4} T2g{a3,u1;i1,i2} GAM0{u2;u3} T2g{a4,u3;i3,i4} 
+  - 1/2 1/4 A{i1,i2;u1,u2} g{i3,i4;a3,a4} GAM0{u1,u2;u3,u4} T2g{a3,u3;i3,i4} T2g{a4,u4;i1,i2} 
+  + 1/2 1/2 A{i1,i2;u1,u2} g{i3,i4;a3,a4} GAM0{u1,u2;u3,u4} T2g{a3,u3;i1,i3} T2g{a4,u4;i2,i4}

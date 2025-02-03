@@ -1,0 +1,10 @@
+INT3ext{a1,u1;i1,i2} = 
+  + 1/2 A{i1,i2;} T2g{a1,u1;i1,i2} 
+  - 1/2 A{i1,i2;} GAM0{u1;u2} T2g{a1,u2;i1,i2} 
+  - A{i1,i2;} T1{u1;i1} T1s{a1;i2} 
+  - 1/2 1/2 A{i1,i2;} T1{a1;u2} T2g{u1,u2;i1,i2} 
+  - 1/2 1/2 A{i1,i2;} T1{a1;u2} GAM0{u1;u3} T2g{u2,u3;i1,i2} 
+  + 1/2 A{i1,i2;} T1{a1;u3} GAM0{u3;u2} T2g{u1,u2;i1,i2} 
+  + A{i1,i2;} T1{u1;i1} GAM0{u3;u2} T2g{a1,u2;u3,i2} 
+  - 1/2 A{i1,i2;} T2g{a1,u1;u2,i1} T1{u2;i2} 
+  + 1/2 A{i1,i2;} GAM0{u1;u2} T2g{a1,u2;u3,i1} T1{u3;i2}

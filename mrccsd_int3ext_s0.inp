@@ -1,0 +1,2 @@
+INT3ext{a1,u3;u1,u2} = 
+  - 1/2 A{u1,u2;} GAM0{u3,u4;u1,u2} T1{a1;u4}
