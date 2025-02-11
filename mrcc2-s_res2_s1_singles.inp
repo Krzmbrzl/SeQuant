@@ -1,0 +1,53 @@
+R2{a1;i1} = 
+  + f{a1;i1} 
+  - GAM0{u2;u1} g{a1,u1;u2,i1} 
+  + f{a1;u1} T1{u1;i1} 
+  + g{i2,a1;u1,i1} T1{u1;i2} 
+  - g{i2,a1;u2,i1} GAM0{u2;u1} T1{u1;i2} 
+  + GAM0{u3;u1} g{a1,u1;u2,u3} T1{u2;i1} 
+  - GAM0{u2;u1} g{a1,u1;a2,i1} T1{a2;u2} 
+  - f{i2;i1} T1{a1;i2} 
+  + f{a1;a2} T1{a2;i1} 
+  + g{i2,a1;a2,i1} T1{a2;i2} 
+  + GAM0{u2;u1} g{i2,u1;u2,i1} T1{a1;i2} 
+  + GAM0{u2;u1} g{a1,u1;a2,u2} T1{a2;i1} 
+  - T1{a1;u1} f{u1;i1} 
+  + T1{a1;u1} GAM0{u3;u2} g{u1,u2;u3,i1} 
+  - HAM_D{i2;i1} T2g{a1;i2} 
+  + HAM_D{a1;a2} T2g{a2;i1} 
+  + HAM_D{i2;i1} GAM0{u2;u1} T2g{a1,u1;u2,i2} 
+  - HAM_D{a1;a2} GAM0{u2;u1} T2g{a2,u1;u2,i1} 
+  - GAM0{u3;u1} HAM_D{u1;u2} T2g{a1,u2;u3,i1} 
+  + 1/2 GAM0{u4,u5;u1,u2} HAM_D{u1,u2;u3,u4} T2g{a1,u3;u5,i1} 
+  + GAM0{u3;u1} T2g{a1,u1;u2,i1} HAM_D{u2;u3} 
+  - 1/2 GAM0{u4,u5;u1,u2} T2g{a1,u1;u3,i1} HAM_D{u2,u3;u4,u5} 
+  + g{i2,a1;u1,u2} T1{u1;i2} T1{u2;i1} 
+  + g{i2,a1;u1,u3} T1{u1;i1} GAM0{u3;u2} T1{u2;i2} 
+  + 1/2 f{i2;i1} T1{a1;u1} T1{u1;i2} 
+  + 1/2 f{a1;a2} T1{a2;u1} T1{u1;i1} 
+  + 1/2 g{i2,a1;a2,i1} T1{a2;u1} T1{u1;i2} 
+  - g{i2,a1;a2,i1} T1{a2;u2} GAM0{u2;u1} T1{u1;i2} 
+  - 1/2 GAM0{u3;u1} g{i2,u1;u3,i1} T1{a1;u2} T1{u2;i2} 
+  + 1/2 GAM0{u3;u1} g{a1,u1;a2,u3} T1{a2;u2} T1{u2;i1} 
+  - GAM0{u3;u1} g{a1,u1;a2,u2} T1{a2;u3} T1{u2;i1} 
+  - f{i2;u1} T1{a1;i2} T1{u1;i1} 
+  + g{i2,i3;u1,i1} T1{a1;i2} T1{u1;i3} 
+  - g{i2,i3;u2,i1} T1{a1;i2} GAM0{u2;u1} T1{u1;i3} 
+  + g{i2,a1;a2,u1} T1{a2;i2} T1{u1;i1} 
+  - g{i2,a1;a2,u1} T1{a2;i1} T1{u1;i2} 
+  + g{i2,a1;a2,u2} T1{a2;i1} GAM0{u2;u1} T1{u1;i2} 
+  - GAM0{u3;u1} g{i2,u1;u2,u3} T1{a1;i2} T1{u2;i1} 
+  + GAM0{u2;u1} g{i2,u1;a2,i1} T1{a1;i2} T1{a2;u2} 
+  - 1/2 INTkx{a2,a3;u1,i1} g{a1,u1;a2,a3} 
+  - f{i2;a2} T1{a2;i1} T1{a1;i2} 
+  + g{i2,i3;a2,i1} INTkx{a1,a2;i2,i3} 
+  - g{i2,a1;a2,a3} INTkx{a2,a3;i1,i2} 
+  - GAM0{u2;u1} g{i2,u1;a2,u2} T1{a2;i1} T1{a1;i2} 
+  - T1{a1;u1} f{u1;u2} T1{u2;i1} 
+  - T1{a1;u1} g{i2,u1;u2,i1} T1{u2;i2} 
+  + T1{a1;u1} g{i2,u1;u3,i1} GAM0{u3;u2} T1{u2;i2} 
+  - T1{a1;u1} GAM0{u4;u2} g{u1,u2;u3,u4} T1{u3;i1} 
+  + T1{a1;u1} GAM0{u3;u2} g{u1,u2;a2,i1} T1{a2;u3} 
+  - T1{a1;u1} f{u1;a2} T1{a2;i1} 
+  - T1{a1;u1} g{i2,u1;a2,i1} T1{a2;i2} 
+  - T1{a1;u1} GAM0{u3;u2} g{u1,u2;a2,u3} T1{a2;i1}
