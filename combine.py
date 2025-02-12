@@ -53,6 +53,17 @@ def main():
         itf += "alloc INTkx:eeac[abui]\nstore INTkx:eeac[abui]\n\n"
         itf += "alloc INTkx:eecc[abij]\nstore INTkx:eecc[abij]\n\n"
 
+    if not "code(\"Sum_T1\")" in itf:
+        itf += "\n---- code(\"Sum_T1\")\n"
+        itf += "alloc T1s:ec[ai]\n"
+        itf += "load T1:ec[ai]\n"
+        itf += ".T1s:ec[ai] += T1:ec[ai]\n"
+        itf += "drop T1:ec[ai]\n"
+        itf += "load T2:ec[ai]\n"
+        itf += ".T1s:ec[ai] += T2:ec[ai]\n"
+        itf += "drop T2:ec[ai]\n"
+        itf += "store T1s:ec[ai]\n"
+
     itf += "\n\n---- end\n"
 
     print(itf)

@@ -391,17 +391,6 @@ store T2:eecc[abij]
 
 
 
----- code("Sum_T1")
-alloc T1s:ec[ai]
-load T1:ec[ai]
-.T1s:ec[ai] += T1:ec[ai]
-drop T1:ec[ai]
-load T2:ec[ai]
-.T1s:ec[ai] += T2:ec[ai]
-drop T2:ec[ai]
-store T1s:ec[ai]
-
-
 ---- code("Transform_K")
 // Transform output form Kext into separate blocks
 alloc K4E:eecc[abij], K4E:eeac[abpi], K4E:eeaa[abpq]
