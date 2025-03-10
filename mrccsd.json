@@ -6,7 +6,7 @@
 			"projection": "biorthogonal",
 			"spintracing": "closed_shell",
 			"density_fitting": false,
-			"term_by_term": true
+			"term_by_term": false
 		},
 		"code_blocks": [
 			{
