@@ -1,2 +1,2 @@
-INTkx{a1,a2;u1,u2} = 
-  + 1/2 1/2 A{u1,u2;a1,a2} GAM0{u3,u4;u1,u2} T1{a1;u3} T1{a2;u4}
+INTkx{a1,a2;u1,u2} =
+  + 1/2 1/2 A{u1,u2;a1,a2} GAM0{u3,u4;u1,u2} T1{a1;u3} T1{a2;u4} 
