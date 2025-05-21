@@ -5,6 +5,7 @@
 #include <SeQuant/core/export/generator.hpp>
 #include <SeQuant/core/export/utils.hpp>
 #include <SeQuant/core/expr.hpp>
+#include <SeQuant/core/parse.hpp>
 #include <SeQuant/core/tensor.hpp>
 
 #include <pv/polymorphic_variant.hpp>
@@ -115,6 +116,57 @@ class GenerationOptimizer final : public Generator<MainContext> {
       // should not be reached
       assert(false);
       return MemoryAction::None;
+    }
+
+    std::string to_string() const {
+      std::string str;
+      switch (type()) {
+        case OperationType::Create:
+          str += "Create";
+          break;
+        case OperationType::Load:
+          str += "Load";
+          break;
+        case OperationType::LoadAndZero:
+          str += "Load&Zero";
+          break;
+        case OperationType::Zero:
+          str += "Zero";
+          break;
+        case OperationType::Unload:
+          str += "Unload";
+          break;
+        case OperationType::Destroy:
+          str += "Destroy";
+          break;
+        case OperationType::Persist:
+          str += "Persist";
+          break;
+        case OperationType::Compute:
+          str += "Compute";
+          break;
+      }
+
+      assert(!str.empty());
+
+      str += " ";
+
+      if (std::holds_alternative<Tensor>(m_object)) {
+        const Tensor &tensor = std::get<Tensor>(m_object);
+        str += toUtf8(tensor.label());
+        str += ":";
+        for (const Index &idx : tensor.indices()) {
+          str += toUtf8(idx.space().reduce_key(idx.label()));
+        }
+      } else {
+        str += toUtf8(std::get<Variable>(m_object).label());
+      }
+
+      return str;
+    }
+
+    bool operator==(const AbstractOperation &other) const {
+      return type() == other.type() && object_equals(other.m_object);
     }
 
    private:
@@ -472,21 +524,22 @@ class GenerationOptimizer final : public Generator<MainContext> {
   }
 
   void process_operation_cache(const MainContext &ctx) {
-    // Remove operations that cancel each other from the queue
-    for (std::size_t i = 0; i < m_queue.size(); ++i) {
-      const Operation &first = m_queue.at(i);
+    std::cout << "Input queue:\n";
+    for (const Operation &qop : m_queue) {
+      std::cout << qop->to_string() << std::endl;
+    }
 
-      for (std::size_t k = i; k < m_queue.size(); ++k) {
-        const Operation &second = m_queue.at(k);
+    // Step 1: Get rid of redundant operations in the queue
 
-        if (first->cancels(second)) {
-          m_queue.erase(m_queue.begin() + k);
-          m_queue.erase(m_queue.begin() + i);
-          // Needed to make the outer loop re-visit the current
-          // value of i
-          i--;
-          break;
-        }
+    // If two subsequent elements cancel each other, they can be erased without
+    // having to worry about potentially violating the stack-like ordering of
+    // memory operations (it will be preserved).
+    for (std::size_t i = 0; i < m_queue.size() - 1; ++i) {
+      if (m_queue[i]->cancels(m_queue.at(i + 1))) {
+        m_queue.erase(m_queue.begin() + i + 1);
+        m_queue.erase(m_queue.begin() + i);
+        // Re-visit the current value of i in the next iteration
+        i--;
       }
     }
 
@@ -518,9 +571,44 @@ class GenerationOptimizer final : public Generator<MainContext> {
                        distance_to_matching_alloc(rhs);
               });
 
+    std::cout << "Preprocessed queue:\n";
+    for (const Operation &qop : m_queue) {
+      std::cout << qop->to_string() << std::endl;
+    }
+	std::cout << "\n";
+
+    // Search for redundant operations that have other operations in between
+    // them. Erasing these will screw up the stack-like ordering though, so
+    // we'll have to do some re-arranging to make up for it.
+    container::svector<std::size_t> erase_candidates;
+    for (std::size_t i = 0; i < m_queue.size() - 1; ++i) {
+      const Operation &first = m_queue.at(i);
+
+      for (std::size_t k = i + 1; k < m_queue.size(); ++k) {
+        const Operation &second = m_queue.at(k);
+
+        if (first->cancels(second)) {
+          erase_candidates.push_back(i);
+          erase_candidates.push_back(k);
+          break;
+        }
+      }
+    }
+
     // Move items from the queue into the cache
-    for (Operation &op : m_queue) {
+    for (std::size_t i = 0; i < m_queue.size(); ++i) {
+      Operation &op = m_queue[i];
+
+      if (std::find(erase_candidates.begin(), erase_candidates.end(), i) !=
+          erase_candidates.end()) {
+        std::cout << "Skipping " << op->to_string() << std::endl;
+        continue;
+      }
+
+      // TODO: only erase if the re-ordering is unproblematic
+
       if (op->memory_action() != MemoryAction::Deallocate) {
+        std::cout << "Adding " << op->to_string() << std::endl;
         m_cache.push_back(std::move(op));
         continue;
       }
@@ -561,20 +649,95 @@ class GenerationOptimizer final : public Generator<MainContext> {
         assert(rpos > 0);
         assert((*(m_cache.rbegin() + rpos))->pairs_with(op));
 
-        // Move the unpaired allocation to be located before the allocation
-        // of op. That is, we do
-        // M, A, B, C, X -> X, M, A, B, C
-        // where M is the allocation pairing with op and X is the
-        // unpaired allocation.
-        std::rotate(unpaired_alloc, unpaired_alloc + 1,
-                    m_cache.rbegin() + rpos + 1);
+        const Operation &unpaired = *unpaired_alloc;
 
-        rpos -= 1;
+        std::cout << "Would have to move " << unpaired->to_string() << " in order to add " << op->to_string()
+                  << std::endl;
+
+        auto it = std::find_if(
+            unpaired_alloc + 1, op_alloc, [&](const Operation &other) {
+              std::cout << "    Cmp " << other->to_string() << " vs. "
+                        << unpaired->to_string() << " -> "
+                        << unpaired->pairs_with(other) << std::endl;
+              return unpaired->pairs_with(other);
+            });
+
+        if (it == op_alloc) {
+          // Safe to move
+          std::cout << "Moving " << (*unpaired_alloc)->to_string() << " before "
+                    << (*op_alloc)->to_string() << "\n";
+
+          // Move the unpaired allocation to be located before the allocation
+          // of op. That is, we do
+          // M, A, B, C, X -> X, M, A, B, C
+          // where M is the allocation pairing with op and X is the
+          // unpaired allocation.
+          std::rotate(unpaired_alloc, unpaired_alloc + 1,
+                      m_cache.rbegin() + rpos + 1);
+
+          rpos -= 1;
+        } else {
+          // Moving unpaired_alloc would cross previous uses of that object.
+          // Hence, this would result in code like
+          // Load A
+          // …
+          // Load A
+          // …
+          // Unload A
+          // Hence, at some point we would try to load an object while it
+          // is already loaded, which clearly doesn't make sense.
+          // We can resolve this in two ways
+          // 1. Remove the intermittent Load and Unload
+          // 2. Don't move unpaired_alloc
+          // The first option brings the risk of ending up with a code that
+          // keeps too many objects in memory at the same time. Hence, we
+          // prefer the second option.
+          // Note moving implies that we have to undo the cancellation of
+          // operations that lead to the need for the move in the first place.
+          std::cout << "Want to cancel erasure of operations involving "
+                    << (*unpaired_alloc)->to_string() << std::endl;
+          [[maybe_unused]] int undone = 0;
+          for (std::size_t erased_idx : erase_candidates) {
+            // TODO: Does inserting the erased op here guarantee maintained
+            // stack-order?
+            if (m_queue.at(erased_idx)->pairs_with(*unpaired_alloc)) {
+              assert(erased_idx < i);
+              std::cout << "Undoing erasure of "
+                        << m_queue[erased_idx]->to_string() << "\n";
+              m_cache.push_back(std::move(m_queue[erased_idx]));
+              undone++;
+            } else {
+              std::cout << "Comparing " << m_queue[erased_idx]->to_string()
+                        << " with " << (*unpaired_alloc)->to_string()
+                        << std::endl;
+              if (m_queue[erased_idx] == *unpaired_alloc) {
+                assert(erased_idx > i);
+                // Pretend this was never intended to be erased in the first
+                // place
+                std::cout << "Preventing erasure of "
+                          << m_queue[erased_idx]->to_string() << std::endl;
+                erase_candidates.erase(
+                    std::remove(erase_candidates.begin(),
+                                erase_candidates.end(), erased_idx),
+                    erase_candidates.end());
+                undone++;
+                break;
+              }
+            }
+          }
+          assert(undone == 2);
+
+          rpos += 1;
+        }
+
         op_alloc = m_cache.rbegin() + rpos;
-
+        std::cout << "op_alloc points to " << (*op_alloc)->to_string()
+                  << std::endl;
+        assert((*op_alloc)->memory_action() == MemoryAction::Allocate);
         unpaired_alloc = find_unpaired_allocation(m_cache.rbegin(), op_alloc);
       }
 
+      std::cout << "Adding " << op->to_string() << std::endl;
       m_cache.push_back(std::move(op));
     }
 
@@ -589,6 +752,12 @@ class GenerationOptimizer final : public Generator<MainContext> {
 
       m_cache.clear();
     }
+
+    std::cout << "\n>>>>>>>>>>>> Current cache <<<<<<<<<<<<<<<:\n";
+    for (const Operation &op : m_cache) {
+      std::cout << op->to_string() << std::endl;
+    }
+    std::cout << "\n";
   }
 };
 
