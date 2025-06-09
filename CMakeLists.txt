@@ -241,6 +241,7 @@ set(SeQuant_src
         SeQuant/core/op.cpp
         SeQuant/core/op.hpp
         SeQuant/core/optimize.hpp
+        SeQuant/core/optimize/common_subexpression_elimination.hpp
         SeQuant/core/optimize/fusion.cpp
         SeQuant/core/optimize/fusion.hpp
         SeQuant/core/optimize/optimize.cpp
