@@ -2,6 +2,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <SeQuant/core/export/export.hpp>
+#include <SeQuant/core/export/tapp.hpp>
 #include <SeQuant/core/export/export_expr.hpp>
 #include <SeQuant/core/export/export_node.hpp>
 #include <SeQuant/core/export/expression_group.hpp>
@@ -86,7 +87,8 @@ using KnownGenerators = std::tuple<
     JuliaITensorGenerator<JuliaITensorGeneratorContext>,
     JuliaTensorKitGenerator<JuliaTensorKitGeneratorContext>,
     JuliaTensorOperationsGenerator<JuliaTensorOperationsGeneratorContext>,
-	ItfGenerator<ItfContext>
+	ItfGenerator<ItfContext>,
+	TappGenerator<TappContext>
 >;
 // clang-format on
 
@@ -107,6 +109,8 @@ std::set<std::string> known_format_names(std::tuple<Generator...> generators) {
 }
 
 void configure_context_defaults(TextGeneratorContext &ctx) {}
+
+void configure_context_defaults(TappContext &ctx) {}
 
 void configure_context_defaults(ItfContext &ctx) {
   auto registry = get_default_context().index_space_registry();
@@ -132,6 +136,11 @@ void configure_context_defaults(JuliaTensorOperationsGeneratorContext &ctx) {
   ctx.set_tag(virt, "v");
 }
 
+void add_to_context(TappContext &ctx, std::string_view key,
+                    std::string_view value) {
+  throw std::runtime_error(
+      "TappContext doesn't support specifications");
+}
 void add_to_context(TextGeneratorContext &ctx, std::string_view key,
                     std::string_view value) {
   throw std::runtime_error(
@@ -253,7 +262,7 @@ TEMPLATE_LIST_TEST_CASE("export_tests", "[export]", KnownGenerators) {
   REQUIRE(Index(L"i_1") < Index(L"a_1"));
 
   // Safe-guard that template magic works
-  const std::size_t n_generators = 5;
+  const std::size_t n_generators = 6;
 
   const std::set<std::string> known_formats =
       known_format_names(KnownGenerators{});
