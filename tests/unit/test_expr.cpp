@@ -12,6 +12,7 @@
 #include <SeQuant/core/hash.hpp>
 #include <SeQuant/core/latex.hpp>
 #include <SeQuant/core/meta.hpp>
+#include <SeQuant/core/utility/tensor.hpp>
 #include <SeQuant/core/wolfram.hpp>
 #include <SeQuant/domain/mbpt/convention.hpp>
 
@@ -762,6 +763,36 @@ TEST_CASE("expr", "[elements]") {
       ex3.reset();
       REQUIRE_NOTHROW(ex3 *= ex2);
       CHECK(ex3 == ex2);
+    }
+  }
+
+  SECTION("contains") {
+    for (const auto &[expr_str, item_str, expected] :
+         std::vector<std::tuple<std::wstring, std::wstring, bool>>{
+             {L"Var", L"Var", true},
+             {L"Var", L"Var2", false},
+             {L"2 Var Var2", L"Var", true},
+             {L"2 (Var - 1) Var2", L"Var", true},
+             {L"t{a1;a2}", L"t{a1;a2}", true},
+             {L"t{a1;a2}", L"t{a2;a1}", false},
+         }) {
+      ExprPtr expr = parse_expr(expr_str);
+      ExprPtr item = parse_expr(item_str);
+
+      REQUIRE(contains(expr, item) == expected);
+    }
+
+    SECTION("tensor block") {
+      for (const auto &[expr_str, item_str, expected] :
+           std::vector<std::tuple<std::wstring, std::wstring, bool>>{
+               {L"t{a1;a2}", L"t{a1;a2}", true},
+               {L"t{a1;a2}", L"t{a2;a1}", true},
+           }) {
+        ExprPtr expr = parse_expr(expr_str);
+        ExprPtr item = parse_expr(item_str);
+
+        REQUIRE(contains<TensorBlockEqualComparator>(expr, item) == expected);
+      }
     }
   }
 }

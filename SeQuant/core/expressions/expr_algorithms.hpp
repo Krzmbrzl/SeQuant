@@ -659,6 +659,41 @@ inline ExprPtr& non_canon_simplify(ExprPtr& expr) {
   return expr;
 }
 
+/// @returns Whether the provided expression contains the given item
+/// @note The item must not be a composite expression (must be an atom/leaf)
+template <typename EqualityCmp = std::equal_to<>>
+bool contains(const Expr& expr, const Expr& item, EqualityCmp cmp = {}) {
+  assert(item.is_atom());
+
+  if (expr.is_atom()) {
+    if (cmp(expr, item)) {
+      return true;
+    }
+
+    return false;
+  }
+
+  if (item.is<Constant>() && expr.is<Product>() &&
+      cmp(Constant(expr.as<Product>().scalar()), item)) {
+    return true;
+  }
+
+  for (const ExprPtr& expr : expr) {
+    if (contains(*expr, item, cmp)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/// @returns Whether the provided expression contains the given item
+/// @note The item must not be a composite expression (must be an atom/leaf)
+template <typename EqualityCmp = std::equal_to<>>
+bool contains(const ExprPtr& expr, const ExprPtr& item, EqualityCmp cmp = {}) {
+  return contains(*expr, *item, cmp);
+}
+
 }  // namespace sequant
 
 #endif  // SEQUANT_EXPRESSIONS_ALGORITHMS_HPP
