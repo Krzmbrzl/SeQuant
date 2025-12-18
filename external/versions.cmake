@@ -38,3 +38,5 @@ set(SEQUANT_OLDEST_PYBIND11_VERSION 3)
 
 # oldest Doxygen we can tolerate ... doxygen-awesome-css requires doxygen 1.9.1 - 1.9.4 or 1.9.6 - 1.14.0, so just use 1.9.6 as the minimum
 set(SEQUANT_OLDEST_DOXYGEN_VERSION 1.9.6)
+
+set(SEQUANT_TRACKED_CPPPEGLIB_TAG de57145d884e1eb6ca81b3972b588eb1cf5e643e)
