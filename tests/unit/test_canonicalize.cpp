@@ -256,6 +256,47 @@ TEST_CASE("canonicalization", "[algorithms]") {
     }
   }
 
+  SECTION("Powers in Products") {
+    const auto f = deserialize(L"f{p_1;p_2}:A-C-S * ã{p_2;p_1}");
+    const auto t1 = deserialize(L"t{a_1;i_1}:A-C-S * ã{i_1;a_1}");
+    const auto pw = ex<Power>(ex<Variable>(L"x"), rational{1, 2});
+
+    auto expr1 = f * t1 * pw;
+    simplify(expr1);
+    REQUIRE_THAT(expr1, EquivalentTo(L"x^(1/2) * ã{p_2;p_1} * ã{i_1;a_1} * "
+                                     L"t{a_1;i_1}:A-C-S * f{p_1;p_2}:A-C-S"));
+
+    auto expr2 = ex<Constant>(rational{1, 2}) * f * t1 * pw;
+    simplify(expr2);
+    REQUIRE_THAT(expr2, EquivalentTo(L"1/2 x^(1/2) * ã{p_2;p_1} * ã{i_1;a_1} * "
+                                     L"t{a_1;i_1}:A-C-S * f{p_1;p_2}:A-C-S"));
+
+    auto expr3 = f * t1 * ex<Power>(2, 3);
+    simplify(expr3);
+    REQUIRE_THAT(expr3, EquivalentTo(L"8 * ã{p_2;p_1} * ã{i_1;a_1} * "
+                                     L"t{a_1;i_1}:A-C-S * f{p_1;p_2}:A-C-S"));
+  }
+
+  SECTION("Sum of Powers") {
+    const auto vx = ex<Variable>(L"x");
+
+    // x^{1/2} + x^{1/2} = 2 * x^{1/2}
+    auto pw1 = ex<Power>(vx, rational{1, 2});
+    auto pw2 = ex<Power>(vx, rational{1, 2});
+    auto sum_expr = pw1 + pw2;
+    simplify(sum_expr);
+    REQUIRE(sum_expr->is<Product>());
+    REQUIRE(sum_expr->as<Product>().scalar() == 2);
+
+    // 2 x^{1/2} + 3 x^{1/2} = 5 x^{1/2}
+    auto s1 = ex<Constant>(2) * ex<Power>(vx, rational{1, 2});
+    auto s2 = ex<Constant>(3) * ex<Power>(vx, rational{1, 2});
+    auto sum2 = s1 + s2;
+    simplify(sum2);
+    REQUIRE(sum2->is<Product>());
+    REQUIRE(sum2->as<Product>().scalar() == 5);
+  }
+
   SECTION("Sum of Products") {
     // P.S. ref outputs produced with complete canonicalization
     auto ctx = get_default_context();
