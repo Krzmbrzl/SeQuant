@@ -246,7 +246,7 @@ std::string EvalExpr::label() const noexcept {
   else if (is_constant()) {
     return toUtf8(io::serialization::to_string(as_constant()));
   } else if (is_power()) {
-    return toUtf8(as_power().to_latex());
+    return toUtf8(io::serialization::to_string(as_power()));
   } else if (is_variable()) {
     return toUtf8(as_variable().label());
   } else {
