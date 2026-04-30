@@ -801,7 +801,10 @@ TEST_CASE("expr", "[elements]") {
               L"{\\text{Dummy}}\\bigr) }{\\text{Dummy}}{ "
               L"\\bigl({\\text{Dummy}} + {\\text{Dummy}}\\bigr) }}");
     }
-    {  // Power::flatten: Constant base + integer exponent folds in place
+
+    {  // Power::flatten
+
+      // Constant base + integer exponent folds in place
       auto pf1 = ex<Power>(2, 3);
       Power::flatten(pf1);
       REQUIRE(pf1 == ex<Constant>(rational{8}));
@@ -814,7 +817,7 @@ TEST_CASE("expr", "[elements]") {
       Power::flatten(pf3);
       REQUIRE(pf3 == ex<Constant>(rational{1}));
 
-      // non-integer exponent on a Constant base is a no-op
+      // non-integer exponent without an exact root is a no-op
       auto pf4 = ex<Power>(2, rational{1, 2});
       Power::flatten(pf4);
       REQUIRE(pf4->is<Power>());
@@ -833,6 +836,42 @@ TEST_CASE("expr", "[elements]") {
       auto pf8 = ex<Power>(2, -20);
       Power::flatten(pf8);
       REQUIRE(pf8 == ex<Constant>(rational{1, 1048576}));
+
+      // square-root exponent with perfect-square base folds
+      // 4^(1/2) = 2
+      auto pf9 = ex<Power>(4, rational{1, 2});
+      Power::flatten(pf9);
+      REQUIRE(pf9 == ex<Constant>(rational{2}));
+
+      // (1/4)^(1/2) = 1/2
+      auto pf10 = ex<Power>(rational{1, 4}, rational{1, 2});
+      Power::flatten(pf10);
+      REQUIRE(pf10 == ex<Constant>(rational{1, 2}));
+
+      // (1/4)^(-1/2) = 2 (negative exponent inverts the base)
+      auto pf11 = ex<Power>(rational{1, 4}, rational{-1, 2});
+      Power::flatten(pf11);
+      REQUIRE(pf11 == ex<Constant>(rational{2}));
+
+      // (9/16)^(3/2) = 27/64
+      auto pf12 = ex<Power>(rational{9, 16}, rational{3, 2});
+      Power::flatten(pf12);
+      REQUIRE(pf12 == ex<Constant>(rational{27, 64}));
+
+      // (-1)^(1/2) is imaginary; left as Power
+      auto pf13 = ex<Power>(-1, rational{1, 2});
+      Power::flatten(pf13);
+      REQUIRE(pf13->is<Power>());
+
+      // 8^(1/3) is not folded
+      auto pf14 = ex<Power>(8, rational{1, 3});
+      Power::flatten(pf14);
+      REQUIRE(pf14->is<Power>());
+
+      // 4^(9/2) = 2^9 = 512
+      auto pf15 = ex<Power>(4, rational{9, 2});
+      Power::flatten(pf15);
+      REQUIRE(pf15 == ex<Constant>(rational{512}));
     }
   }
 

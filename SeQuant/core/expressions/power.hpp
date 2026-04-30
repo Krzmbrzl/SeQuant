@@ -88,44 +88,87 @@ class Power : public Expr {
   }
 
   /// @brief Attempts to flatten a Power into a Constant, mutating @p expr
-  /// in place. No-op unless @p expr holds a Power whose:
-  ///   - base is a Constant
-  ///   - exponent is a real integer
+  /// in place. Folds when @p expr holds a Power whose base is a Constant
+  /// and any of:
+  ///   - the base is 1 (then `1^k = 1` for any rational @c k);
+  ///   - the exponent is a real integer (any Constant base);
+  ///   - the exponent has the form `m/2` and the base is a non-negative
+  ///     real rational `p/q` with both @c p and @c q perfect squares
+  ///     (e.g. `4^{1/2} -> 2`, `(1/4)^{1/2} -> 1/2`).
   /// On success, @p expr is rebound to the folded Constant; otherwise it is
   /// left unchanged.
+  /// @note Only square-root exponents are folded (that is the only
+  /// case needed in practice right now). Extending to general n-th roots only
+  /// requires replacing the integer-square-root step with an integer n-th-root.
   static void flatten(ExprPtr& expr) {
     if (!expr || !expr->is<Power>()) return;
-    const auto& self = expr->as<Power>();
-    if (!self.base_->is<Constant>()) return;
-    if (denominator(self.exponent_) != 1) return;
+    const auto& pw = expr->as<Power>();
+    if (!pw.base_->is<Constant>()) return;
 
-    auto exp_numerator = numerator(self.exponent_);
-    const auto& base_val = self.base_->as<Constant>().value();
     using scalar_type = Constant::scalar_type;
+    const auto& base_val = pw.base_->as<Constant>().value();
 
-    // zero power
-    if (exp_numerator == 0) {
+    // 1^k = 1 for any rational k.
+    if (base_val == scalar_type{1}) {
       expr = ex<Constant>(scalar_type{1});
       return;
     }
-    // negative power
-    const bool negate = exp_numerator < 0;
-    if (negate) exp_numerator = -exp_numerator;
 
-    // exponentiation by squaring
+    // Both remaining fold cases share one shape — `rational base raised to
+    // an integer exponent` — so we normalize to that shape and run a single
+    // exp-by-squaring loop. Anything else is left untouched.
+    //
+    // Case A: integer exponent (any Constant base, real or complex).
+    //   `base` is just `base_val`.
+    // Case B: half-integer exponent on a non-negative real rational base
+    //   `p/q` with both `p` and `q` perfect squares. Then
+    //     (p/q)^(m/2) = (sqrt(p)/sqrt(q))^m,
+    //   so we replace `base` with `sqrt(p)/sqrt(q)` (still a rational) and
+    //   keep `exp_int = m`.
+
+    // initialize the base
+    scalar_type base{0};
+    auto exp_nr = numerator(pw.exponent_);  // numerator of exponent
+
+    if (denominator(pw.exponent_) == 1) {
+      base = base_val;
+    } else if (denominator(pw.exponent_) == 2 && base_val.imag() == 0 &&
+               base_val.real() >= 0) {
+      intmax_t p = numerator(base_val.real());
+      intmax_t q = denominator(base_val.real());  // > 0 by Boost's convention,
+                                                  // sign is with the numerator
+
+      // check for perfect squares
+      intmax_t p_rem{0}, q_rem{0};
+      intmax_t p_root = boost::multiprecision::sqrt(p, p_rem);
+      intmax_t q_root = boost::multiprecision::sqrt(q, q_rem);
+      // fold if p and q are perfect squares, else return
+      if (p_rem != 0 || q_rem != 0) return;
+      base = scalar_type{rational(p_root) / rational(q_root)};
+    } else {
+      return;
+    }
+
+    // a^0 = 1; the ctor already rejects 0^(negative).
+    if (exp_nr == 0) {
+      expr = ex<Constant>(scalar_type{1});
+      return;
+    }
+
+    // Standard exp-by-squaring; for negative exponents we power the
+    // magnitude and invert at the end.
+    const bool negate = exp_nr < 0;
+    if (negate) exp_nr = -exp_nr;
     scalar_type value{1};
-    scalar_type b = base_val;
-    auto n = exp_numerator;
-    while (n > 0) {
-      if (n % 2 != 0) value *= b;
-      n /= 2;
-      if (n > 0) b *= b;
+    scalar_type b = base;
+    while (exp_nr > 0) {
+      if (exp_nr % 2 != 0) value *= b;
+      exp_nr /= 2;
+      if (exp_nr > 0) b *= b;
     }
     if (negate) value = scalar_type{1} / value;
 
-    // apply conjugation if needed
-    if (self.conjugated_) value = conj(value);
-
+    if (pw.conjugated_) value = conj(value);
     expr = ex<Constant>(std::move(value));
   }
 
