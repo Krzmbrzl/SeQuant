@@ -505,7 +505,7 @@ TEST_CASE("expr", "[elements]") {
       const auto c2 = ex<Constant>(rational{1, 2});
 
       Power p1(c2, rational{1, 2});
-      REQUIRE(p1.to_latex() == L"{{{\\frac{1}{2}}}}^{\\frac{1}{2}}");
+      REQUIRE(p1.to_latex() == L"{\\frac{1}{2^{\\frac{1}{2}}}}");
 
       Power p_exp1(c2, rational{1});
       REQUIRE(p_exp1.to_latex() == L"{{{\\frac{1}{2}}}}");
