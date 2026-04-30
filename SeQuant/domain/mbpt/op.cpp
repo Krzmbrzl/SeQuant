@@ -1186,7 +1186,8 @@ qns_t apply_to_vac(const ExprPtr& expr) {
     qns = expr.as<op_t>()();
   } else if (expr.is<Product>()) {
     const auto& op_product = expr.as<Product>();
-    for (auto& op_ptr : ranges::views::reverse(op_product.factors())) {
+    for (auto& op_ptr :
+         ranges::views::reverse(op_product.nonscalar_factors())) {
       SEQUANT_ASSERT(op_ptr->template is<op_t>());
       const auto& op = op_ptr->template as<op_t>();
       qns = op(qns);
@@ -1239,23 +1240,15 @@ namespace tensor {
 ExprPtr expectation_value_impl(ExprPtr expr, OpConnections<int> connect,
                                OpConnections<int> avoid, bool use_top,
                                bool full_contractions) {
-  // Pull scalar-type factors (Variable and Power) out of a Product before
-  // WickTheorem sees it. Extracted factors are reattached to the result after
-  // Wick evaluation.
-  auto is_scalar_leaf = [](const ExprPtr& f) {
-    return f->is<Variable>() || f->is<Power>();
-  };
+  // Pull scalar factors  out of a Product before WickTheorem sees it.
+  // Extracted factors are reattached to the result after Wick evaluation.
   container::svector<ExprPtr> scalar_factors;
   if (expr.is<Product>()) {
-    auto factors = expr.as<Product>().factors();
-    scalar_factors = factors | ranges::views::filter(is_scalar_leaf) |
-                     ranges::to<container::svector<ExprPtr>>;
+    const auto& prod = expr.as<Product>();
+    scalar_factors =
+        prod.scalar_factors() | ranges::to<container::svector<ExprPtr>>;
     if (!scalar_factors.empty()) {
-      auto kept = factors | ranges::views::filter([&](const auto& f) {
-                    return !is_scalar_leaf(f);
-                  }) |
-                  ranges::to<decltype(factors)>;
-      expr = ex<Product>(expr.as<Product>().scalar(), kept.begin(), kept.end());
+      expr = ex<Product>(prod.scalar(), prod.nonscalar_factors());
     }
   }
 

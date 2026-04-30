@@ -190,10 +190,8 @@ ExprPtr Product::canonicalize_impl(CanonicalizeOptions opts) {
                << ") input: " << to_latex() << std::endl;
   }
 
-  // pull out all scalar factors (Variables, Powers) to the front
-  auto is_scalar = [](const auto &factor) {
-    return factor.template is<Variable>() || factor.template is<Power>();
-  };
+  // pull out all scalar factors to the front
+  auto is_scalar = [](const auto &factor) { return factor->is_scalar(); };
   auto scalars =
       factors_ | ranges::views::filter(is_scalar) | ranges::to_vector;
   // scalars commute, so we can reorder them freely
