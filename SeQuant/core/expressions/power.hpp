@@ -133,6 +133,8 @@ class Power : public Expr {
 
   type_id_type type_id() const override { return get_type_id<Power>(); }
 
+  bool is_scalar() const override { return true; }
+
   ExprPtr clone() const override {
     auto cloned = ex<Power>(base_->clone(), exponent_);
     if (conjugated_) cloned->as<Power>().conjugate();
