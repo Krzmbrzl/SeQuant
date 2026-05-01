@@ -93,10 +93,14 @@ struct Sum;
 struct Power : boost::spirit::x3::position_tagged {
   boost::variant<Number, Variable> base;
   Number exponent;
+  bool conjugated;
 
   Power() noexcept = default;
-  Power(boost::variant<Number, Variable> base, Number exponent)
-      : base(std::move(base)), exponent(std::move(exponent)) {}
+  Power(boost::variant<Number, Variable> base, Number exponent,
+        bool conjugated = false)
+      : base(std::move(base)),
+        exponent(std::move(exponent)),
+        conjugated(conjugated) {}
 };
 
 using NullaryValue =
@@ -158,7 +162,7 @@ BOOST_FUSION_ADAPT_STRUCT(sequant::io::serialization::v1::ast::SymmetrySpec,
 BOOST_FUSION_ADAPT_STRUCT(sequant::io::serialization::v1::ast::Tensor, name,
                           indices, symmetry);
 BOOST_FUSION_ADAPT_STRUCT(sequant::io::serialization::v1::ast::Power, base,
-                          exponent);
+                          exponent, conjugated);
 
 BOOST_FUSION_ADAPT_STRUCT(sequant::io::serialization::v1::ast::Product,
                           factors);

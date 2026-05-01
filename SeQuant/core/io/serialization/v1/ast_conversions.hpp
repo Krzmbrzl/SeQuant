@@ -332,7 +332,11 @@ struct Transformer {
         static_cast<std::int64_t>(power.exponent.numerator),
         static_cast<std::int64_t>(power.exponent.denominator));
 
-    return ex<Power>(std::move(base), std::move(exponent));
+    auto pw = ex<Power>(std::move(base), std::move(exponent));
+    if (power.conjugated) {
+      pw->as<Power>().conjugate();
+    }
+    return pw;
   }
 };
 
