@@ -26,8 +26,12 @@ class Power : public Expr {
   Power& operator=(Power&&) = default;
 
   /// @param[in] base the base expression; must be a Constant, Variable, or
-  ///   Power (in the last case the result is flattened:
-  ///   `Power(Power(b,e1), e2)` → `Power(b, e1*e2)`)
+  ///   Power. When @p base is a Power we attempt to flatten:
+  ///   `Power(Power(b,e1), e2)` → `Power(b, e1*e2)`. If the inner Power is
+  ///   conjugated, flattening is only safe for integer outer exponent, in
+  ///   which case the conjugation flag is propagated
+  ///   (`conj(b^e1)^n = conj(b^(e1*n))`). Otherwise we refuse to flatten and
+  ///   keep the nested Power as the base.
   /// @param[in] exponent rational exponent
   Power(ExprPtr base, exponent_type exponent)
       : base_{}, exponent_{std::move(exponent)} {
@@ -36,8 +40,14 @@ class Power : public Expr {
     // mutations of the input cannot invalidate our memoized hash
     if (base->is<Power>()) {
       auto& inner = base->as<Power>();
-      base_ = inner.base()->clone();
-      exponent_ = inner.exponent() * exponent_;
+      // `conj(z)^n == conj(z^n)` only for integer n
+      if (inner.conjugated() && denominator(exponent_) != 1) {
+        base_ = base->clone();
+      } else {
+        base_ = inner.base()->clone();
+        exponent_ = inner.exponent() * exponent_;
+        if (inner.conjugated()) conjugated_ = true;
+      }
     } else {
       SEQUANT_ASSERT(base->is<Constant>() || base->is<Variable>());
       base_ = base->clone();
@@ -87,22 +97,30 @@ class Power : public Expr {
            base_->as<Constant>().is_zero();
   }
 
-  /// @brief Attempts to flatten a Power into a Constant, mutating @p expr
-  /// in place. Folds when @p expr holds a Power whose base is a Constant
-  /// and any of:
-  ///   - the base is 1 (then `1^k = 1` for any rational @c k);
-  ///   - the exponent is a real integer (any Constant base);
-  ///   - the exponent has the form `m/2` and the base is a non-negative
-  ///     real rational `p/q` with both @c p and @c q perfect squares
-  ///     (e.g. `4^{1/2} -> 2`, `(1/4)^{1/2} -> 1/2`).
-  /// On success, @p expr is rebound to the folded Constant; otherwise it is
-  /// left unchanged.
+  /// @brief Attempts to flatten a Power, mutating @p expr in place. Folds
+  /// when @p expr holds a Power and any of:
+  ///   - the exponent is 1 (then `b^1 = b` and conjugate if needed);
+  ///   - the base is the constant 1 (then `1^k = 1` for any rational @c k);
+  ///   - the base is a Constant and the exponent is a real integer;
+  ///   - the base is a Constant and the exponent has the form `m/2` and the
+  ///     base is a non-negative real rational `p/q` with both @c p and @c q
+  ///     perfect squares (e.g. `4^{1/2} -> 2`, `(1/4)^{1/2} -> 1/2`).
+  /// On success, @p expr is rebound to the folded expression; otherwise it
+  /// is left unchanged.
   /// @note Only square-root exponents are folded (that is the only
   /// case needed in practice right now). Extending to general n-th roots only
   /// requires replacing the integer-square-root step with an integer n-th-root.
   static void flatten(ExprPtr& expr) {
     if (!expr || !expr->is<Power>()) return;
     const auto& pw = expr->as<Power>();
+
+    // b^1 = b and conjugate if needed
+    if (pw.exponent_ == 1) {
+      auto lifted = pw.base_->clone();
+      if (pw.conjugated_) lifted->adjoint();
+      expr = std::move(lifted);
+      return;
+    }
     if (!pw.base_->is<Constant>()) return;
 
     using scalar_type = Constant::scalar_type;

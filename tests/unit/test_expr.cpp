@@ -287,6 +287,23 @@ TEST_CASE("expr", "[elements]") {
       REQUIRE(outer.exponent() == rational{1, 3});  // 1/2 * 2/3 = 1/3
       REQUIRE(outer.base() == c2);
 
+      // power-of-power with conjugated inner: conj(b^e1)^n = conj(b^(e1*n))
+      // for integer n, so the conjugation flag must be propagated.
+      auto inner_c1 = ex<Power>(vx, rational{2});
+      inner_c1->as<Power>().conjugate();
+      Power outer_conj(inner_c1, rational{3});
+      REQUIRE(outer_conj.conjugated());
+      REQUIRE(outer_conj.exponent() == rational{6});
+
+      // conjugated inner Power with non-integer outer exponent: refuse to
+      // flatten and keep the nested Power as base.
+      auto inner_c2 = ex<Power>(vx, rational{2});
+      inner_c2->as<Power>().conjugate();
+      Power nested(inner_c2, rational{1, 2});
+      REQUIRE(!nested.conjugated());
+      REQUIRE(nested.exponent() == rational{1, 2});
+      REQUIRE(nested.base()->is<Power>());
+
       if constexpr (sequant::assert_behavior() ==
                     sequant::AssertBehavior::Throw) {
         // base must be a Constant, Variable, or Power
@@ -872,6 +889,14 @@ TEST_CASE("expr", "[elements]") {
       auto pf15 = ex<Power>(4, rational{9, 2});
       Power::flatten(pf15);
       REQUIRE(pf15 == ex<Constant>(rational{512}));
+
+      // (b^1)* = conj(b):
+      auto pf16 = ex<Power>(L"y", rational{1});
+      pf16->as<Power>().conjugate();
+      Power::flatten(pf16);
+      REQUIRE(pf16->is<Variable>());
+      REQUIRE(pf16->as<Variable>().label() == L"y");
+      REQUIRE(pf16->as<Variable>().conjugated());
     }
   }
 
