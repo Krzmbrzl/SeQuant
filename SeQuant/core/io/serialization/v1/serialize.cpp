@@ -149,7 +149,10 @@ std::wstring to_string(const Power& power,
                        const SerializationOptions& options) {
   std::wstring core;
   const auto& base = power.base();
-  const bool parenthesize_base = base->is<Constant>();
+  // parenthesize bases for Constants and conjugated Variables
+  const bool parenthesize_base =
+      base->is<Constant>() ||
+      (base->is<Variable>() && base->as<Variable>().conjugated());
   if (parenthesize_base) core += L"(";
   core += v1::to_string(*base, options);
   if (parenthesize_base) core += L")";

@@ -314,6 +314,14 @@ TEST_CASE("serialization", "[serialization]") {
       const auto frac_half_str = L"(3/2)^(1/2)";
       REQUIRE(serialize(frac_half) == frac_half_str);
       REQUIRE(deserialize<ExprPtr>(L"(3/2)^(1/2)") == frac_half);
+
+      // conjugated Variable base must be parenthesized
+      auto conj_var = ex<Variable>(L"x");
+      conj_var->as<Variable>().conjugate();
+      auto pw_conj_var = ex<Power>(conj_var, rational{2});
+      const auto pw_conj_var_str = L"(x^*)^(2)";
+      REQUIRE(serialize(pw_conj_var) == pw_conj_var_str);
+      REQUIRE(deserialize<ExprPtr>(pw_conj_var_str) == pw_conj_var);
     }
 
     SECTION("Product") {
