@@ -196,10 +196,16 @@ class PythonEinsumGeneratorBase : public Generator<Context> {
 
   std::string represent(const Power &power, const Context &ctx) const override {
     const ExprPtr &base = power.base();
-    return detail::format_power_base(base, stringify_scalar(*base, ctx)) +
-           "**" +
-           detail::format_power_exponent(power.exponent(),
-                                         /*double_slash*/ false);
+    auto s = detail::format_power_base(base, stringify_scalar(*base, ctx)) +
+             "**" +
+             detail::format_power_exponent(power.exponent(),
+                                           /*double_slash*/ false);
+    if (power.conjugated()) s = wrap_conj(std::move(s));
+    return s;
+  }
+
+  std::string wrap_conj(std::string s) const override {
+    return module_prefix() + "conj(" + std::move(s) + ")";
   }
 
   void unload(const Tensor &tensor, const Context &ctx) override {

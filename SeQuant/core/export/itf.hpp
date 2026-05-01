@@ -209,11 +209,17 @@ class ItfGenerator : public Generator<Context> {
           "ITF only supports Power with a Constant base; got base of type " +
           base->type_name());
     }
-    return detail::format_power_base(base,
-                                     represent(base->as<Constant>(), ctx)) +
-           "**" +
-           detail::format_power_exponent(power.exponent(),
-                                         /*double_slash*/ false);
+    auto s =
+        detail::format_power_base(base, represent(base->as<Constant>(), ctx)) +
+        "**" +
+        detail::format_power_exponent(power.exponent(),
+                                      /*double_slash*/ false);
+    if (power.conjugated()) s = this->wrap_conj(std::move(s));
+    return s;
+  }
+
+  std::string wrap_conj(std::string s) const override {
+    return "conj(" + std::move(s) + ")";
   }
 
   void create(const Tensor &tensor, bool zero_init,
