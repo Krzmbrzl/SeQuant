@@ -322,6 +322,13 @@ TEST_CASE("serialization", "[serialization]") {
       const auto pw_conj_var_str = L"(x^*)^(2)";
       REQUIRE(serialize(pw_conj_var) == pw_conj_var_str);
       REQUIRE(deserialize<ExprPtr>(pw_conj_var_str) == pw_conj_var);
+
+      // conjugated power with conjugated Variable base: ((x^*)^(2))^*
+      auto pw_conj_var_conj = pw_conj_var->clone();
+      pw_conj_var_conj->as<Power>().conjugate();
+      const auto pw_conj_var_conj_str = L"((x^*)^(2))^*";
+      REQUIRE(serialize(pw_conj_var_conj) == pw_conj_var_conj_str);
+      REQUIRE(deserialize<ExprPtr>(pw_conj_var_conj_str) == pw_conj_var_conj);
     }
 
     SECTION("Product") {

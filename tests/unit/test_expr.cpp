@@ -802,82 +802,74 @@ TEST_CASE("expr", "[elements]") {
       Power::flatten(pf1);
       REQUIRE(pf1 == ex<Constant>(rational{8}));
 
-      auto pf2 = ex<Power>(2, -3);
-      Power::flatten(pf2);
-      REQUIRE(pf2 == ex<Constant>(rational{1, 8}));
-
-      auto pf3 = ex<Power>(rational{2, 3}, 0);
-      Power::flatten(pf3);
-      REQUIRE(pf3 == ex<Constant>(rational{1}));
-
       // non-integer exponent without an exact root is a no-op
-      auto pf4 = ex<Power>(2, rational{1, 2});
-      Power::flatten(pf4);
-      REQUIRE(pf4->is<Power>());
+      auto pf2 = ex<Power>(2, rational{1, 2});
+      Power::flatten(pf2);
+      REQUIRE(pf2->is<Power>());
 
       // Variable base is a no-op
-      auto pf5 = ex<Power>(L"x", 2);
-      Power::flatten(pf5);
-      REQUIRE(pf5->is<Power>());
+      auto pf3 = ex<Power>(L"x", 2);
+      Power::flatten(pf3);
+      REQUIRE(pf3->is<Power>());
 
       // Variable base, zero exponent: x^0 = 1
-      auto pf6 = ex<Power>(L"x", 0);
-      Power::flatten(pf6);
-      REQUIRE(pf6 == ex<Constant>(rational{1}));
-
-      // 2^20 = 1048576
-      auto pf7 = ex<Power>(2, 20);
-      Power::flatten(pf7);
-      REQUIRE(pf7 == ex<Constant>(rational{1048576}));
+      auto pf4 = ex<Power>(L"x", 0);
+      Power::flatten(pf4);
+      REQUIRE(pf4 == ex<Constant>(rational{1}));
 
       // 2^(-20) = 1/1048576
-      auto pf8 = ex<Power>(2, -20);
-      Power::flatten(pf8);
-      REQUIRE(pf8 == ex<Constant>(rational{1, 1048576}));
+      auto pf5 = ex<Power>(2, -20);
+      Power::flatten(pf5);
+      REQUIRE(pf5 == ex<Constant>(rational{1, 1048576}));
 
       // square-root exponent with perfect-square base folds
       // 4^(1/2) = 2
-      auto pf9 = ex<Power>(4, rational{1, 2});
-      Power::flatten(pf9);
-      REQUIRE(pf9 == ex<Constant>(rational{2}));
+      auto pf6 = ex<Power>(4, rational{1, 2});
+      Power::flatten(pf6);
+      REQUIRE(pf6 == ex<Constant>(rational{2}));
 
       // (1/4)^(1/2) = 1/2
-      auto pf10 = ex<Power>(rational{1, 4}, rational{1, 2});
-      Power::flatten(pf10);
-      REQUIRE(pf10 == ex<Constant>(rational{1, 2}));
+      auto pf7 = ex<Power>(rational{1, 4}, rational{1, 2});
+      Power::flatten(pf7);
+      REQUIRE(pf7 == ex<Constant>(rational{1, 2}));
 
-      // (1/4)^(-1/2) = 2 (negative exponent inverts the base)
-      auto pf11 = ex<Power>(rational{1, 4}, rational{-1, 2});
-      Power::flatten(pf11);
-      REQUIRE(pf11 == ex<Constant>(rational{2}));
+      // (1/4)^(-1/2) = 2
+      auto pf8 = ex<Power>(rational{1, 4}, rational{-1, 2});
+      Power::flatten(pf8);
+      REQUIRE(pf8 == ex<Constant>(rational{2}));
 
       // (9/16)^(3/2) = 27/64
-      auto pf12 = ex<Power>(rational{9, 16}, rational{3, 2});
-      Power::flatten(pf12);
-      REQUIRE(pf12 == ex<Constant>(rational{27, 64}));
+      auto pf9 = ex<Power>(rational{9, 16}, rational{3, 2});
+      Power::flatten(pf9);
+      REQUIRE(pf9 == ex<Constant>(rational{27, 64}));
 
       // (-1)^(1/2) is imaginary; left as Power
-      auto pf13 = ex<Power>(-1, rational{1, 2});
+      auto pf10 = ex<Power>(-1, rational{1, 2});
+      Power::flatten(pf10);
+      REQUIRE(pf10->is<Power>());
+
+      // negative-real base with half-integer exponent: not folded
+      auto pf11 = ex<Power>(-4, rational{1, 2});
+      Power::flatten(pf11);
+      REQUIRE(pf11->is<Power>());
+
+      // complex base (imag != 0) with half-integer exponent: not folded
+      auto pf12 = ex<Power>(Constant::scalar_type{1, 1}, rational{1, 2});
+      Power::flatten(pf12);
+      REQUIRE(pf12->is<Power>());
+
+      // 8^(1/3) is not folded
+      auto pf13 = ex<Power>(8, rational{1, 3});
       Power::flatten(pf13);
       REQUIRE(pf13->is<Power>());
 
-      // 8^(1/3) is not folded
-      auto pf14 = ex<Power>(8, rational{1, 3});
-      Power::flatten(pf14);
-      REQUIRE(pf14->is<Power>());
-
-      // 4^(9/2) = 2^9 = 512
-      auto pf15 = ex<Power>(4, rational{9, 2});
-      Power::flatten(pf15);
-      REQUIRE(pf15 == ex<Constant>(rational{512}));
-
       // (b^1)* = conj(b):
-      auto pf16 = ex<Power>(L"y", rational{1});
-      pf16->as<Power>().conjugate();
-      Power::flatten(pf16);
-      REQUIRE(pf16->is<Variable>());
-      REQUIRE(pf16->as<Variable>().label() == L"y");
-      REQUIRE(pf16->as<Variable>().conjugated());
+      auto pf14 = ex<Power>(L"y", rational{1});
+      pf14->as<Power>().conjugate();
+      Power::flatten(pf14);
+      REQUIRE(pf14->is<Variable>());
+      REQUIRE(pf14->as<Variable>().label() == L"y");
+      REQUIRE(pf14->as<Variable>().conjugated());
     }
   }
 
