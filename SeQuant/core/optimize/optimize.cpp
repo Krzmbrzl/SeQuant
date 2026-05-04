@@ -50,7 +50,7 @@ ExprPtr optimize(ExprPtr const& expr, IdxToSize const& idx2size,
 
       for (auto i = 0; i < prod.size(); ++i) {
         auto&& f = prod.factor(i);
-        if (f.is<Tensor>() || f->is_scalar())
+        if (f->is<Tensor>() || f->is_scalar())
           new_factors.emplace_back(f);
         else {
           non_tensors[i] = f;

@@ -41,8 +41,8 @@ std::wstring to_string(const rational& t) {
 
 std::wstring to_string(const Power& power) {
   std::wstring result;
-  auto& base = power.base();
-  auto& exp = power.exponent();
+  const auto& base = power.base();
+  const auto& exp = power.exponent();
 
   // special case when base is a unit fraction 1/k with k > 1
   const auto base_nr_1 = base->is<Constant>() &&
