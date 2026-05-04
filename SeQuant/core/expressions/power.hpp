@@ -83,7 +83,7 @@ class Power : public Expr {
   /// when @p expr holds a Power and any of:
   ///   - the exponent is 1 (then `b^1 = b` and conjugate if needed);
   ///   - the exponent is 0 (then `b^0 = 1` for any base);
-  ///   - the base is the constant 1 (then `1^k = 1` for any rational @c k);
+  ///   - the base is the `Constant` 1 (then `1^k = 1` for any rational @c k);
   ///   - the base is a Constant and the exponent is a real integer;
   ///   - the base is a Constant and the exponent has the form `m/2` and the
   ///     base is a non-negative real rational `p/q` with both @c p and @c q
@@ -179,7 +179,7 @@ class Power : public Expr {
   bool is_scalar() const override { return true; }
 
   ExprPtr clone() const override {
-    auto cloned = ex<Power>(base_->clone(), exponent_);
+    auto cloned = ex<Power>(base_, exponent_);
     if (conjugated_) cloned->as<Power>().conjugate();
     return cloned;
   }

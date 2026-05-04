@@ -213,7 +213,7 @@ class rand_tensor_yield {
       base_val = base_result->template get<NumericT>();
     }
 
-    auto exp_val = static_cast<double>(pw.exponent().real());
+    auto exp_val = static_cast<double>(pw.exponent());
     return sequant::eval_result<result_t>(
         static_cast<NumericT>(std::pow(base_val, exp_val)));
   }
