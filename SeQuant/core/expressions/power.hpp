@@ -25,33 +25,15 @@ class Power : public Expr {
   Power& operator=(const Power&) = default;
   Power& operator=(Power&&) = default;
 
-  /// @param[in] base the base expression; must be a Constant, Variable, or
-  ///   Power. When @p base is a Power we attempt to flatten:
-  ///   `Power(Power(b,e1), e2)` → `Power(b, e1*e2)`. If the inner Power is
-  ///   conjugated, flattening is only safe for integer outer exponent, in
-  ///   which case the conjugation flag is propagated
-  ///   (`conj(b^e1)^n = conj(b^(e1*n))`). Otherwise we refuse to flatten and
-  ///   keep the nested Power as the base.
+  /// @param[in] base the base expression; must be a Constant or Variable.
   /// @param[in] exponent rational exponent
   Power(ExprPtr base, exponent_type exponent)
       : base_{}, exponent_{std::move(exponent)} {
     SEQUANT_ASSERT(base);
+    SEQUANT_ASSERT(base->is<Constant>() || base->is<Variable>());
     // clone on construction so that external
     // mutations of the input cannot invalidate our memoized hash
-    if (base->is<Power>()) {
-      auto& inner = base->as<Power>();
-      // `conj(z)^n == conj(z^n)` only for integer n
-      if (inner.conjugated() && denominator(exponent_) != 1) {
-        base_ = base->clone();
-      } else {
-        base_ = inner.base()->clone();
-        exponent_ = inner.exponent() * exponent_;
-        if (inner.conjugated()) conjugated_ = true;
-      }
-    } else {
-      SEQUANT_ASSERT(base->is<Constant>() || base->is<Variable>());
-      base_ = base->clone();
-    }
+    base_ = base->clone();
     // 0^n is defined only for n >= 0 (0^0 = 1 by convention)
     SEQUANT_ASSERT(!base_->is<Constant>() || !base_->as<Constant>().is_zero() ||
                    exponent_ >= 0);
@@ -100,6 +82,7 @@ class Power : public Expr {
   /// @brief Attempts to flatten a Power, mutating @p expr in place. Folds
   /// when @p expr holds a Power and any of:
   ///   - the exponent is 1 (then `b^1 = b` and conjugate if needed);
+  ///   - the exponent is 0 (then `b^0 = 1` for any base);
   ///   - the base is the constant 1 (then `1^k = 1` for any rational @c k);
   ///   - the base is a Constant and the exponent is a real integer;
   ///   - the base is a Constant and the exponent has the form `m/2` and the
@@ -119,6 +102,11 @@ class Power : public Expr {
       auto lifted = pw.base_->clone();
       if (pw.conjugated_) lifted->adjoint();
       expr = std::move(lifted);
+      return;
+    }
+    // b^0 = 1 for any base (the ctor rejects 0^(negative)
+    if (pw.exponent_ == 0) {
+      expr = ex<Constant>(Constant::scalar_type{1});
       return;
     }
     if (!pw.base_->is<Constant>()) return;
@@ -164,12 +152,6 @@ class Power : public Expr {
       if (p_rem != 0 || q_rem != 0) return;
       base = scalar_type{rational(p_root) / rational(q_root)};
     } else {
-      return;
-    }
-
-    // a^0 = 1; the ctor already rejects 0^(negative).
-    if (exp_nr == 0) {
-      expr = ex<Constant>(scalar_type{1});
       return;
     }
 

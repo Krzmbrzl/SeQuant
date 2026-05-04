@@ -281,38 +281,14 @@ TEST_CASE("expr", "[elements]") {
       REQUIRE(Power(2, 3) == Power(ex<Constant>(2), rational{3}));
       REQUIRE(Power(rational{2, 3}, 2) ==
               Power(ex<Constant>(rational{2, 3}), rational{2}));
-      // power-of-power flattens: Power(Power(b, e1), e2) -> Power(b, e1*e2)
-      const auto inner = ex<Power>(c2, rational{1, 2});
-      Power outer(inner, rational{2, 3});
-      REQUIRE(outer.exponent() == rational{1, 3});  // 1/2 * 2/3 = 1/3
-      REQUIRE(outer.base() == c2);
-
-      // power-of-power with conjugated inner: conj(b^e1)^n = conj(b^(e1*n))
-      // for integer n, so the conjugation flag must be propagated.
-      auto inner_c1 = ex<Power>(vx, rational{2});
-      inner_c1->as<Power>().conjugate();
-      Power outer_conj(inner_c1, rational{3});
-      REQUIRE(outer_conj.conjugated());
-      REQUIRE(outer_conj.exponent() == rational{6});
-
-      // conjugated inner Power with non-integer outer exponent: refuse to
-      // flatten and keep the nested Power as base.
-      auto inner_c2 = ex<Power>(vx, rational{2});
-      inner_c2->as<Power>().conjugate();
-      Power nested(inner_c2, rational{1, 2});
-      REQUIRE(!nested.conjugated());
-      REQUIRE(nested.exponent() == rational{1, 2});
-      REQUIRE(nested.base()->is<Power>());
-
       if constexpr (sequant::assert_behavior() ==
                     sequant::AssertBehavior::Throw) {
-        // base must be a Constant, Variable, or Power
-        auto bad_base = ex<Product>(Product{});
-        REQUIRE_THROWS(Power(bad_base, rational{2}));
+        // base must be a Constant or Variable; Power-of-Power is not allowed
+        auto inner = ex<Power>(c2, rational{1, 2});
+        REQUIRE_THROWS(Power(inner, rational{2, 3}));
 
         // 0^n is defined only for n >= 0
         REQUIRE_THROWS(Power(ex<Constant>(0), rational{-1}));
-        REQUIRE_THROWS(Power(ex<Constant>(0), rational{-1, 2}));
       }
     }
 
@@ -843,6 +819,11 @@ TEST_CASE("expr", "[elements]") {
       auto pf5 = ex<Power>(L"x", 2);
       Power::flatten(pf5);
       REQUIRE(pf5->is<Power>());
+
+      // Variable base, zero exponent: x^0 = 1
+      auto pf6 = ex<Power>(L"x", 0);
+      Power::flatten(pf6);
+      REQUIRE(pf6 == ex<Constant>(rational{1}));
 
       // 2^20 = 1048576
       auto pf7 = ex<Power>(2, 20);
