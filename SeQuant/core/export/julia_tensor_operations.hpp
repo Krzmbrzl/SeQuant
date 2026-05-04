@@ -127,7 +127,11 @@ class JuliaTensorOperationsGenerator : public Generator<Context> {
 
   std::string represent(const Power &power, const Context &ctx) const override {
     const ExprPtr &base = power.base();
-    auto s = detail::format_power_base(base, to_julia_expr(*base, ctx)) + "^" +
+    std::string base_str = to_julia_expr(*base, ctx);
+    if (base->is<Variable>() && base->as<Variable>().conjugated()) {
+      base_str = this->wrap_conj(std::move(base_str));
+    }
+    auto s = detail::format_power_base(base, std::move(base_str)) + "^" +
              detail::format_power_exponent(power.exponent(),
                                            /*double_slash*/ true);
     if (power.conjugated()) s = this->wrap_conj(std::move(s));
