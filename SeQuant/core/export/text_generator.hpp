@@ -87,6 +87,7 @@ class TextGenerator : public Generator<Context> {
       } else {
         sstream << " + i" << constant.value().imag();
       }
+      sstream << ")";
     } else {
       sstream << constant.value().real();
     }

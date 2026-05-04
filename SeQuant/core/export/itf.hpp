@@ -195,6 +195,7 @@ class ItfGenerator : public Generator<Context> {
       } else {
         sstream << " + j" << constant.value().imag();
       }
+      sstream << ")";
     } else {
       sstream << constant.value().real();
     }
