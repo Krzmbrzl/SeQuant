@@ -334,8 +334,25 @@ TEST_CASE("expr", "[elements]") {
 
       // bare base: b^e *= b -> b^(e+1)
       Power pc(vx, rational{1, 2});
-      pc *= static_cast<const Expr &>(*vx);
+      pc *= vx.as<Variable>();
       REQUIRE(pc.exponent() == rational{3, 2});
+
+      // (b^e)* *= b* -> ((b^(e+1))*) (Power-level conjugation; bare base
+      // also conjugated)
+      Power pc_conj(vx, rational{1, 2});
+      pc_conj.conjugate();
+      Variable vx_conj(L"x");
+      vx_conj.conjugate();
+      pc_conj *= vx_conj;
+      REQUIRE(pc_conj.conjugated());
+      REQUIRE(pc_conj.exponent() == rational{3, 2});
+
+      // mirror case: (b*^e)* *= b -> ((b*^(e+1))*) (base Variable is conj'd,
+      // Power conj'd, matches)
+      Power pc_conj2(ex<Variable>(vx_conj), rational{1, 2});
+      pc_conj2.conjugate();
+      pc_conj2 *= vx.as<Variable>();
+      REQUIRE(pc_conj2.exponent() == rational{3, 2});
 
       // 2^{1/2} * 2^{1/2} = 2
       Power pe(ex<Constant>(2), rational{1, 2});

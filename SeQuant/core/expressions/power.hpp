@@ -187,15 +187,16 @@ class Power : public Expr {
   /// @brief adjoint of Power: flips the conjugation flag.
   void adjoint() override { conjugate(); }
 
-  /// @brief Combines exponents when bases match and conjugation flags agree:
-  ///   - `b^e1 *= b^e2` → `b^(e1+e2)`         (both unconjugated)
-  ///   - `(b^e1)* *= (b^e2)*` → `(b^(e1+e2))*` (both conjugated)
-  ///   - `b^e *= b` → `b^(e+1)` (treats bare base as base^1; only when this
-  ///      is unconjugated)
-  /// @throw Exception if bases differ, conjugation flags differ, or @p that
-  /// is not combinable. Mixed conjugation (e.g. `b^e1 * (b^e2)*`) has no
-  /// Power representation.
+  /// @brief Combines exponents when effective bases match:
+  ///   - `b^e1 *= b^e2` → `b^(e1+e2)` when this and @p that share the same
+  ///      Power-level conjugation flag.
+  ///   - `b^e *= B` → `b^(e+1)` for a bare scalar @p B equal to this
+  ///      Power's effective base. For a Variable base the labels must match
+  ///      and the effective conjugation parities align. For a Constant base
+  ///      only the fully unconjugated case combines.
+  /// @throw Exception if @p that is not combinable.
   Expr& operator*=(const Expr& that) override {
+    // b^e1 *= b^e2  ->  b^(e1+e2)
     if (that.is<Power>()) {
       const auto& other = that.as<Power>();
       if (conjugated_ == other.conjugated_ && *base_ == *other.base_) {
@@ -203,7 +204,22 @@ class Power : public Expr {
         reset_hash_value();
         return *this;
       }
-    } else if (!conjugated_ && *base_ == that) {
+    }
+    // (b^e)* *= b*  ->  (b^(e+1))*
+    else if (base_->is<Variable>() && that.is<Variable>()) {
+      // check effective conjugation of Variable in this and that, if valid
+      // operation iff they match
+      const auto& base_var = base_->as<Variable>();
+      const auto& that_var = that.as<Variable>();
+      if (base_var.label() == that_var.label() &&
+          (base_var.conjugated() ^ conjugated_) == that_var.conjugated()) {
+        exponent_ += rational{1};
+        reset_hash_value();
+        return *this;
+      }
+    }
+    // C^e *= C  ->  C^(e+1)
+    else if (!conjugated_ && *base_ == that) {
       exponent_ += rational{1};
       reset_hash_value();
       return *this;
