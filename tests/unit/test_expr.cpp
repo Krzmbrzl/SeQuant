@@ -359,7 +359,7 @@ TEST_CASE("expr", "[elements]") {
       Power pf(ex<Constant>(2), rational{1, 2});
       pe *= pf;
       REQUIRE(pe.exponent() == rational{1});
-      REQUIRE(pe.to_latex() == Constant(2).to_latex());
+      REQUIRE(to_latex(pe) == Constant(2).to_latex());
     }
 
     {  // Power should NOT be absorbed into Product::scalar_
@@ -515,13 +515,13 @@ TEST_CASE("expr", "[elements]") {
       const auto c2 = ex<Constant>(rational{1, 2});
 
       Power p1(c2, rational{1, 2});
-      REQUIRE(p1.to_latex() == L"{\\frac{1}{2^{\\frac{1}{2}}}}");
+      REQUIRE(to_latex(p1) == L"{\\frac{1}{2^{\\frac{1}{2}}}}");
 
       Power p_exp1(c2, rational{1});
-      REQUIRE(p_exp1.to_latex() == L"{{{\\frac{1}{2}}}}");
+      REQUIRE(to_latex(p_exp1) == L"{{{\\frac{1}{2}}}}");
 
       Power pv(ex<Variable>(L"x"), rational{2, 1});
-      REQUIRE(pv.to_latex() == L"{x}^{2}");
+      REQUIRE(to_latex(pv) == L"{x}^{2}");
     }
 
     Product sp0{};
