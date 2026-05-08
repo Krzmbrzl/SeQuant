@@ -172,8 +172,6 @@ class Power : public Expr {
     expr = ex<Constant>(std::move(value));
   }
 
-  std::wstring to_latex() const override { return io::latex::to_string(*this); }
-
   type_id_type type_id() const override { return get_type_id<Power>(); }
 
   bool is_scalar() const override { return true; }
