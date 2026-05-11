@@ -110,6 +110,21 @@ struct EvalStat {
   Bytes memory;
 };
 
+struct EvalDetailBinary {
+  EvalMode mode;
+  Duration time;
+  Bytes mem_left;
+  Bytes mem_right;
+  Bytes mem_result;
+  Bytes mem_hwmark;
+};
+
+struct CacheDetail {
+  CacheMode mode;
+  size_t key;
+  Bytes memory;
+};
+
 struct CacheStat {
   CacheMode mode;
   size_t key;
@@ -129,6 +144,27 @@ auto eval(EvalStat const& stat, Args const&... args) {
   log("Eval",                  //
       to_string(stat.mode),    //
       stat.time,               //
+      to_string(stat.memory),  //
+      args...);
+}
+
+template <typename... Args>
+auto eval(EvalDetailBinary const& stat, Args const&... args) {
+  log("EvalDetail",                                          //
+      to_string(stat.mode),                                  //
+      stat.time,                                             //
+      std::format("left={}", to_string(stat.mem_left)),      //
+      std::format("right={}", to_string(stat.mem_right)),    //
+      std::format("result={}", to_string(stat.mem_result)),  //
+      std::format("hw={}", to_string(stat.mem_hwmark)),      //
+      args...);
+}
+
+template <typename... Args>
+auto cache(CacheDetail const& stat, Args const&... args) {
+  log("CacheDetail",           //
+      to_string(stat.mode),    //
+      stat.key,                //
       to_string(stat.memory),  //
       args...);
 }
@@ -278,14 +314,28 @@ ResultPtr evaluate(Node const& node,  //
     };
 
     if (auto ptr = cache.access(node); ptr) {
-      if constexpr (trace(EvalTrace)) log::cache(node, cache);
+      if constexpr (trace(EvalTrace)) {
+        log::cache(node, cache);
+        log::cache(log::CacheDetail{.mode = cache.life(node) == 0
+                                                ? log::CacheMode::Release
+                                                : log::CacheMode::Access,
+                                    .key = node->hash_value(),
+                                    .memory = log::bytes(ptr)},
+                   log::label(node));
+      }
 
       return mult_by_phase(ptr);
     } else if (cache.exists(node)) {
       auto ptr = cache.store(
           node, mult_by_phase(evaluate<EvalTrace, CacheCheck::Unchecked>(
                     node, le, cache)));
-      if constexpr (trace(EvalTrace)) log::cache(node, cache);
+      if constexpr (trace(EvalTrace)) {
+        log::cache(node, cache);
+        log::cache(log::CacheDetail{.mode = log::CacheMode::Store,
+                                    .key = node->hash_value(),
+                                    .memory = log::bytes(ptr)},
+                   log::label(node));
+      }
 
       return mult_by_phase(ptr);
     } else {
@@ -326,12 +376,25 @@ ResultPtr evaluate(Node const& node,  //
 
   // logging
   if constexpr (trace(EvalTrace)) {
-    auto stat =
+    log::eval(
         log::EvalStat{.mode = log::eval_mode(node),
                       .time = time,
                       .memory = node.leaf() ? log::bytes(result)
-                                            : log::bytes(left, right, result)};
-    log::eval(stat, log::label(node));
+                                            : log::bytes(left, right, result)},
+        log::label(node));
+
+    if (!node.leaf()) {
+      auto hwmark = log::bytes(cache) + log::bytes(result).value;
+      if (!cache.alive(node.left())) hwmark += log::bytes(left).value;
+      if (!cache.alive(node.right())) hwmark += log::bytes(right).value;
+      auto stat = log::EvalDetailBinary{.mode = log::eval_mode(node),
+                                        .time = time,
+                                        .mem_left = log::bytes(left),
+                                        .mem_right = log::bytes(right),
+                                        .mem_result = log::bytes(result),
+                                        .mem_hwmark = {hwmark}};
+      log::eval(stat, log::label(node));
+    }
   }
 
   return result;
