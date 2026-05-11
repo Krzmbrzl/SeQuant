@@ -1186,7 +1186,8 @@ qns_t apply_to_vac(const ExprPtr& expr) {
     qns = expr.as<op_t>()();
   } else if (expr.is<Product>()) {
     const auto& op_product = expr.as<Product>();
-    for (auto& op_ptr : ranges::views::reverse(op_product.factors())) {
+    for (auto& op_ptr :
+         ranges::views::reverse(op_product.nonscalar_factors())) {
       SEQUANT_ASSERT(op_ptr->template is<op_t>());
       const auto& op = op_ptr->template as<op_t>();
       qns = op(qns);
@@ -1239,6 +1240,18 @@ namespace tensor {
 ExprPtr expectation_value_impl(ExprPtr expr, OpConnections<int> connect,
                                OpConnections<int> avoid, bool use_top,
                                bool full_contractions) {
+  // Pull scalar factors  out of a Product before WickTheorem sees it.
+  // Extracted factors are reattached to the result after Wick evaluation.
+  container::svector<ExprPtr> scalar_factors;
+  if (expr.is<Product>()) {
+    const auto& prod = expr.as<Product>();
+    scalar_factors =
+        prod.scalar_factors() | ranges::to<container::svector<ExprPtr>>;
+    if (!scalar_factors.empty()) {
+      expr = ex<Product>(prod.scalar(), prod.nonscalar_factors());
+    }
+  }
+
   simplify(expr);
   auto isr = get_default_context().index_space_registry();
   const auto spinor = get_default_context().spbasis() == SPBasis::Spinor;
@@ -1264,6 +1277,13 @@ ExprPtr expectation_value_impl(ExprPtr expr, OpConnections<int> connect,
                              true);
   simplify(result);
 
+  auto restore_scalars = [&scalar_factors](ExprPtr& r) {
+    if (!scalar_factors.empty()) {
+      ranges::for_each(scalar_factors, [&r](const auto& s) { r = r * s; });
+      simplify(r);
+    }
+  };
+
   if (Logger::instance().wick_stats) {
     std::wcout << "WickTheorem stats: # of contractions attempted = "
                << wick.stats().num_attempted_contractions
@@ -1278,6 +1298,7 @@ ExprPtr expectation_value_impl(ExprPtr expr, OpConnections<int> connect,
   if (isr->reference_occupied_space() == IndexSpace::Type{} ||
       isr->reference_occupied_space(Spin::any) ==
           isr->vacuum_occupied_space(Spin::any)) {
+    restore_scalars(result);
     return result;
   } else {
     const auto target_rdm_space_type =
@@ -1453,6 +1474,7 @@ ExprPtr expectation_value_impl(ExprPtr expr, OpConnections<int> connect,
                  << " # of useful contractions = "
                  << wick.stats().num_useful_contractions << std::endl;
     }
+    restore_scalars(result);
     return result;
   }
 }

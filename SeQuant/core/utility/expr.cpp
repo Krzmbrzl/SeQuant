@@ -528,7 +528,7 @@ std::optional<ExprPtr> pop_tensor(ExprPtr &expression,
     return tensor;
   }
 
-  if (expression->is<Constant>() || expression->is<Variable>()) {
+  if (expression->is_scalar()) {
     return tensor;
   }
 

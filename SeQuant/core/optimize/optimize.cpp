@@ -39,7 +39,7 @@ ExprPtr optimize(ExprPtr const& expr, IdxToSize const& idx2size,
   using ranges::views::transform;
   if (expr->is<Product>()) {
     if (ranges::all_of(*expr, [](auto&& x) {
-          return x->template is<Tensor>() || x->template is<Variable>();
+          return x->template is<Tensor>() || x->is_scalar();
         }))
       return opt::single_term_opt(expr->as<Product>(), idx2size);
     else {
@@ -50,7 +50,7 @@ ExprPtr optimize(ExprPtr const& expr, IdxToSize const& idx2size,
 
       for (auto i = 0; i < prod.size(); ++i) {
         auto&& f = prod.factor(i);
-        if (f.is<Tensor>() || f.is<Variable>())
+        if (f->is<Tensor>() || f->is_scalar())
           new_factors.emplace_back(f);
         else {
           non_tensors[i] = f;

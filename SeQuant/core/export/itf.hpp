@@ -5,6 +5,7 @@
 #include <SeQuant/core/export/context.hpp>
 #include <SeQuant/core/export/reordering_context.hpp>
 #include <SeQuant/core/export/text_generator.hpp>
+#include <SeQuant/core/export/utils.hpp>
 #include <SeQuant/core/expr.hpp>
 #include <SeQuant/core/index.hpp>
 #include <SeQuant/core/space.hpp>
@@ -194,10 +195,32 @@ class ItfGenerator : public Generator<Context> {
       } else {
         sstream << " + j" << constant.value().imag();
       }
+      sstream << ")";
     } else {
       sstream << constant.value().real();
     }
     return sstream.str();
+  }
+
+  std::string represent(const Power &power, const Context &ctx) const override {
+    const ExprPtr &base = power.base();
+    // ITF can only express powers of Constants
+    if (!base->is<Constant>()) {
+      throw Exception(
+          "ITF only supports Power with a Constant base; got base of type " +
+          base->type_name());
+    }
+    auto s =
+        detail::format_power_base(base, represent(base->as<Constant>(), ctx)) +
+        "**" +
+        detail::format_power_exponent(power.exponent(),
+                                      /*double_slash*/ false);
+    if (power.conjugated()) s = this->wrap_conj(std::move(s));
+    return s;
+  }
+
+  std::string wrap_conj(std::string s) const override {
+    return "conj(" + std::move(s) + ")";
   }
 
   void create(const Tensor &tensor, bool zero_init,
@@ -400,6 +423,8 @@ class ItfGenerator : public Generator<Context> {
       return represent(expr.as<Variable>(), ctx);
     } else if (expr.is<Constant>()) {
       return represent(expr.as<Constant>(), ctx);
+    } else if (expr.is<Power>()) {
+      return represent(expr.as<Power>(), ctx);
     } else if (expr.is<Product>()) {
       const Product &product = expr.as<Product>();
 

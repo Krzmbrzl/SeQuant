@@ -309,7 +309,8 @@ ExprPtr single_term_opt(Product const& prod, IdxToSz&& idxsz,
     }
 
   auto& p_ = (*result.rbegin()).as<Product>();
-  for (auto&& v : prod | reverse | filter(&Expr::template is<Variable>))
+  for (auto&& v :
+       prod | reverse | filter([](const ExprPtr& e) { return e->is_scalar(); }))
     p_.prepend(1, v, Product::Flatten::No);
 
   p_.scale(prod.scalar());
