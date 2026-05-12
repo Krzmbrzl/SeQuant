@@ -154,6 +154,13 @@ class CacheManager {
     return iter != cache_map_.end() && iter->second.alive();
   }
 
+  /// \return size in bytes of the data currently held for @p key, or 0 if
+  ///         the key is not registered or no data is currently stored.
+  [[nodiscard]] size_t entry_size_in_bytes(key_type const& key) const noexcept {
+    auto iter = cache_map_.find(key);
+    return iter == cache_map_.end() ? 0 : iter->second.size_in_bytes();
+  }
+
   ///
   /// \return The number of entries with life_count greater than zero.
   ///

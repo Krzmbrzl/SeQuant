@@ -33,15 +33,15 @@ struct Bytes {
   size_t value;
 };
 
-template <typename... T>
-  requires((std::same_as<ResultPtr, T> && ...))
-[[nodiscard]] auto bytes(T const&... args) {
-  return Bytes{(args->size_in_bytes() + ...)};
-}
-
-template <typename N, bool F>
-[[nodiscard]] inline auto bytes(CacheManager<N, F> const& cman) {
-  return cman.size_in_bytes();
+template <typename T, typename... Ts>
+[[nodiscard]] inline auto bytes(T const& arg, Ts const&... args) {
+  auto one = [](auto const& a) -> size_t {
+    if constexpr (requires { a->size_in_bytes(); })
+      return a->size_in_bytes();
+    else
+      return a.size_in_bytes();
+  };
+  return Bytes{(one(arg) + ... + one(args))};
 }
 
 [[nodiscard]] inline auto to_string(Bytes bs) noexcept {
@@ -119,18 +119,13 @@ struct EvalDetailBinary {
   Bytes mem_hwmark;
 };
 
-struct CacheDetail {
-  CacheMode mode;
-  size_t key;
-  Bytes memory;
-};
-
 struct CacheStat {
   CacheMode mode;
   size_t key;
   int curr_life, max_life;
   size_t num_alive;
-  Bytes memory;
+  Bytes entry_memory;
+  Bytes total_memory;
 };
 
 template <typename Arg, typename... Args>
@@ -161,22 +156,14 @@ auto eval(EvalDetailBinary const& stat, Args const&... args) {
 }
 
 template <typename... Args>
-auto cache(CacheDetail const& stat, Args const&... args) {
-  log("CacheDetail",           //
-      to_string(stat.mode),    //
-      stat.key,                //
-      to_string(stat.memory),  //
-      args...);
-}
-
-template <typename... Args>
 auto cache(CacheStat const& stat, Args const&... args) {
-  log("Cache",                                              //
-      to_string(stat.mode),                                 //
-      stat.key,                                             //
-      std::format("{}/{}", stat.curr_life, stat.max_life),  //
-      stat.num_alive,                                       //
-      to_string(stat.memory),                               //
+  log("Cache",                                                   //
+      to_string(stat.mode),                                      //
+      std::format("key={}", stat.key),                           //
+      std::format("life={}/{}", stat.curr_life, stat.max_life),  //
+      std::format("alive={}", stat.num_alive),                   //
+      std::format("entry={}", to_string(stat.entry_memory)),     //
+      std::format("total={}", to_string(stat.total_memory)),     //
       args...);
 }
 
@@ -197,7 +184,8 @@ auto cache(N const& node, CacheManager<N, F>& cm, Args const&... args) {
                   .curr_life = cur_l,
                   .max_life = max_l,
                   .num_alive = cm.alive_count(),
-                  .memory = {bytes(cm)}},
+                  .entry_memory = {cm.entry_size_in_bytes(node)},
+                  .total_memory = {bytes(cm)}},
         args...);
 }
 
@@ -314,28 +302,14 @@ ResultPtr evaluate(Node const& node,  //
     };
 
     if (auto ptr = cache.access(node); ptr) {
-      if constexpr (trace(EvalTrace)) {
-        log::cache(node, cache);
-        log::cache(log::CacheDetail{.mode = cache.life(node) == 0
-                                                ? log::CacheMode::Release
-                                                : log::CacheMode::Access,
-                                    .key = node->hash_value(),
-                                    .memory = log::bytes(ptr)},
-                   log::label(node));
-      }
+      if constexpr (trace(EvalTrace)) log::cache(node, cache, log::label(node));
 
       return mult_by_phase(ptr);
     } else if (cache.exists(node)) {
       auto ptr = cache.store(
           node, mult_by_phase(evaluate<EvalTrace, CacheCheck::Unchecked>(
                     node, le, cache)));
-      if constexpr (trace(EvalTrace)) {
-        log::cache(node, cache);
-        log::cache(log::CacheDetail{.mode = log::CacheMode::Store,
-                                    .key = node->hash_value(),
-                                    .memory = log::bytes(ptr)},
-                   log::label(node));
-      }
+      if constexpr (trace(EvalTrace)) log::cache(node, cache, log::label(node));
 
       return mult_by_phase(ptr);
     } else {
@@ -384,9 +358,15 @@ ResultPtr evaluate(Node const& node,  //
         log::label(node));
 
     if (!node.leaf()) {
-      auto hwmark = log::bytes(cache) + log::bytes(result).value;
-      if (!cache.alive(node.left())) hwmark += log::bytes(left).value;
-      if (!cache.alive(node.right())) hwmark += log::bytes(right).value;
+      // A cached child is *distinct* from the local left/right when its
+      // canon_phase != 1, because mult_by_phase allocates a fresh buffer
+      // while the cache still holds the pre-phase data. So only skip the
+      // local's bytes when the cache aliases the same buffer (phase == 1).
+      size_t hwmark = log::bytes(cache).value + log::bytes(result).value;
+      if (!cache.alive(node.left()) || node.left()->canon_phase() != 1)
+        hwmark += log::bytes(left).value;
+      if (!cache.alive(node.right()) || node.right()->canon_phase() != 1)
+        hwmark += log::bytes(right).value;
       auto stat = log::EvalDetailBinary{.mode = log::eval_mode(node),
                                         .time = time,
                                         .mem_left = log::bytes(left),
