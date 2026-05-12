@@ -20,6 +20,7 @@
 
 #include <any>
 #include <iostream>
+#include <optional>
 #include <stdexcept>
 #include <type_traits>
 
@@ -104,19 +105,45 @@ enum struct TermMode { Begin, End };
   return (mode == TermMode::Begin) ? "Begin" : "End";
 }
 
+/// One log record per eval op. Line format:
+///
+// clang-format off
+/// Eval | <mode> | <time> | [left=L | right=R |] result=X | alloc=A | hw=H | <label>
+// clang-format on
+///
+/// Which fields are set depends on the op's arity:
+///
+///   mode                                          | left/right | alloc
+///   ----------------------------------------------+------------+--------
+///   Constant / Variable / Tensor (leaf)           | —          | result
+///   Permute / MultByPhase /                       | —          | result
+///     Symmetrize / Antisymmetrize                 |            |
+///   SumInplace                                    | —          | 0B
+///   Sum / Product                                 | set        | result
+///
+/// Only Sum and Product set left/right, since their operand sizes can
+/// differ from the result. Other modes omit those fields rather than
+/// zeroing them, so a logged 0B always means an empty buffer.
+///
+/// mem_result is the size of the buffer the op produces; for SumInplace
+/// it's the size of the accumulator after the add. mem_alloc is what the
+/// op allocated — equal to mem_result everywhere except SumInplace,
+/// which writes into the accumulator and allocates nothing. mem_hwmark
+/// is the live working set during the op:
+///
+///   bytes(cache) + bytes(result) + bytes of each operand not aliased
+///                                  to a cache entry
+///
+/// Aliasing is evaluated at each call site using cache.alive,
+/// canon_phase, and the requested layout.
 struct EvalStat {
   EvalMode mode;
   Duration time;
-  Bytes memory;
-};
-
-struct EvalDetailBinary {
-  EvalMode mode;
-  Duration time;
-  Bytes mem_left;
-  Bytes mem_right;
-  Bytes mem_result;
-  Bytes mem_hwmark;
+  Bytes mem_result{};
+  Bytes mem_alloc{};
+  Bytes mem_hwmark{};
+  std::optional<Bytes> mem_left;
+  std::optional<Bytes> mem_right;
 };
 
 struct CacheStat {
@@ -136,23 +163,24 @@ void log(Arg const& arg, Args const&... args) {
 
 template <typename... Args>
 auto eval(EvalStat const& stat, Args const&... args) {
-  log("Eval",                  //
-      to_string(stat.mode),    //
-      stat.time,               //
-      to_string(stat.memory),  //
-      args...);
-}
-
-template <typename... Args>
-auto eval(EvalDetailBinary const& stat, Args const&... args) {
-  log("EvalDetail",                                          //
-      to_string(stat.mode),                                  //
-      stat.time,                                             //
-      std::format("left={}", to_string(stat.mem_left)),      //
-      std::format("right={}", to_string(stat.mem_right)),    //
-      std::format("result={}", to_string(stat.mem_result)),  //
-      std::format("hw={}", to_string(stat.mem_hwmark)),      //
-      args...);
+  auto const result_s = std::format("result={}", to_string(stat.mem_result));
+  auto const alloc_s = std::format("alloc={}", to_string(stat.mem_alloc));
+  auto const hw_s = std::format("hw={}", to_string(stat.mem_hwmark));
+  if (stat.mem_left) {
+    SEQUANT_ASSERT(stat.mem_right);
+    log("Eval",                                               //
+        to_string(stat.mode),                                 //
+        stat.time,                                            //
+        std::format("left={}", to_string(*stat.mem_left)),    //
+        std::format("right={}", to_string(*stat.mem_right)),  //
+        result_s, alloc_s, hw_s,                              //
+        args...);
+  } else {
+    log("Eval",                //
+        to_string(stat.mode),  //
+        stat.time,             //
+        result_s, alloc_s, hw_s, args...);
+  }
 }
 
 template <typename... Args>
@@ -284,7 +312,7 @@ ResultPtr evaluate(Node const& node,  //
                    CacheManager<N, FHC>& cache) {
   if constexpr (Cache == CacheCheck::Checked) {  // return from cache if found
 
-    auto mult_by_phase = [&node](ResultPtr res) {
+    auto mult_by_phase = [&node, &cache](ResultPtr res) {
       auto phase = node->canon_phase();
       if (phase == 1) return res;
 
@@ -293,9 +321,13 @@ ResultPtr evaluate(Node const& node,  //
           timed_eval_inplace([&]() { post = res->mult_by_phase(phase); });
 
       if constexpr (trace(EvalTrace)) {
+        size_t hwmark = log::bytes(cache, post).value;
+        if (!cache.alive(node)) hwmark += log::bytes(res).value;
         auto stat = log::EvalStat{.mode = log::EvalMode::MultByPhase,
                                   .time = time,
-                                  .memory = log::bytes(res, post)};
+                                  .mem_result = log::bytes(post),
+                                  .mem_alloc = log::bytes(post),
+                                  .mem_hwmark = {hwmark}};
         log::eval(stat, std::format("{} * {}", phase, node->label()));
       }
       return post;
@@ -350,30 +382,31 @@ ResultPtr evaluate(Node const& node,  //
 
   // logging
   if constexpr (trace(EvalTrace)) {
-    log::eval(
-        log::EvalStat{.mode = log::eval_mode(node),
-                      .time = time,
-                      .memory = node.leaf() ? log::bytes(result)
-                                            : log::bytes(left, right, result)},
-        log::label(node));
-
-    if (!node.leaf()) {
+    if (node.leaf()) {
+      log::eval(log::EvalStat{.mode = log::eval_mode(node),
+                              .time = time,
+                              .mem_result = log::bytes(result),
+                              .mem_alloc = log::bytes(result),
+                              .mem_hwmark = log::bytes(cache, result)},
+                log::label(node));
+    } else {
       // A cached child is *distinct* from the local left/right when its
       // canon_phase != 1, because mult_by_phase allocates a fresh buffer
       // while the cache still holds the pre-phase data. So only skip the
       // local's bytes when the cache aliases the same buffer (phase == 1).
-      size_t hwmark = log::bytes(cache).value + log::bytes(result).value;
+      size_t hwmark = log::bytes(cache, result).value;
       if (!cache.alive(node.left()) || node.left()->canon_phase() != 1)
         hwmark += log::bytes(left).value;
       if (!cache.alive(node.right()) || node.right()->canon_phase() != 1)
         hwmark += log::bytes(right).value;
-      auto stat = log::EvalDetailBinary{.mode = log::eval_mode(node),
-                                        .time = time,
-                                        .mem_left = log::bytes(left),
-                                        .mem_right = log::bytes(right),
-                                        .mem_result = log::bytes(result),
-                                        .mem_hwmark = {hwmark}};
-      log::eval(stat, log::label(node));
+      log::eval(log::EvalStat{.mode = log::eval_mode(node),
+                              .time = time,
+                              .mem_result = log::bytes(result),
+                              .mem_alloc = log::bytes(result),
+                              .mem_hwmark = {hwmark},
+                              .mem_left = log::bytes(left),
+                              .mem_right = log::bytes(right)},
+                log::label(node));
     }
   }
 
@@ -426,9 +459,17 @@ ResultPtr evaluate(Node const& node,           //
   // logging
   if constexpr (trace(EvalTrace)) {
     if (perm) {
+      // result.pre aliases the cache only when the inner evaluate returned
+      // the cached buffer unchanged — i.e. the node is cached AND no
+      // mult_by_phase fresh allocation happened (phase == 1).
+      size_t hwmark = log::bytes(cache, result.post).value;
+      if (!cache.alive(node) || node->canon_phase() != 1)
+        hwmark += log::bytes(result.pre).value;
       auto stat = log::EvalStat{.mode = log::EvalMode::Permute,
                                 .time = time,
-                                .memory = log::bytes(result.pre, result.post)};
+                                .mem_result = log::bytes(result.post),
+                                .mem_alloc = log::bytes(result.post),
+                                .mem_hwmark = {hwmark}};
       log::eval(stat, node->label());
     }
     log::term(log::TermMode::End, xpr);
@@ -462,6 +503,11 @@ ResultPtr evaluate(Nodes const& nodes,  //
                    F const& le, CacheManager<N, FHC>& cache) {
   ResultPtr result;
 
+  // pre comes back from the permute-wrapping evaluate; it aliases the
+  // cache only when the inner evaluate returned the cached buffer
+  // unchanged — i.e. node cached, phase == 1, AND no permute happened.
+  bool const layout_is_default = (layout == decltype(layout){});
+
   for (auto&& n : nodes) {
     if (!result) {
       result = evaluate<EvalTrace>(n, layout, le, cache);
@@ -473,9 +519,17 @@ ResultPtr evaluate(Nodes const& nodes,  //
 
     // logging
     if constexpr (trace(EvalTrace)) {
+      // SumInplace allocates nothing: it writes into the accumulator.
+      // hwmark counts the cache plus both operands live at this moment;
+      // skip pre's bytes only when pre is the cached buffer itself.
+      size_t hwmark = log::bytes(cache, result).value;
+      if (!cache.alive(n) || n->canon_phase() != 1 || !layout_is_default)
+        hwmark += log::bytes(pre).value;
       auto stat = log::EvalStat{.mode = log::EvalMode::SumInplace,
                                 .time = time,
-                                .memory = log::bytes(result, pre)};
+                                .mem_result = log::bytes(result),
+                                .mem_alloc = {0},
+                                .mem_hwmark = {hwmark}};
       log::eval(stat, n->label());
     }
   }
@@ -550,9 +604,14 @@ ResultPtr evaluate_symm(Args&&... args) {
 
   // logging
   if constexpr (trace(EvalTrace)) {
+    // cache is owned by the inner evaluate call and out of scope here;
+    // hwmark reflects only the local working set (pre + freshly allocated
+    // result both live during the symmetrize op).
     auto stat = log::EvalStat{.mode = log::EvalMode::Symmetrize,
                               .time = time,
-                              .memory = log::bytes(pre, result)};
+                              .mem_result = log::bytes(result),
+                              .mem_alloc = log::bytes(result),
+                              .mem_hwmark = log::bytes(pre, result)};
     log::eval(stat, node0(arg0(std::forward<Args>(args)...))->label());
   }
 
@@ -582,9 +641,12 @@ ResultPtr evaluate_antisymm(Args&&... args) {
 
   // logging
   if constexpr (trace(EvalTrace)) {
+    // See Symmetrize for the rationale on hwmark.
     auto stat = log::EvalStat{.mode = log::EvalMode::Antisymmetrize,
                               .time = time,
-                              .memory = log::bytes(pre, result)};
+                              .mem_result = log::bytes(result),
+                              .mem_alloc = log::bytes(result),
+                              .mem_hwmark = log::bytes(pre, result)};
     log::eval(stat, n0->label());
   }
   return result;
