@@ -31,7 +31,7 @@
 namespace sequant {
 
 std::wstring Expr::to_latex() const {
-  throw Exception("to_latex not implemented for " + type_id());
+  throw Exception("to_latex not implemented for " + type_name());
 }
 
 std::wstring_view Variable::label() const { return label_; }
