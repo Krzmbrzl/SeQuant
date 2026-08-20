@@ -1,6 +1,7 @@
 #ifndef SEQUANT_EXPRESSIONS_EXPR_HPP
 #define SEQUANT_EXPRESSIONS_EXPR_HPP
 
+#include <SeQuant/core/expressions/expr_container.hpp>
 #include <SeQuant/core/expressions/expr_iterator.hpp>
 #include <SeQuant/core/expressions/expr_ptr.hpp>
 #include <SeQuant/core/options.hpp>
@@ -9,11 +10,14 @@
 #include <boost/core/demangle.hpp>
 
 #include <atomic>
+#include <concepts>
 #include <memory>
 #include <optional>
 #include <ranges>
 
 namespace sequant {
+
+class Constant;
 
 /// @brief the wchar used for labeling adjoints, i.e. the superscript + sign
 static const wchar_t adjoint_label = L'\u207A';
@@ -123,23 +127,18 @@ class Expr : public std::enable_shared_from_this<Expr> {
 
   /// Canonicalizes @c this and returns the byproduct of canonicalization (e.g.
   /// phase)
-  /// @return the byproduct of canonicalization, or @c nullptr if no byproduct
+  /// @return the byproduct of canonicalization
   /// generated
-  virtual ExprPtr canonicalize(
-      CanonicalizeOptions = CanonicalizeOptions::default_options()) {
-    return {};  // by default do nothing and return nullptr
-  }
+  virtual Constant canonicalize(
+      const CanonicalizeOptions & = CanonicalizeOptions::default_options()) = 0;
 
   /// Performs approximate, but fast, canonicalization of @c this and returns
   /// the byproduct of canonicalization (e.g. phase) The default is to use
   /// canonicalize(), unless overridden in the derived class.
   /// @return the byproduct of canonicalization, or @c nullptr if no byproduct
   /// generated
-  virtual ExprPtr rapid_canonicalize(
-      CanonicalizeOptions = CanonicalizeOptions::default_options().copy_and_set(
-          CanonicalizationMethod::Rapid)) {
-    return this->canonicalize({.method = CanonicalizationMethod::Rapid});
-  }
+  virtual Constant rapid_canonicalize(
+      CanonicalizeOptions opts = CanonicalizeOptions::default_options());
 
   // clang-format off
   /// recursively visit this expression, i.e. call visitor on each subexpression
@@ -167,19 +166,6 @@ class Expr : public std::enable_shared_from_this<Expr> {
 
   Expr &expr() { return *this; }
   const Expr &expr() const { return *this; }
-
-  template <typename T, typename Enabler = void>
-  struct is_shared_ptr_of_expr : std::false_type {};
-  template <typename T>
-  struct is_shared_ptr_of_expr<std::shared_ptr<T>,
-                               std::enable_if_t<is_expr_v<T>>>
-      : std::true_type {};
-  template <typename T, typename Enabler = void>
-  struct is_shared_ptr_of_expr_or_derived : std::false_type {};
-  template <typename T>
-  struct is_shared_ptr_of_expr_or_derived<std::shared_ptr<T>,
-                                          std::enable_if_t<is_an_expr_v<T>>>
-      : std::true_type {};
 
   /// @brief Reports if this is a pure scalar (number-like) expression
   /// @return true if this is a scalar
@@ -377,25 +363,24 @@ class Expr : public std::enable_shared_from_this<Expr> {
  private:
   template <
       typename E, typename Visitor,
-      typename = std::enable_if_t<std::is_same_v<std::remove_cvref_t<E>, Expr>>>
+      typename = std::enable_if_t<std::same_as<std::remove_cvref_t<E>, Expr>>>
   static bool visit_impl(E &&expr, Visitor &&visitor, const bool atoms_only) {
-    constexpr bool visitor_uses_exprptr =
-        std::is_invocable_r_v<void, std::remove_reference_t<Visitor>,
-                              ExprPtr &>;
+    constexpr bool visitor_uses_expr =
+        std::is_invocable_r_v<void, std::remove_reference_t<Visitor>, Expr &>;
 
-    for (auto &subexpr_ptr : expr.expr()) {
-      const auto subexpr_is_an_atom = subexpr_ptr->is_atom();
+    for (auto &subexpr : expr.expr()) {
+      const auto subexpr_is_an_atom = subexpr->is_atom();
       const auto need_to_visit_subexpr = !atoms_only || subexpr_is_an_atom;
       bool visited = false;
       if (!subexpr_is_an_atom)  // if not a leaf, recur into it
-        visited = visit_impl(*subexpr_ptr, std::forward<Visitor>(visitor),
-                             atoms_only);
+        visited =
+            visit_impl(*subexpr, std::forward<Visitor>(visitor), atoms_only);
       // call on the subexpression itself, if not yet done so
       if (need_to_visit_subexpr && !visited) {
-        if constexpr (visitor_uses_exprptr) {
-          visitor(subexpr_ptr);
+        if constexpr (visitor_uses_expr) {
+          visitor(*subexpr);
         } else {
-          visitor(*subexpr_ptr);
+          visitor(subexpr);
         }
       }
     }
@@ -482,12 +467,6 @@ class Expr : public std::enable_shared_from_this<Expr> {
 static_assert(std::ranges::sized_range<Expr>);
 static_assert(std::ranges::bidirectional_range<Expr>);
 static_assert(std::ranges::random_access_range<Expr>);
-
-template <>
-struct Expr::is_shared_ptr_of_expr<ExprPtr, void> : std::true_type {};
-template <>
-struct Expr::is_shared_ptr_of_expr_or_derived<ExprPtr, void> : std::true_type {
-};
 
 /// @return true if @c a is equal to @c b
 inline bool operator==(const Expr &a, const Expr &b) {

@@ -1,4 +1,5 @@
 #include <SeQuant/core/expressions/expr_algorithms.hpp>
+#include <SeQuant/core/expressions/expr_container.hpp>
 #include <SeQuant/core/expressions/expr_ptr.hpp>
 #include <SeQuant/core/expressions/sum.hpp>
 #include <SeQuant/core/logger.hpp>
@@ -7,13 +8,6 @@
 #include <memory>
 
 namespace sequant {
-
-Sum::Sum(ExprPtrList summands) {
-  // use append to flatten out Sum summands
-  for (auto &&summand : summands) {
-    append(std::forward<decltype(summand)>(summand));
-  }
-}
 
 Sum::Sum(summands_type &&summands, move_only_tag)
     : summands_(std::move(summands)) {
@@ -24,12 +18,14 @@ Sum::Sum(summands_type &&summands, move_only_tag)
     if (summand->is_zero()) {
       do_erase = true;
     } else if (summand->is<Constant>()) {
-      auto summand_constant = summand.as_shared_ptr<Constant>();
-      if (constant_summand_idx_) {  // add up to the existing constant ...
+      const Constant &summand_constant = summand->as<Constant>();
+      if (constant_summand_idx_) {
+        // add up to the existing constant ...
         SEQUANT_ASSERT(summands_.at(*constant_summand_idx_)->is<Constant>());
-        summands_[*constant_summand_idx_].as<Constant>() += *summand_constant;
+        summands_[*constant_summand_idx_]->as<Constant>() += summand_constant;
         do_erase = true;
-      } else {  // or memorize the position of the constant
+      } else {
+        // or memorize the position of the constant
         constant_summand_idx_ = pos;
       }
     }
@@ -44,77 +40,86 @@ Sum::Sum(summands_type &&summands, move_only_tag)
   }
 }
 
-Sum &Sum::append(ExprPtr summand) {
-  SEQUANT_ASSERT(summand);
-  if (!summand->is<Sum>()) {
-    if (!summand->is_zero()) {        // exclude zeros
-      if (summand->is<Constant>()) {  // add up constants
-        // immediately, if possible
-        auto summand_constant = summand.as_shared_ptr<Constant>();
-        if (constant_summand_idx_) {
-          SEQUANT_ASSERT(summands_.at(*constant_summand_idx_)->is<Constant>());
-          summands_[*constant_summand_idx_].as<Constant>() += *summand;
-        } else {
-          summands_.push_back(summand->clone());
-          constant_summand_idx_ = summands_.size() - 1;
-        }
-      } else {
-        summands_.push_back(summand->clone());
-      }
-      reset_hash_value();
-    }
-  } else {  // this recursively flattens Sum summands
-    for (auto &subsummand : *summand) this->append(subsummand);
+Sum &Sum::append(ExprContainer summand) {
+  if (summand->is_zero()) {
+    // Skip zeros
+    return *this;
   }
+
+  if (summand->is<Sum>()) {
+    // Recursively flatten sum
+    for (auto &subsummand : *summand) {
+      this->append(std::move(*subsummand));
+    }
+  }
+
+  if (summand->is<Constant>()) {  // add up constants
+    // immediately, if possible
+    if (constant_summand_idx_) {
+      SEQUANT_ASSERT(summands_.at(*constant_summand_idx_)->is<Constant>());
+      summands_[*constant_summand_idx_]->as<Constant>() +=
+          summand->as<Constant>();
+    } else {
+      summands_.emplace_back(std::move(summand));
+      constant_summand_idx_ = summands_.size() - 1;
+    }
+  } else {
+    summands_.emplace_back(std::move(summand));
+  }
+
+  reset_hash_value();
+
   return *this;
 }
 
-Sum &Sum::prepend(ExprPtr summand) {
-  SEQUANT_ASSERT(summand);
-  if (!summand->is<Sum>()) {
-    if (!summand->is_zero()) {
-      // exclude zeros
-      if (summand->is<Constant>()) {
-        auto summand_constant = summand.as_shared_ptr<Constant>();
-        if (constant_summand_idx_) {  // add up to the existing constant ...
-          SEQUANT_ASSERT(summands_.at(*constant_summand_idx_)->is<Constant>());
-          summands_[*constant_summand_idx_].as<Constant>() += *summand_constant;
-        } else {  // or include the nonzero constant and update
-          // constant_summand_idx_
-          summands_.insert(summands_.begin(), summand->clone());
-          constant_summand_idx_ = 0;
-        }
-      } else {
-        summands_.insert(summands_.begin(), summand->clone());
-        if (constant_summand_idx_)  // if have a constant, update its position
-          ++*constant_summand_idx_;
-      }
-      reset_hash_value();
-    }
-  } else {  // this recursively flattens Sum summands
-    for (auto &subsummand : *summand) this->prepend(subsummand);
+Sum &Sum::prepend(ExprContainer summand) {
+  if (summand->is_zero()) {
+    // Skip zeros
+    return *this;
   }
+
+  if (summand->is<Sum>()) {
+    // Recursively flatten sum
+    for (auto &subsummand : *summand) {
+      this->prepend(std::move(*subsummand));
+    }
+  }
+  if (summand->is<Constant>()) {
+    if (constant_summand_idx_) {
+      // add up to the existing constant ...
+      SEQUANT_ASSERT(summands_.at(*constant_summand_idx_)->is<Constant>());
+      summands_[*constant_summand_idx_]->as<Constant>() +=
+          summand->as<Constant>();
+    } else {
+      // or include the nonzero constant and update
+      // constant_summand_idx_
+      summands_.insert(summands_.begin(), std::move(summand));
+      constant_summand_idx_ = 0;
+    }
+  } else {
+    summands_.insert(summands_.begin(), std::move(summand));
+    if (constant_summand_idx_) {
+      // if have a constant, update its position
+      ++*constant_summand_idx_;
+    }
+  }
+
+  reset_hash_value();
   return *this;
 }
 
 const Sum::summands_type &Sum::summands() const { return summands_; }
 
-const ExprPtr &Sum::summand(size_t i) const { return summands_.at(i); }
+const ExprContainer &Sum::summand(size_t i) const { return summands_.at(i); }
 
-ExprPtr Sum::take_n(size_t count) const {
-  const auto e = (count >= summands_.size() ? summands_.end()
-                                            : (summands_.begin() + count));
-  return ex<Sum>(summands_.begin(), e);
+ExprContainer Sum::take_n(size_t count) const {
+  SEQUANT_ASSERT(count < summands_.size());
+  return Sum(summands_.begin(), summands_.begin() + count);
 }
 
-ExprPtr Sum::take_n(size_t offset, size_t count) const {
-  const auto offset_plus_count = offset + count;
-  const auto b = (offset >= summands_.size() ? summands_.end()
-                                             : (summands_.begin() + offset));
-  const auto e = (offset_plus_count >= summands_.size()
-                      ? summands_.end()
-                      : (summands_.begin() + offset_plus_count));
-  return ex<Sum>(b, e);
+ExprContainer Sum::take_n(size_t offset, size_t count) const {
+  SEQUANT_ASSERT(count + offset < summands_.size());
+  return Sum(summands_.begin() + offset, summands_.begin() + offset + count);
 }
 
 bool Sum::empty() const { return summands_.empty(); }
@@ -148,10 +153,9 @@ Expr::type_id_type Sum::type_id() const { return Expr::get_type_id<Sum>(); };
 
 void Sum::adjoint() {
   using namespace ranges;
-  auto adj_summands = summands() | views::transform([](auto &&expr) {
-                        return ::sequant::adjoint(expr);
-                      });
-  *this = Sum(ranges::begin(adj_summands), ranges::end(adj_summands));
+  for (Expr &current : summands_) {
+    current.adjoint();
+  }
 }
 
 ExprPtr Sum::canonicalize_impl(bool multipass, CanonicalizeOptions opts) {
@@ -216,15 +220,15 @@ ExprPtr Sum::canonicalize_impl(bool multipass, CanonicalizeOptions opts) {
 }
 
 Sum &Sum::operator+=(const Expr &that) {
-  this->append(that.clone());
+  this->append(ExprContainer(that));
   return *this;
 }
 
 Sum &Sum::operator-=(const Expr &that) {
   if (that.is<Constant>())
-    this->append(ex<Constant>(-that.as<Constant>().value()));
+    this->append(Constant(-that.as<Constant>().value()));
   else
-    this->append(ex<Product>(-1, ExprPtrList{that.clone()}));
+    this->append(Product(-1, ExprPtrList{that.clone()}));
   return *this;
 }
 
@@ -249,11 +253,7 @@ ConstExprIterator Sum::end_subexpr() const {
 }
 
 std::unique_ptr<Expr> Sum::unique_copy() const {
-  auto cloned_summands =
-      summands() |
-      ranges::views::transform([](const ExprPtr &ptr) { return ptr->clone(); });
-  return std::make_unique<Sum>(ranges::begin(cloned_summands),
-                               ranges::end(cloned_summands));
+  return std::make_unique<Sum>(*this);
 }
 
 Expr::hash_type Sum::memoizing_hash() const {
@@ -264,7 +264,7 @@ Expr::hash_type Sum::memoizing_hash() const {
       auto deref_summands =
           summands() |
           ranges::views::transform(
-              [](const ExprPtr &ptr) -> const Expr & { return *ptr; });
+              [](const auto &holder) -> const Expr & { return *holder; });
       auto value = hash::range(ranges::begin(deref_summands),
                                ranges::end(deref_summands));
       return value;
@@ -303,10 +303,11 @@ bool Sum::static_equal(const Expr &that) const {
     return false;
 }
 
-HashingAccumulator &HashingAccumulator::append(ExprPtr summand, bool flatten) {
+HashingAccumulator &HashingAccumulator::append(ExprContainer summand,
+                                               bool flatten) {
   // flatten, if needed
-  if (flatten && summand.is<Sum>()) {
-    for (auto &subsummand : summand.as<Sum>().summands()) {
+  if (flatten && summand->is<Sum>()) {
+    for (auto &subsummand : summand->as<Sum>().summands()) {
       this->append(subsummand, flatten);
     }
     return *this;
@@ -331,8 +332,8 @@ HashingAccumulator &HashingAccumulator::append(ExprPtr summand, bool flatten) {
         summands_.emplace(std::move(product_copy));
       }
     } else {
-      if (existing_summand.is<Product>()) {
-        existing_summand.as<Product>().add_identical(summand);
+      if (existing_summand->is<Product>()) {
+        existing_summand->as<Product>().add_identical(summand);
       } else {
         // neither is a product - create new product
         auto product_form = std::make_shared<Product>();

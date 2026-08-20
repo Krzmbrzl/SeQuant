@@ -18,6 +18,7 @@
 #include <range/v3/view/transform.hpp>
 
 #include <concepts>
+#include <initializer_list>
 #include <memory>
 #include <optional>
 #include <ranges>
@@ -30,7 +31,7 @@ namespace sequant {
 /// Sum is associative and is flattened automatically.
 class Sum : public Expr {
  public:
-  using summands_type = container::svector<ExprPtr, 2>;
+  using summands_type = container::svector<ExprContainer, 2>;
 
   Sum() = default;
   virtual ~Sum() = default;
@@ -41,37 +42,37 @@ class Sum : public Expr {
 
   /// construct a Sum out of zero or more summands
   /// @param summands an initializer list of summands
-  Sum(ExprPtrList summands);
+  template <expr_holder E>
+  Sum(std::initializer_list<E> summands) {
+    // use append to flatten out Sum summands
+    for (auto &&summand : summands) {
+      if constexpr (std::same_as<ExprPtr, std::remove_cvref_t<E>>) {
+        append(std::forward<decltype(summand)>(summand));
+      } else {
+        append(ExprContainer(std::forward<decltype(summand)>(summand)));
+      }
+    }
+  }
 
   /// construct a Sum out of a range of summands
   /// @param begin the begin iterator
   /// @param end the end iterator
   template <typename Iterator>
-  Sum(Iterator begin, Iterator end) {
-    // use append to flatten out Sum summands
-    for (auto it = begin; it != end; ++it) {
-      append(*it);
-    }
-  }
+  Sum(Iterator begin, Iterator end) : Sum(std::ranges::subrange(begin, end)) {}
 
   /// construct a Sum out of a range of summands
   /// @param rng a range
   template <std::ranges::range Range>
-    requires(!std::same_as<std::remove_cvref_t<Range>, ExprPtrList>)
+    requires(!std::same_as<std::remove_cvref_t<Range>, ExprPtrList> &&
+             !std::same_as<std::remove_cvref_t<Range>, ExprContainerList>)
   explicit Sum(Range &&rng) {
     // N.B. use append to flatten out Sum summands
-    constexpr auto rng_is_expr = is_an_expr_v<std::remove_cvref_t<Range>>;
-    constexpr auto rng_is_exprptr =
-        std::same_as<ExprPtr, std::remove_cvref_t<Range>>;
+    constexpr auto is_expr = is_an_expr_v<std::remove_cvref_t<Range>>;
+    constexpr auto is_expr_holder = expr_holder<Range>;
 
-    if constexpr (rng_is_expr || rng_is_exprptr) {
-      ExprPtr rng_as_exprptr;
-      if constexpr (rng_is_expr) {
-        rng_as_exprptr = rng.clone();
-      } else {
-        rng_as_exprptr = rng;
-      }
-      this->append(rng_as_exprptr);
+    if constexpr (is_expr || is_expr_holder) {
+      ExprContainer cont(std::forward<decltype(rng)>(rng));
+      this->append(std::move(cont));
     } else {
       for (auto &&v : rng) {
         append(std::forward<decltype(v)>(v));
@@ -89,11 +90,11 @@ class Sum : public Expr {
 
   /// append a summand to the sum
   /// @param summand the summand
-  Sum &append(ExprPtr summand);
+  Sum &append(ExprContainer summand);
 
   /// prepend a summand to the sum
   /// @param summand the summand
-  Sum &prepend(ExprPtr summand);
+  Sum &prepend(ExprContainer summand);
 
   /// Summands accessor
   const summands_type &summands() const;
@@ -101,22 +102,20 @@ class Sum : public Expr {
   /// Summand accessor
   /// @param i summand index
   /// @return ith summand
-  const ExprPtr &summand(size_t i) const;
+  const ExprContainer &summand(size_t i) const;
 
   /// Takes the first @c count elements of the sum
-  ExprPtr take_n(size_t count) const;
+  ExprContainer take_n(size_t count) const;
 
   /// Takes the first @c count elements of the sum starting with element @c
   /// offset
-  ExprPtr take_n(size_t offset, size_t count) const;
+  ExprContainer take_n(size_t offset, size_t count) const;
 
   /// @param f Boolean predicate
   /// @returns A sum containing only the summands for which f was true.
   template <std::predicate<const Expr &> Filter>
-  ExprPtr filter(Filter &&f) const {
-    return ex<Sum>(summands_ |
-                   ranges::views::transform([](const auto &e) { return *e; }) |
-                   ranges::views::filter(f));
+  ExprContainer filter(Filter &&f) const {
+    return ex<Sum>(summands_ | ranges::views::filter(f));
   }
 
   /// @return true if the number of factors is zero
@@ -180,17 +179,17 @@ class HashingAccumulator {
  public:
   /// @p summand expr to append to the sum
   /// @p flatten if true, and @p summand is a Sum, will flatten the sum
-  HashingAccumulator &append(ExprPtr summand, bool flatten = true);
+  HashingAccumulator &append(ExprContainer summand, bool flatten = true);
 
-  SumPtr make_sum();
+  ExprContainer make_sum();
 
-  SumPtr make_canonicalized_sum();
+  ExprContainer make_canonicalized_sum();
 
   /// @param canonicalize if true, will sort the summands to canonical order
   /// defined by ExprPtr::operator<
   /// @return summands as a Sum (if have more than 1 summand), Constant (if have
   /// zero summands), or the lone summand itself
-  ExprPtr make_expr(bool canonicalize = true);
+  ExprContainer make_expr(bool canonicalize = true);
 
   bool empty() const;
 
@@ -199,7 +198,8 @@ class HashingAccumulator {
   /// @param canonicalize if true, sort the summands by hash value
   SumPtr make_sum_impl(bool canonicalize);
 
-  container::unordered_set<ExprPtr, sequant::hash::_<ExprPtr>, proportional_to>
+  container::unordered_set<ExprContainer, sequant::hash::_<ExprContainer>,
+                           proportional_to>
       summands_;
 };
 

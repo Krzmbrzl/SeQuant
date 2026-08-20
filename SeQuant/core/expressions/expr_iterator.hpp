@@ -9,14 +9,14 @@
 
 namespace sequant {
 
-class ExprPtr;
+class ExprContainer;
 
 namespace detail {
 
 template <bool is_const>
 class ExprIteratorImpl {
  public:
-  using value_type = ExprPtr;
+  using value_type = ExprContainer;
   using reference = std::add_lvalue_reference_t<
       std::conditional_t<is_const, std::add_const_t<value_type>, value_type>>;
   using const_reference =

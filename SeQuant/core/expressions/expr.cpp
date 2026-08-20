@@ -80,6 +80,11 @@ std::weak_ptr<const Expr> Expr::weak_from_this() const {
   return std::enable_shared_from_this<Expr>::weak_from_this();
 }
 
+Constant Expr::rapid_canonicalize(CanonicalizeOptions opts) {
+  opts.method = CanonicalizationMethod::Rapid;
+  return this->canonicalize(opts);
+}
+
 bool proportional_to::operator()(const Expr &expr1, const Expr &expr2) const {
   if (expr1.type_id() != expr2.type_id()) {
     // if expr1 is a Product with single factor == expr2,

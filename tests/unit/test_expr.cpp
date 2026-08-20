@@ -417,6 +417,16 @@ TEST_CASE("expr", "[elements]") {
     REQUIRE(sp0.scalar() == 4);
   }
 
+  SECTION("sum") {
+    SECTION("filter") {
+      Sum sum = deserialize("A + 2 * B + C")->as<Sum>();
+      ExprPtr filtered =
+          sum.filter([](const Expr &expr) { return expr.is<Variable>(); });
+
+      REQUIRE_THAT(filtered, EquivalentTo("A + C"));
+    }
+  }
+
   SECTION("adjoint") {
     {  // implemented in Adjointable
       const auto e = std::make_shared<Adjointable>();
